@@ -9,7 +9,7 @@ async function initDB() {
   return AppDataSource.getRepository(User);
 }
 
-// GET User by ID
+// GET User berdasarkan ID
 export async function GET(req: NextRequest, { params }: { params: { id_user: string } }) {
   try {
     const userRepo = await initDB();
