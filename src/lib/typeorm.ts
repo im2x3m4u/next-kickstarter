@@ -9,10 +9,10 @@ export const AppDataSource = new DataSource({
   type: 'mysql',
   host: 'localhost',
   port: 3306,
-  username: 'root',      // ganti sesuai konfigurasi
-  password: '',          // password mysql
+  username: 'root',     
+  password: '',         
   database: 'kickstarter',
-  synchronize: false,     // auto generate tabel (hati-hati di production)
+  synchronize: false,   
   entities: [User, Role, UserRole],
   migrations: [],
 });
