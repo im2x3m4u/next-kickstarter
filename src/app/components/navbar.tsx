@@ -43,9 +43,9 @@ export default function Navbar() {
           <Button asChild variant="outline" size="sm">
             <Link href="/login">Login</Link>
           </Button>
-          <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+          {/* <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
             <Link href="/register">Register</Link>
-          </Button>
+          </Button> */}
         </div>
 
         {/* Mobile toggle */}
@@ -83,9 +83,9 @@ export default function Navbar() {
               <Button asChild variant="outline" size="sm" onClick={() => setIsOpen(false)}>
                 <Link href="/login">Login</Link>
               </Button>
-              <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300" onClick={() => setIsOpen(false)}>
+              {/* <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300" onClick={() => setIsOpen(false)}>
                 <Link href="/register">Register</Link>
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
