@@ -1,0 +1,31 @@
+meta {
+  name: Update userRole
+  type: http
+  seq: 15
+}
+
+put {
+  url: http://localhost:3000/api/userRole/38891352-6a6f-4da3-8ff9-12aaf99e69f7
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+  {
+    "id_role": "401a3820-fac6-4b6f-990f-e80dc24b7996",
+    "id_user": "0f23a6cd-6176-48d1-b442-ac89cc5cacd2"
+  } 
+}
+
+settings {
+  encodeUrl: true
+}

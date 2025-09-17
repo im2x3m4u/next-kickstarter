@@ -1,0 +1,29 @@
+meta {
+  name: Delete userRole
+  type: http
+  seq: 16
+}
+
+delete {
+  url: http://localhost:3000/api/userRole/cac897b4-e0d4-4e31-be8b-af29ce67cb6a
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+    
+  
+}
+
+settings {
+  encodeUrl: true
+}

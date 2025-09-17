@@ -1,47 +1,54 @@
+// src/app/api/role/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "../../../../lib/typeorm";
+import { Role } from "../../../../entities/role";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const id_role = params.id;
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-  const { Role } = await import("../../../../entities/role");
-  const roleRepo = AppDataSource.getRepository(Role);
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    if (!AppDataSource.isInitialized) await AppDataSource.initialize();
+    const roleRepo = AppDataSource.getRepository(Role);
+    const role = await roleRepo.findOne({ where: { id_role: params.id } });
 
-  const role = await roleRepo.findOne({ where: { id_role } });
-  if (!role) return NextResponse.json({ ok: false, message: "Role tidak ditemukan" }, { status: 404 });
+    if (!role) return NextResponse.json({ error: "Role not found" }, { status: 404 });
 
-  return NextResponse.json({ ok: true, role });
+    return NextResponse.json(role);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const id_role = params.id;
-  const body = await req.json();
-  const { nama_role, is_aktif } = body;
+  try {
+    const body = await req.json();
+    if (!AppDataSource.isInitialized) await AppDataSource.initialize();
+    const roleRepo = AppDataSource.getRepository(Role);
 
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-  const { Role } = await import("../../../../entities/role");
-  const roleRepo = AppDataSource.getRepository(Role);
+    let role = await roleRepo.findOne({ where: { id_role: params.id } });
+    if (!role) return NextResponse.json({ error: "Role not found" }, { status: 404 });
 
-  const role = await roleRepo.findOne({ where: { id_role } });
-  if (!role) return NextResponse.json({ ok: false, message: "Role tidak ditemukan" }, { status: 404 });
+    roleRepo.merge(role, body);
+    const updated = await roleRepo.save(role);
 
-  role.nama_role = nama_role ?? role.nama_role;
-  if (is_aktif !== undefined) role.is_aktif = is_aktif;
-
-  await roleRepo.save(role);
-  return NextResponse.json({ ok: true, message: "Role berhasil diupdate", role });
+    return NextResponse.json(updated);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const id_role = params.id;
+export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    if (!AppDataSource.isInitialized) await AppDataSource.initialize();
+    const roleRepo = AppDataSource.getRepository(Role);
 
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-  const { Role } = await import("../../../../entities/role");
-  const roleRepo = AppDataSource.getRepository(Role);
+    const role = await roleRepo.findOne({ where: { id_role: params.id } });
+    if (!role) return NextResponse.json({ error: "Role not found" }, { status: 404 });
 
-  const role = await roleRepo.findOne({ where: { id_role } });
-  if (!role) return NextResponse.json({ ok: false, message: "Role tidak ditemukan" }, { status: 404 });
-
-  await roleRepo.remove(role);
-  return NextResponse.json({ ok: true, message: "Role berhasil dihapus" });
+    await roleRepo.remove(role);
+    return NextResponse.json({ message: "Role deleted" });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

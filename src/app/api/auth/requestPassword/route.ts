@@ -5,8 +5,8 @@ import { AppDataSource } from "../../../../lib/typeorm";
 import { User } from "../../../../entities/user";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = "123"; // ganti dengan secret lebih aman
-const TOKEN_EXP = "1h"; // token berlaku 1 jam
+const JWT_SECRET = "123"; 
+const TOKEN_EXP = "1h"; 
 
 export async function POST(req: NextRequest) {
   try {

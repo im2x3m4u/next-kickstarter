@@ -1,0 +1,28 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:3000/api/auth/login
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+body:json {
+  {
+    "username": "setyakc",
+    "password": "cici"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}

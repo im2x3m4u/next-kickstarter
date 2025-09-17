@@ -1,0 +1,32 @@
+meta {
+  name: Create userRole
+  type: http
+  seq: 14
+}
+
+post {
+  url: http://localhost:3000/api/userRole/
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+  {
+    "id_role": "401a3820-fac6-4b6f-990f-e80dc24b7996",
+    "id_user": "0f23a6cd-6176-48d1-b442-ac89cc5cacd2"
+  } 
+  
+}
+
+settings {
+  encodeUrl: true
+}

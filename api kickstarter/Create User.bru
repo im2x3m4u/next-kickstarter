@@ -1,0 +1,36 @@
+meta {
+  name: Create User
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://localhost:3000/api/user/
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+  {
+    "nama": "shela",
+    "username": "shela",
+    "password": "shela",
+    "email": "shela@gmail.com",
+    "no_telepon": "098765432123",
+    "is_aktif": "1"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}

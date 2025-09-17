@@ -1,0 +1,31 @@
+meta {
+  name: Update Role
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:3000/api/role/478fc0f0-cc23-455f-8300-bed7fb0710b5
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+  {
+    "nama_role": "shela128"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}
