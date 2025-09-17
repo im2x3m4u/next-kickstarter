@@ -20,7 +20,6 @@ export default function Home() {
   <Testimoni />
   <FAQ />
   <CTA />
-
   <Footer />
 </div>
   );

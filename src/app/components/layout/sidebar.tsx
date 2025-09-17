@@ -1,16 +1,8 @@
 "use client"
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
 import { Home, Users, Shield } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -19,30 +11,32 @@ const items = [
 ]
 
 export function AppSidebar() {
+  const pathname = usePathname()
+
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarGroupLabel className="p-4 text-lg font-semibold">
-          Halo, admin!
-        </SidebarGroupLabel>
-        <SidebarContent>
-          <SidebarMenu>
-            {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <Link
-                    href={item.url}
-                    className="flex items-center gap-2 px-2 py-2"
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-    </SidebarProvider>
+    <div className="w-64 bg-gray-900 text-white min-h-screen">
+      <div className="p-6">
+        <h2 className="text-xl font-bold text-white">Halo, admin!</h2>
+      </div>
+      <nav className="px-4">
+        <ul className="space-y-2">
+          {items.map((item) => (
+            <li key={item.title}>
+              <Link
+                href={item.url}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  pathname === item.url
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="font-medium">{item.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
   )
 }

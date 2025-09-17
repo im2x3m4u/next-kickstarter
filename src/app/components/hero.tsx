@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import heroIllustration from "@/assets/undraw_reading_atc8.svg";
 
 export default function Hero() {
   return (
@@ -61,7 +60,7 @@ export default function Hero() {
             <div className="relative">
               <div className="">
                 <Image
-                  src={heroIllustration}
+                  src="/undraw_reading_atc8.svg"
                   alt="Hero Illustration"
                   width={640}
                   height={480}
