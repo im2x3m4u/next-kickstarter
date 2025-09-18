@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { useAtom } from "jotai";
+import { forgotPasswordAtom } from "@/app/state/authState";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useAtom(forgotPasswordAtom);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    //Validasi email sederhana
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Format email tidak valid!");
+      return;
+    }
+
     // TODO: Tambahkan logic kirim request reset password ke backend
-    alert(`Link reset password dikirim ke: ${email}`);
+    toast.success(`Silahkan cek email Anda untuk reset password di ${email}`);
   };
 
   return (
@@ -31,12 +41,12 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-900">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
-                className="mt-1"
+                className="mt-1 text-gray-800"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -44,7 +54,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             {/* Reset Button */}
-            <Button type="submit" className="w-full">
+            <Button type="submit" variant="outline" className="text-white w-full h-10 sm:h-11">
               Kirim Link Reset
             </Button>
 
