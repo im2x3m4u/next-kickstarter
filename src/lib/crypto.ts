@@ -1,7 +1,10 @@
 // src/lib/crypto.ts
 import CryptoJS from "crypto-js";
 
-const SECRET_KEY = process.env.SECRET_KEY as string || "dev_secret_key";
+// Prefer PASSWORD_SECRET, fallback to SECRET_KEY, then to a dev default
+const SECRET_KEY = (process.env.PASSWORD_SECRET as string)
+  || (process.env.SECRET_KEY as string)
+  || "dev_secret_key";
 
 export function encryptPassword(plain: string): string {
   return CryptoJS.AES.encrypt(plain, SECRET_KEY).toString();

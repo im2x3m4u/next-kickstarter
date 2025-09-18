@@ -1,3 +1,4 @@
+"use client"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search, LogOut, User, Settings } from "lucide-react"
@@ -10,6 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { logout } from "@/lib/auth"
+import { toast } from "sonner"
 
 export function AppHeader() {
   return (
@@ -41,7 +44,14 @@ export function AppHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 hover:bg-red-50 focus:bg-red-50">
+            <DropdownMenuItem
+              className="text-red-600 hover:bg-red-50 focus:bg-red-50 cursor-pointer"
+              onClick={async () => {
+                const res = await logout()
+                toast.success(res.message)
+                window.location.href = "/"
+              }}
+            >
               <LogOut className="mr-2 h-4 w-4 text-red-600" />
               Logout
             </DropdownMenuItem>

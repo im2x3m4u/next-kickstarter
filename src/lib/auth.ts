@@ -82,3 +82,29 @@ export const login = async (username: string, password: string): Promise<LoginRe
     };
   }
 };
+
+// Logout function
+export const logout = async (): Promise<{ ok: boolean; status: number; message: string }> => {
+  try {
+    const token = getToken();
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    const data = await response.json();
+    // Clear local auth regardless of server response to avoid stale sessions on client
+    clearAuthData();
+    return {
+      ok: Boolean(data?.ok ?? response.ok),
+      status: data?.status ?? response.status,
+      message: data?.message ?? (response.ok ? "Logout berhasil" : "Gagal logout"),
+    };
+  } catch (error) {
+    // Network/server error: still clear client-side session
+    clearAuthData();
+    return { ok: true, status: 200, message: "Logout lokal berhasil" };
+  }
+};

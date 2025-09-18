@@ -1,10 +1,9 @@
 "use client"
 import { useEffect } from "react"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import { ArrowLeft, Mail, Phone, User2, Shield, PencilLine, LogOut } from "lucide-react"
@@ -12,9 +11,11 @@ import { ArrowLeft, Mail, Phone, User2, Shield, PencilLine, LogOut } from "lucid
 import { userAtom, profileDraftAtom, profileEditModeAtom } from "@/app/state/authState"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { logout } from "@/lib/auth"
 
 export default function ProfilePage() {
-  const [user, setUser] = useAtom(userAtom)
+  const user = useAtomValue(userAtom)
+  const setUser = useSetAtom(userAtom as any) as (u: any) => void
   const [draft, setDraft] = useAtom(profileDraftAtom)
   const [isEdit, setIsEdit] = useAtom(profileEditModeAtom)
 
@@ -71,10 +72,6 @@ export default function ProfilePage() {
     )
   }
 
-  const isAdmin = Array.isArray(user.roles)
-    ? user.roles.some((r: any) => String(r.role_name || "").toLowerCase() === "admin")
-    : false
-  const roleText = isAdmin ? "admin" : "user"
 
   const startEdit = () => {
     setDraft({
@@ -97,6 +94,7 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nama: draft.nama,
+          username: draft.username,
           email: draft.email,
           no_telepon: draft.no_telepon,
         }),
@@ -158,20 +156,13 @@ export default function ProfilePage() {
                   <Input
                     value={draft.nama}
                     onChange={(e) => setDraft({ ...draft, nama: e.target.value })}
-                    className="text-center text-lg"
+                    className="text-center text-lg text-gray-900"
                     placeholder="Nama"
                   />
                 </div>
               ) : (
                 <h2 className="mt-5 text-2xl font-semibold tracking-tight text-gray-900">{user.nama ?? user.username}</h2>
               )}
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                {roleText !== "-" ? roleText.split(", ").map((r) => (
-                  <Badge key={r} className="bg-indigo-50 text-indigo-700 border border-indigo-100">{r}</Badge>
-                )) : (
-                  <Badge className="bg-indigo-50 text-indigo-700 border border-indigo-100">User</Badge>
-                )}
-              </div>
             </div>
 
             <Separator className="bg-gray-200/70" />
@@ -188,6 +179,7 @@ export default function ProfilePage() {
                         value={draft.username}
                         onChange={(e) => setDraft({ ...draft, username: e.target.value })}
                         placeholder="Username"
+                        className="text-gray-900"
                       />
                     ) : (
                       <p className="text-gray-900 font-medium">{user.username ?? "-"}</p>
@@ -206,6 +198,7 @@ export default function ProfilePage() {
                         value={draft.email}
                         onChange={(e) => setDraft({ ...draft, email: e.target.value })}
                         placeholder="email@example.com"
+                        className="text-gray-900"
                       />
                     ) : (
                       <p className="text-gray-900 font-medium">{user.email ?? "-"}</p>
@@ -223,19 +216,11 @@ export default function ProfilePage() {
                         value={draft.no_telepon}
                         onChange={(e) => setDraft({ ...draft, no_telepon: e.target.value })}
                         placeholder="08xxxxxxxxxx"
+                        className="text-gray-900"
                       />
                     ) : (
                       <p className="text-gray-900 font-medium">{user.no_telepon ?? "-"}</p>
                     )}
-                  </div>
-                </div>
-              </div>
-              <div className="group rounded-xl border border-gray-200/70 bg-white/70 p-4 hover:border-indigo-200 hover:bg-white transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="rounded-lg bg-purple-50 text-purple-600 p-2"><Shield className="h-5 w-5" /></div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wider text-gray-500">Role</p>
-                    <p className="text-gray-900 font-medium">{roleText}</p>
                   </div>
                 </div>
               </div>
@@ -255,7 +240,17 @@ export default function ProfilePage() {
                   <Button onClick={saveEdit} className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white">Simpan</Button>
                 </div>
               )}
-              <Button variant="destructive" className="gap-2 rounded-lg"><LogOut className="h-4 w-4" /> Logout</Button>
+              <Button
+                variant="destructive"
+                className="gap-2 rounded-lg"
+                onClick={async () => {
+                  const res = await logout()
+                  toast.success(res.message)
+                  window.location.href = "/"
+                }}
+              >
+                <LogOut className="h-4 w-4" /> Logout
+              </Button>
             </div>
           </div>
         </Card>

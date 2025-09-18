@@ -17,7 +17,7 @@ export type AuthUser = {
   nama?: string;
   email?: string;
   no_telepon?: string;
-  roles?: Array<{ id_userRole: number; role_name: string }>;
+  roles?: Array<{ id_userRole: number; id_role?: string; role_name: string }>;
 } | null;
 
 export const userAtom = atom<AuthUser>(null);
