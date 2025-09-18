@@ -1,0 +1,29 @@
+meta {
+  name: Logout
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3000/api/auth/logout
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoiMTI4YTA4NWUtY2U4NS00NzllLWIwZTItZTVmOWM2MGJhZWEwIiwidXNlcm5hbWUiOiJzaGVsYSIsIm5hbWEiOiJzaGVsYSIsImlhdCI6MTc1ODE3NzU4MywiZXhwIjoxNzU4MTgxMTgzfQ.FuXe8oQfQUzZcRq1mpYU3HPG7R6JD5_Oc-VMpHvENNU
+}
+
+body:json {
+  
+  
+}
+
+settings {
+  encodeUrl: true
+}

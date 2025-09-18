@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 15 Sep 2025 pada 08.58
+-- Waktu pembuatan: 18 Sep 2025 pada 08.44
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.0.30
 
@@ -57,15 +57,18 @@ CREATE TABLE `user` (
   `no_telepon` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_aktif` tinyint(1) NOT NULL
+  `is_aktif` tinyint(1) NOT NULL,
+  `reset_token` text DEFAULT NULL,
+  `login_token` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data untuk tabel `user`
 --
 
-INSERT INTO `user` (`id_user`, `nama`, `username`, `password`, `email`, `no_telepon`, `created_at`, `updated_at`, `is_aktif`) VALUES
-('e8f6c1f5-91d4-11f0-bcb7-586c25927655', 'setya kristendy cianjur', 'setyakc', 'cici', 'setyakristendy@gmail.com', '082323916094', '2025-09-15 01:40:07', '2025-09-15 01:40:07', 1);
+INSERT INTO `user` (`id_user`, `nama`, `username`, `password`, `email`, `no_telepon`, `created_at`, `updated_at`, `is_aktif`, `reset_token`, `login_token`) VALUES
+('128a085e-ce85-479e-b0e2-e5f9c60baea0', 'shela', 'shela', 'U2FsdGVkX19hUSZ6/D4Sj9E4VgHc5/7wY8rClOXIBg8=', 'shela@gmail.com', '098765432123', '2025-09-18 06:39:57', '2025-09-18 06:39:57', 1, NULL, NULL),
+('e8f6c1f5-91d4-11f0-bcb7-586c25927655', 'setya kristendy cianjur', 'setyakc', 'U2FsdGVkX1996deBAaSGoUvbOtoEHKDAJh/Z0d8dRQg=', 'setyakristendy@gmail.com', '082323916094', '2025-09-18 06:39:18', '2025-09-18 06:39:18', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 

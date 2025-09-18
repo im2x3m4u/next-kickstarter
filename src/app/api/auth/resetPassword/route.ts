@@ -3,36 +3,60 @@ import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "../../../../lib/typeorm";
 import { User } from "../../../../entities/user";
 import jwt from "jsonwebtoken";
+import CryptoJS from "crypto-js";
 
-const JWT_SECRET = "123";
+const JWT_SECRET = process.env.JWT_SECRET as string; 
+const PASSWORD_SECRET = process.env.PASSWORD_SECRET as string; // simpan di .env
 
 export async function POST(req: NextRequest) {
   try {
     const { token, newPassword } = await req.json();
-    if (!token || !newPassword) return NextResponse.json({ ok: false, message: "Token dan password wajib diisi" }, { status: 400 });
+    if (!token || !newPassword) {
+      return NextResponse.json(
+        { ok: false, message: "Token dan newPassword wajib diisi" },
+        { status: 400 }
+      );
+    }
 
-    // Verifikasi token
-    let decoded: any;
+    // Verifikasi token JWT
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch {
-      return NextResponse.json({ ok: false, message: "Token tidak valid atau expired" }, { status: 401 });
+      jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return NextResponse.json(
+        { ok: false, message: "Token tidak valid atau expired" },
+        { status: 401 }
+      );
     }
 
     if (!AppDataSource.isInitialized) await AppDataSource.initialize();
     const userRepo = AppDataSource.getRepository(User);
 
-    const user = await userRepo.findOne({ where: { id_user: decoded.id_user } });
-    if (!user) return NextResponse.json({ ok: false, message: "User tidak ditemukan" }, { status: 404 });
+    // Cari user berdasarkan token
+    const user = await userRepo.findOne({ where: { reset_token: token } });
+    if (!user) {
+      return NextResponse.json(
+        { ok: false, message: "Token tidak valid" },
+        { status: 404 }
+      );
+    }
 
-    // Update password
-    user.password = newPassword;
+    // Hash password baru pakai CryptoJS
+    const encryptedPassword = CryptoJS.AES.encrypt(
+      newPassword,
+      PASSWORD_SECRET
+    ).toString();
+
+    user.password = encryptedPassword;
+    user.reset_token = null;
+
     await userRepo.save(user);
 
-    return NextResponse.json({ ok: true, message: "Password berhasil diubah" }, { status: 200 });
-
+    return NextResponse.json({ ok: true, message: "Password berhasil diubah" });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ ok: false, message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

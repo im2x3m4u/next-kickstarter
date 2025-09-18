@@ -12,7 +12,7 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column()
+  @Column({ type: "text" })
   password: string;
 
   @Column()
@@ -23,6 +23,12 @@ export class User {
 
   @Column({ type: "tinyint", default: 1 })
   is_aktif: number;
+
+  @Column({ type: "text", nullable: true })
+  reset_token: string | null;
+  
+  @Column({ type: "text", nullable: true })
+  login_token: string | null;
 
   @CreateDateColumn()
   created_at: Date;

@@ -1,8 +1,8 @@
 // src/app/api/auth/login/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "../../../../lib/typeorm";
 import jwt from "jsonwebtoken";
+import CryptoJS from "crypto-js";
 
 const JWT_SECRET = "123";
 
@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { username, password } = body;
 
-    // Initialize datasource sekali saja
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
     }
@@ -19,13 +18,31 @@ export async function POST(req: NextRequest) {
     const { User } = await import("../../../../entities/user");
     const userRepo = AppDataSource.getRepository(User);
 
-    // Cari user dan load relasi userRoles -> role
     const user = await userRepo.findOne({
       where: { username },
       relations: ["userRoles", "userRoles.role"],
     });
 
-    if (!user || user.password !== password) {
+    if (!user) {
+      return NextResponse.json(
+        { ok: false, status: 401, message: "Username atau password salah" },
+        { status: 401 }
+      );
+    }
+
+//     console.log("password input:", password);
+// console.log("password DB:", user.password);
+
+// const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
+// const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+// console.log("decrypted password:", decryptedPassword);
+
+
+    // 🔑 decrypt password dari DB
+    const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
+    const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+
+    if (decryptedPassword !== password) {
       return NextResponse.json(
         { ok: false, status: 401, message: "Username atau password salah" },
         { status: 401 }
@@ -45,6 +62,10 @@ export async function POST(req: NextRequest) {
       JWT_SECRET,
       { expiresIn: "1h" }
     );
+
+    // Simpan token ke database (kolom login_token)
+    user.login_token = token;
+    await userRepo.save(user);
 
     return NextResponse.json({
       ok: true,
