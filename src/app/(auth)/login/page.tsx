@@ -1,17 +1,104 @@
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-
+import { useAtom } from "jotai";
+import { useState } from "react";
 import IlustrationLogin from "@/assets/IlustrationLogin.png";
+import { showPasswordAtom } from "@/app/state/uiState";
+import { usernameAtom, passwordAtom, isLoggedInAtom, userAtom, tokenAtom } from "@/app/state/authState";
+import { toast } from "sonner";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useAtom(showPasswordAtom);
+  const [username, setUsername] = useAtom(usernameAtom);
+  const [password, setPassword] = useAtom(passwordAtom);
+  const [, setUser] = useAtom(userAtom);
+  const [, setToken] = useAtom(tokenAtom);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validasi
+    if (username === "" || password === "") {
+      toast.error("Username atau password tidak boleh kosong!", {
+        description: "Silakan isi kedua field dengan benar",
+        duration: 4000,
+      });
+      return;
+    }
+    
+    if (username.length < 3) {
+      toast.error("Username minimal 3 karakter!", {
+        description: "Username harus lebih dari 3 karakter",
+        duration: 4000,
+      });
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast.error("Password minimal 6 karakter!", {
+        description: "Password harus lebih dari 6 karakter",
+        duration: 4000,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        // Simpan token ke localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        // Set ke Jotai atoms
+        setUser(data.user);
+        setToken(data.token);
+        
+        toast.success("Login berhasil! 🎉", {
+          description: `Selamat datang ${data.user.nama}!`,
+          duration: 3000,
+        });
+
+        // Redirect ke dashboard setelah 1.5 detik
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
+      } else {
+        toast.error(data.message || "Login gagal!", {
+          description: "Silakan cek username dan password Anda",
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Terjadi kesalahan!", {
+        description: "Silakan coba lagi nanti",
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
@@ -39,28 +126,32 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent>
-            <form className="space-y-4">
-              {/* Email */}
+            <form className="space-y-4" onSubmit={handleLogin}>
+              {/* Username */}
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username" className="text-gray-900">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="mt-1 h-10 sm:h-11"
+                  id="username"
+                  type="text"
+                  placeholder="Masukkan username Anda"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="mt-1 h-10 sm:h-11 text-gray-800"
                   required
                 />
               </div>
 
               {/* Password */}
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-gray-900">Password</Label>
                 <div className="relative mt-1">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="h-10 sm:h-11 pr-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-10 sm:h-11 pr-10 text-gray-800"
                     required
                   />
                   <button
@@ -82,20 +173,23 @@ export default function LoginPage() {
               </div>
 
               {/* Login Button */}
-              <Button type="submit" className="w-full h-10 sm:h-11">
-                Masuk
-              </Button>
-
-              {/* Divider */}
-              <div className="flex items-center gap-2">
-                <hr className="flex-1 border-gray-200" />
-                <span className="text-sm text-gray-400">atau</span>
-                <hr className="flex-1 border-gray-200" />
-              </div>
-
-              {/* Social Login (opsional) */}
-              <Button variant="outline" className="w-full h-10 sm:h-11">
-                Masuk dengan Google
+              <Button 
+                type="submit" 
+                variant="default" 
+                className="w-full h-10 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Memproses...
+                  </>
+                ) : (
+                  "Masuk"
+                )}
               </Button>
 
               {/* Link ke Register */}
@@ -111,4 +205,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-}
+};

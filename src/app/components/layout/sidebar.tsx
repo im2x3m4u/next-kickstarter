@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Home, Users, Shield } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -12,11 +13,25 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const [displayName, setDisplayName] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const raw = localStorage.getItem("user")
+      if (!raw) return
+      const user = JSON.parse(raw) as { nama?: string; username?: string }
+      setDisplayName(user?.username || user?.username || null)
+    } catch {
+      // ignore parse errors
+    }
+  }, [])
 
   return (
     <div className="w-64 bg-gray-900 text-white min-h-screen">
       <div className="p-6">
-        <h2 className="text-xl font-bold text-white">Halo, admin!</h2>
+        <h2 className="text-xl font-bold text-white">{displayName ? `Halo, ${displayName}!` : "Halo, Pengguna!"}</h2>
+      <p className="italic text-gray-300">Admin</p>
       </div>
       <nav className="px-4">
         <ul className="space-y-2">
