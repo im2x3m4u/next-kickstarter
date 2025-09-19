@@ -1,7 +1,7 @@
 // src/lib/crypto.ts
 import CryptoJS from "crypto-js";
 
-// Prefer PASSWORD_SECRET, fallback to SECRET_KEY, then to a dev default
+// Prefer PASSWORD_SECRET, fallback to SECRET_KEY
 const SECRET_KEY = (process.env.PASSWORD_SECRET as string)
   || (process.env.SECRET_KEY as string)
   || "dev_secret_key";
@@ -15,7 +15,6 @@ export function decryptPassword(cipher: string): string {
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 
-// optional helper compare
 export function verifyPassword(plain: string, cipher: string): boolean {
   try {
     const dec = decryptPassword(cipher);

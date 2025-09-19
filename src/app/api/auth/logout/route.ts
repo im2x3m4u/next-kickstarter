@@ -14,8 +14,7 @@ export async function POST(req: NextRequest) {
 
     const { User } = await import("../../../../entities/user");
     const userRepo = AppDataSource.getRepository(User);
-
-    // Ambil token dari header Authorization
+    
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(

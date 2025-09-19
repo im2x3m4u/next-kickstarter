@@ -1,4 +1,5 @@
 // src/app/api/auth/login/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "../../../../lib/typeorm";
 import jwt from "jsonwebtoken";
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 🔑 decrypt password dari DB
+    // decrypt password dari DB
     const bytes = CryptoJS.AES.decrypt(
       user.password,
       process.env.PASSWORD_SECRET!
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: "1h" }
     );
 
-    // Simpan token ke database (kolom login_token)
+    // Simpan token login ke database
     user.login_token = token;
     await userRepo.save(user);
 

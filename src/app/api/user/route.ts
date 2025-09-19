@@ -4,7 +4,6 @@ import { User } from "../../../entities/user";
 import CryptoJS from "crypto-js";
 import { ILike } from "typeorm";
 
-// Helper init DB
 async function initDB() {
   if (!AppDataSource.isInitialized) {
     await AppDataSource.initialize();
@@ -12,7 +11,7 @@ async function initDB() {
   return AppDataSource.getRepository(User);
 }
 
-// GET All Users (with pagination + search)
+// GET All Users pagination dan search
 export async function GET(req: NextRequest) {
   try {
     const userRepo = await initDB();
@@ -33,7 +32,7 @@ export async function GET(req: NextRequest) {
       where,
       skip: (page - 1) * pageSize,
       take: pageSize,
-      order: { nama: "ASC" }, // optional: biar urut
+      order: { nama: "ASC" },
     });
 
     return NextResponse.json({
