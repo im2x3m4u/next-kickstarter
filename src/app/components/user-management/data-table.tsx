@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAtom } from "jotai"
 import {
   Table,
   TableBody,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   MoreHorizontal, 
   Edit, 
@@ -29,17 +29,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-interface User {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: "active" | "inactive" | "pending"
-  lastLogin: string
-  createdAt: string
-  avatar?: string
-}
+import { type User } from "@/app/state/userState"
+import { selectedUserAtom, formModeAtom, isFormOpenAtom, userToDeleteAtom, deleteDialogOpenAtom } from "@/app/state/userState"
 
 interface DataTableProps {
   users: User[]
@@ -49,7 +40,7 @@ interface DataTableProps {
 }
 
 export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
-  const [sortField, setSortField] = useState<keyof User>("createdAt")
+  const [sortField, setSortField] = useState<keyof User>("created_at")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
   const handleSort = (field: keyof User) => {
@@ -61,36 +52,47 @@ export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
     }
   }
 
-  const getStatusBadge = (status: User["status"]) => {
+  const getStatusBadge = (isAktif: number) => {
     const variants = {
-      active: "bg-green-100 text-green-800 hover:bg-green-100",
-      inactive: "bg-red-100 text-red-800 hover:bg-red-100",
-      pending: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+      1: "bg-green-100 text-green-800 hover:bg-green-100",
+      0: "bg-red-100 text-red-800 hover:bg-red-100"
     }
     
     const labels = {
-      active: "Active",
-      inactive: "Inactive", 
-      pending: "Pending"
+      1: "Active",
+      0: "Inactive"
     }
 
     return (
-      <Badge className={variants[status]}>
-        {labels[status]}
+      <Badge className={variants[isAktif as keyof typeof variants]}>
+        {labels[isAktif as keyof typeof labels]}
       </Badge>
     )
   }
 
-  const getRoleBadge = (role: string) => {
+  const getRoleBadge = (userRoles?: Array<{ role: { nama_role: string } }>) => {
+    // Check if user has roles and if the first role exists
+    if (!userRoles || userRoles.length === 0 || !userRoles[0]?.role?.nama_role) {
+      return (
+        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+          User
+        </Badge>
+      )
+    }
+
+    const roleName = userRoles[0].role.nama_role.toLowerCase()
     const variants = {
       admin: "bg-purple-100 text-purple-800 hover:bg-purple-100",
       manager: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-      employee: "bg-gray-100 text-gray-800 hover:bg-gray-100"
+      employee: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+      user: "bg-gray-100 text-gray-800 hover:bg-gray-100"
     }
 
+    const displayName = roleName === "admin" ? "Admin" : "User"
+
     return (
-      <Badge className={variants[role as keyof typeof variants] || variants.employee}>
-        {role.charAt(0).toUpperCase() + role.slice(1)}
+      <Badge className={variants[roleName as keyof typeof variants] || variants.user}>
+        {displayName}
       </Badge>
     )
   }
@@ -108,12 +110,17 @@ export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px] text-gray-900 font-semibold">Avatar</TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("name")}
+              onClick={() => handleSort("nama")}
             >
               Name
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              onClick={() => handleSort("username")}
+            >
+              Username
             </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
@@ -121,27 +128,18 @@ export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
             >
               Email
             </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("role")}
-            >
+            <TableHead className="text-gray-900 font-semibold">
               Role
             </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("status")}
+              onClick={() => handleSort("is_aktif")}
             >
               Status
             </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("lastLogin")}
-            >
-              Last Login
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("createdAt")}
+              onClick={() => handleSort("created_at")}
             >
               Created
             </TableHead>
@@ -150,30 +148,21 @@ export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <TableRow key={user.id} className="hover:bg-gray-50">
-              <TableCell>
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-xs text-gray-900 bg-gray-100">
-                    {user.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-              </TableCell>
-              <TableCell className="font-medium text-gray-900">{user.name}</TableCell>
+            <TableRow key={user.id_user} className="hover:bg-gray-50">
+              <TableCell className="font-medium text-gray-900">{user.nama}</TableCell>
+              <TableCell className="text-gray-700">{user.username}</TableCell>
               <TableCell className="text-gray-700">{user.email}</TableCell>
-              <TableCell>{getRoleBadge(user.role)}</TableCell>
-              <TableCell>{getStatusBadge(user.status)}</TableCell>
+                     <TableCell>{getRoleBadge(user.userRoles)}</TableCell>
+              <TableCell>{getStatusBadge(user.is_aktif)}</TableCell>
               <TableCell className="text-gray-700">
-                {formatDate(user.lastLogin)}
-              </TableCell>
-              <TableCell className="text-gray-700">
-                {formatDate(user.createdAt)}
+                {formatDate(user.created_at)}
               </TableCell>
               <TableCell className="text-gray-900">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
                       <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
+                      <MoreHorizontal className="h-4 w-4 text-gray-900" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
@@ -194,7 +183,7 @@ export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
-                      onClick={() => onDelete(user.id)}
+                      onClick={() => onDelete(user.id_user)}
                       className="text-red-600 hover:bg-red-50 focus:bg-red-50"
                     >
                       <Trash2 className="mr-2 h-4 w-4 text-red-600" />
@@ -210,3 +199,4 @@ export function DataTable({ users, onEdit, onDelete, onView }: DataTableProps) {
     </div>
   )
 }
+

@@ -137,8 +137,7 @@ export function Toolbar({
                 <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   <SelectItem value="all" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">All Roles</SelectItem>
                   <SelectItem value="admin" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Admin</SelectItem>
-                  <SelectItem value="manager" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Manager</SelectItem>
-                  <SelectItem value="employee" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Employee</SelectItem>
+                  <SelectItem value="user" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">User</SelectItem>
                 </SelectContent>
               </Select>
               

@@ -26,15 +26,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
+// Role interface based on API response
 interface Role {
-  id: string
-  name: string
-  description: string
-  permissions: string[]
-  userCount: number
-  createdAt: string
-  isDefault: boolean
+  id_role: string
+  nama_role: string
+  is_aktif: number
+  created_at: string
+  updated_at: string
 }
 
 interface RoleTableProps {
@@ -45,7 +43,7 @@ interface RoleTableProps {
 }
 
 export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
-  const [sortField, setSortField] = useState<keyof Role>("createdAt")
+  const [sortField, setSortField] = useState<keyof Role>("created_at")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
   const handleSort = (field: keyof Role) => {
@@ -57,16 +55,22 @@ export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
     }
   }
 
-
-  const getRoleBadge = (role: Role) => {
-    if (role.isDefault) {
-      return (
-        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-          Default
-        </Badge>
-      )
+  const getStatusBadge = (isAktif: number) => {
+    const variants = {
+      1: "bg-green-100 text-green-800 hover:bg-green-100",
+      0: "bg-red-100 text-red-800 hover:bg-red-100"
     }
-    return null
+    
+    const labels = {
+      1: "Active",
+      0: "Inactive"
+    }
+
+    return (
+      <Badge className={variants[isAktif as keyof typeof variants]}>
+        {labels[isAktif as keyof typeof labels]}
+      </Badge>
+    )
   }
 
   const formatDate = (dateString: string) => {
@@ -77,11 +81,8 @@ export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
     })
   }
 
-  const formatPermissions = (permissions: string[]) => {
-    if (permissions.length <= 3) {
-      return permissions.join(", ")
-    }
-    return `${permissions.slice(0, 3).join(", ")} +${permissions.length - 3} more`
+  const formatRoleName = (namaRole: string) => {
+    return namaRole.charAt(0).toUpperCase() + namaRole.slice(1)
   }
 
   return (
@@ -91,63 +92,52 @@ export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
           <TableRow>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("name")}
+              onClick={() => handleSort("nama_role")}
             >
               Role Name
             </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("description")}
+              onClick={() => handleSort("is_aktif")}
             >
-              Description
-            </TableHead>
-            <TableHead className="text-gray-900 font-semibold">Permissions</TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("userCount")}
-            >
-              Users
+              Status
             </TableHead>
             <TableHead 
               className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
-              onClick={() => handleSort("createdAt")}
+              onClick={() => handleSort("created_at")}
             >
-              Created
+              Created At
             </TableHead>
-            <TableHead className="text-gray-900 font-semibold">Status</TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              onClick={() => handleSort("updated_at")}
+            >
+              Updated At
+            </TableHead>
             <TableHead className="w-[50px] text-gray-900 font-semibold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {roles.map((role) => (
-            <TableRow key={role.id} className="hover:bg-gray-50">
-              <TableCell className="font-medium text-gray-900">{role.name}</TableCell>
-              <TableCell className="text-gray-700 max-w-xs truncate">
-                {role.description}
-              </TableCell>
-              <TableCell className="text-gray-700 max-w-xs">
-                <div className="truncate" title={role.permissions.join(", ")}>
-                  {formatPermissions(role.permissions)}
-                </div>
-              </TableCell>
-              <TableCell className="text-gray-700">
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {role.userCount}
-                </div>
-              </TableCell>
-              <TableCell className="text-gray-700">
-                {formatDate(role.createdAt)}
+            <TableRow key={role.id_role} className="hover:bg-gray-50">
+              <TableCell className="font-medium text-gray-900">
+                {formatRoleName(role.nama_role)}
               </TableCell>
               <TableCell>
-                {getRoleBadge(role)}
+                {getStatusBadge(role.is_aktif)}
+              </TableCell>
+              <TableCell className="text-gray-700">
+                {formatDate(role.created_at)}
+              </TableCell>
+              <TableCell className="text-gray-700">
+                {formatDate(role.updated_at)}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
                       <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
+                      <MoreHorizontal className="h-4 w-4 text-gray-900" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
@@ -168,9 +158,8 @@ export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
-                      onClick={() => onDelete(role.id)}
+                      onClick={() => onDelete(role.id_role)}
                       className="text-red-600 hover:bg-red-50 focus:bg-red-50"
-                      disabled={role.isDefault}
                     >
                       <Trash2 className="mr-2 h-4 w-4 text-red-600" />
                       Delete Role

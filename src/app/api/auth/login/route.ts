@@ -31,11 +31,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // decrypt password dari DB
-    const bytes = CryptoJS.AES.decrypt(
-      user.password,
-      process.env.PASSWORD_SECRET!
-    );
+//     console.log("password input:", password);
+// console.log("password DB:", user.password);
+
+// const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
+// const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+// console.log("decrypted password:", decryptedPassword);
+
+
+    // 🔑 decrypt password dari DB
+    const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
     const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
 
     if (decryptedPassword !== password) {
