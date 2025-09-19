@@ -4,7 +4,7 @@ import { AppDataSource } from "../../../../lib/typeorm";
 import jwt from "jsonwebtoken";
 import CryptoJS from "crypto-js";
 
-const JWT_SECRET = "123";
+const JWT_SECRET = process.env.JWT_SECRET as string; 
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,16 +30,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-//     console.log("password input:", password);
-// console.log("password DB:", user.password);
-
-// const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
-// const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
-// console.log("decrypted password:", decryptedPassword);
-
-
     // 🔑 decrypt password dari DB
-    const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
+    const bytes = CryptoJS.AES.decrypt(
+      user.password,
+      process.env.PASSWORD_SECRET!
+    );
     const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
 
     if (decryptedPassword !== password) {
@@ -52,6 +47,15 @@ export async function POST(req: NextRequest) {
     if (user.is_aktif !== 1) {
       return NextResponse.json(
         { ok: false, status: 403, message: "Akun tidak aktif" },
+        { status: 403 }
+      );
+    }
+
+    // Cek role "admin"
+    const roles = user.userRoles.map((ur) => ur.role.nama_role);
+    if (!roles.includes("admin")) {
+      return NextResponse.json(
+        { ok: false, status: 403, message: "Anda bukan admin" },
         { status: 403 }
       );
     }
@@ -76,10 +80,7 @@ export async function POST(req: NextRequest) {
         nama: user.nama,
         email: user.email,
         no_telepon: user.no_telepon,
-        roles: user.userRoles.map((ur) => ({
-          id_userRole: ur.id_userRole,
-          role_name: ur.role.nama_role,
-        })),
+        roles,
       },
       token,
     });

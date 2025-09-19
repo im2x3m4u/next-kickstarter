@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "../../../lib/typeorm";
 import { User } from "../../../entities/user";
 import CryptoJS from "crypto-js";
+import { ILike } from "typeorm";
 
 // Helper init DB
 async function initDB() {
@@ -16,24 +17,24 @@ export async function GET(req: NextRequest) {
   try {
     const userRepo = await initDB();
 
-    // Ambil query params dari URL
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
     const search = searchParams.get("search") || "";
 
-    // Buat query builder untuk pencarian + pagination
-    const qb = userRepo.createQueryBuilder("user");
+    const where = search
+      ? [
+          { nama: ILike(`%${search}%`) },
+          { username: ILike(`%${search}%`) },
+        ]
+      : {};
 
-    if (search) {
-      qb.where("user.nama LIKE :search OR user.username LIKE :search", {
-        search: `%${search}%`,
-      });
-    }
-
-    qb.skip((page - 1) * pageSize).take(pageSize);
-
-    const [users, total] = await qb.getManyAndCount();
+    const [users, total] = await userRepo.findAndCount({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      order: { nama: "ASC" }, // optional: biar urut
+    });
 
     return NextResponse.json({
       ok: true,
@@ -51,7 +52,6 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
 
 // POST Create User
 export async function POST(req: NextRequest) {
