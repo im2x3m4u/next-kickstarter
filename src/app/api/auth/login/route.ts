@@ -1,11 +1,10 @@
 // src/app/api/auth/login/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { getConnection } from "../../../../lib/typeorm";
 import jwt from "jsonwebtoken";
 import CryptoJS from "crypto-js";
 
-const JWT_SECRET = process.env.JWT_SECRET as string; 
+const JWT_SECRET = "123";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,8 +35,11 @@ export async function POST(req: NextRequest) {
 // console.log("decrypted password:", decryptedPassword);
 
 
-    // 🔑 decrypt password dari DB
-    const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
+    // decrypt password dari DB
+    const bytes = CryptoJS.AES.decrypt(
+      user.password,
+      process.env.PASSWORD_SECRET!
+    );
     const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
 
     if (decryptedPassword !== password) {
@@ -54,15 +56,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Cek role "admin"
-    const roles = user.userRoles.map((ur) => ur.role.nama_role);
-    if (!roles.includes("admin")) {
-      return NextResponse.json(
-        { ok: false, status: 403, message: "Anda bukan admin" },
-        { status: 403 }
-      );
-    }
-
     // Buat JWT
     const token = jwt.sign(
       { id_user: user.id_user, username: user.username, nama: user.nama },
@@ -70,7 +63,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: "1h" }
     );
 
-    // Simpan token login ke database
+    // Simpan token ke database (kolom login_token)
     user.login_token = token;
     await userRepo.save(user);
 
@@ -83,7 +76,10 @@ export async function POST(req: NextRequest) {
         nama: user.nama,
         email: user.email,
         no_telepon: user.no_telepon,
-        roles,
+        roles: user.userRoles.map((ur) => ({
+          id_userRole: ur.id_userRole,
+          role_name: ur.role.nama_role,
+        })),
       },
       token,
     });

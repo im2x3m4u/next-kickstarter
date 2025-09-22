@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource, getConnection } from "../../../../lib/typeorm";
+import { AppDataSource} from "../../../../lib/typeorm";
 import { User } from "../../../../entities/user";
 import { UserRole } from "../../../../entities/userRole";
 import { Role } from "../../../../entities/role";
 import CryptoJS from "crypto-js";
 
 async function initDB() {
-  await getConnection();
+  if (!AppDataSource.isInitialized) {
+    await AppDataSource.initialize();
+  }
   return AppDataSource.getRepository(User);
 }
 
@@ -89,7 +91,6 @@ export async function PUT(
       }
     }
 
-    // Kembalikan user lengkap dengan roles agar client tidak kehilangan informasi role
     const withRelations = await userRepo.findOne({
       where: { id_user: saved.id_user },
       relations: ["userRoles", "userRoles.role"],
