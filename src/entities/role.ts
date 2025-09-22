@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import type { UserRole } from "./userRole"; // type-only import
+import type { UserRole } from "./userRole"; 
 
 @Entity("role")
 export class Role {

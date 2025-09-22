@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import type { UserRole } from "./userRole"; // type-only import untuk TypeScript
+import type { UserRole } from "./userRole";
 
 @Entity("user")
 export class User {

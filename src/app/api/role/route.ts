@@ -4,7 +4,7 @@ import { AppDataSource } from "../../../lib/typeorm";
 import { Role } from "../../../entities/role";
 import { ILike } from "typeorm";
 
-// Get All Role dengan pagination & search
+// Get All Role dengan pagination dan search
 export async function GET(req: NextRequest) {
   try {
     if (!AppDataSource.isInitialized) await AppDataSource.initialize();

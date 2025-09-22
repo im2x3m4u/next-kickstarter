@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     const newUser = userRepo.create({
       nama,
       username,
-      password: encryptedPassword, // simpan yg sudah terenkripsi
+      password: encryptedPassword, 
       email,
       no_telepon,
       is_aktif: is_aktif ?? 1,

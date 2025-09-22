@@ -68,7 +68,6 @@ export async function PUT(
 
     const saved = await userRepo.save(user);
 
-    // Kembalikan user lengkap dengan roles agar client tidak kehilangan informasi role
     const withRelations = await userRepo.findOne({
       where: { id_user: saved.id_user },
       relations: ["userRoles", "userRoles.role"],
