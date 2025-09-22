@@ -1,10 +1,10 @@
-// src/app/api/auth/requestPassword/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { AppDataSource } from "../../../../lib/typeorm";
 import { User } from "../../../../entities/user";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../../../../lib/mailer";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET!;
 const TOKEN_EXP = "1h"; 
 
 export async function POST(req: NextRequest) {
@@ -18,19 +18,27 @@ export async function POST(req: NextRequest) {
     const user = await userRepo.findOne({ where: { email } });
     if (!user) return NextResponse.json({ ok: false, message: "User tidak ditemukan" }, { status: 404 });
 
-    // Buat token (JWT)
+    // Buat token JWT
     const token = jwt.sign({ id_user: user.id_user }, JWT_SECRET, { expiresIn: TOKEN_EXP });
 
-    // Simpan token 
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    // Simpan token ke database
     user.reset_token = token;
     await userRepo.save(user);
 
-    // Kirim token via email -> untuk percobaan pakai console.log
-    const resetLink = `tokenResetPassword=${token}`;
-    console.log("Reset password link (development):", resetLink);
+    // Buat link reset password
+    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${token}`;
 
-    return NextResponse.json({ ok: true, message: "Link reset password telah dikirim ke email (console)" });
+    // Kirim email
+    await sendEmail(
+      user.email,
+      "Reset Password",
+      `<p>Halo ${user.nama},</p>
+       <p>Silakan klik link berikut untuk mereset password Anda:</p>
+       <a href="${resetLink}" target="_blank">${resetLink}</a>
+       <p>Link berlaku 1 jam.</p>`
+    );
+
+    return NextResponse.json({ ok: true, message: "Link reset password telah dikirim ke email" });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ ok: false, message: "Internal Server Error" }, { status: 500 });

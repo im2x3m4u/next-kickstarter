@@ -13,8 +13,7 @@ async function initDB() {
   return AppDataSource.getRepository(User);
 }
 
-
-// GET All Users pagination dan search
+// GET All Users (pagination + search + roles)
 export async function GET(req: NextRequest) {
   try {
     const userRepo = await initDB();
@@ -24,23 +23,22 @@ export async function GET(req: NextRequest) {
     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
     const search = searchParams.get("search") || "";
 
-    const where = search
-      ? [
-          { nama: ILike(`%${search}%`) },
-          { username: ILike(`%${search}%`) },
-        ]
-      : {};
-    // Buat query builder untuk pencarian + pagination dengan relasi roles
+    // Query builder dengan relasi userRoles + role
     const qb = userRepo.createQueryBuilder("user")
       .leftJoinAndSelect("user.userRoles", "userRoles")
-      .leftJoinAndSelect("userRoles.role", "role");
+      .leftJoinAndSelect("userRoles.role", "role")
+      .orderBy("user.nama", "ASC")
+      .skip((page - 1) * pageSize)
+      .take(pageSize);
 
-    const [users, total] = await userRepo.findAndCount({
-      where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      order: { nama: "ASC" },
-    });
+    if (search) {
+      qb.where(
+        "user.nama ILIKE :search OR user.username ILIKE :search OR user.email ILIKE :search",
+        { search: `%${search}%` }
+      );
+    }
+
+    const [users, total] = await qb.getManyAndCount();
 
     return NextResponse.json({
       ok: true,
@@ -51,12 +49,12 @@ export async function GET(req: NextRequest) {
       users,
     });
   } catch (err) {
-    console.error('GET /api/user error:', err);
+    console.error("GET /api/user error:", err);
     return NextResponse.json(
-      { 
-        ok: false, 
+      {
+        ok: false,
         message: "Internal Server Error",
-        error: err instanceof Error ? err.message : "Unknown error"
+        error: err instanceof Error ? err.message : "Unknown error",
       },
       { status: 500 }
     );
