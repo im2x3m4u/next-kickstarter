@@ -1,19 +1,16 @@
 // src/app/api/auth/logout/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../../lib/typeorm";
+import { getConnection } from "../../../../lib/typeorm";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = "123";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-    }
-
+    const ds = await getConnection();
     const { User } = await import("../../../../entities/user");
-    const userRepo = AppDataSource.getRepository(User);
+    const userRepo = ds.getRepository(User);
     
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {

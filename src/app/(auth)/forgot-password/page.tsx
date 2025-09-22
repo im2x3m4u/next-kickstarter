@@ -11,18 +11,37 @@ import { toast } from "sonner";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useAtom(forgotPasswordAtom);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    //Validasi email sederhana
+    // Validasi email sederhana
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Format email tidak valid!");
       return;
     }
 
-    // TODO: Tambahkan logic kirim request reset password ke backend
-    toast.success(`Silahkan cek email Anda untuk reset password di ${email}`);
+    try {
+      const res = await fetch("/api/auth/requestPassword", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(
+          data.message || "Link reset password telah dikirim ke email Anda."
+        );
+      } else {
+        toast.error(data.message || "Gagal mengirim link reset password.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        "Terjadi kesalahan saat mengirim permintaan. Silakan coba lagi."
+      );
+    }
   };
 
   return (
@@ -41,7 +60,9 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-gray-900">Email</Label>
+              <Label htmlFor="email" className="text-gray-900">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -54,7 +75,10 @@ export default function ForgotPasswordPage() {
             </div>
 
             {/* Reset Button */}
-            <Button type="submit" variant="outline" className="text-white w-full h-10 sm:h-11">
+            <Button
+              type="submit"
+              className="w-full h-10 sm:h-11"
+            >
               Kirim Link Reset
             </Button>
 

@@ -1,11 +1,11 @@
 // GET all UserRole & POST create new UserRole
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../lib/typeorm";
+import { getConnection } from "../../../lib/typeorm";
 
 export async function GET() {
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
+  const ds = await getConnection();
   const { UserRole } = await import("../../../entities/userRole");
-  const userRoleRepo = AppDataSource.getRepository(UserRole);
+  const userRoleRepo = ds.getRepository(UserRole);
 
   const userRoles = await userRoleRepo.find({ relations: ["user", "role"] });
   return NextResponse.json({ ok: true, userRoles });
@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
 
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
+  const ds = await getConnection();
   const { UserRole } = await import("../../../entities/userRole");
-  const userRoleRepo = AppDataSource.getRepository(UserRole);
+  const userRoleRepo = ds.getRepository(UserRole);
 
   const userRole = userRoleRepo.create({ user: { id_user }, role: { id_role } });
   await userRoleRepo.save(userRole);

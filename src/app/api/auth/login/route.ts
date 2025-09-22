@@ -1,7 +1,7 @@
 // src/app/api/auth/login/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../../lib/typeorm";
+import { getConnection } from "../../../../lib/typeorm";
 import jwt from "jsonwebtoken";
 import CryptoJS from "crypto-js";
 
@@ -12,12 +12,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { username, password } = body;
 
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-    }
-
+    const ds = await getConnection();
     const { User } = await import("../../../../entities/user");
-    const userRepo = AppDataSource.getRepository(User);
+    const userRepo = ds.getRepository(User);
 
     const user = await userRepo.findOne({
       where: { username },

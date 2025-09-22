@@ -1,13 +1,12 @@
 // CRUD by ID: GET by ID, PUT update, DELETE
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../../lib/typeorm";
+import { getConnection } from "../../../../lib/typeorm";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const id_userRole = params.id;
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-
+  const ds = await getConnection();
   const { UserRole } = await import("../../../../entities/userRole");
-  const userRoleRepo = AppDataSource.getRepository(UserRole);
+  const userRoleRepo = ds.getRepository(UserRole);
 
   const userRole = await userRoleRepo.findOne({
     where: { id_userRole },
@@ -25,15 +24,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const body = await req.json();
   const { id_user, id_role } = body;
 
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-
+  const ds = await getConnection();
   const { UserRole } = await import("../../../../entities/userRole");
   const { User } = await import("../../../../entities/user");
   const { Role } = await import("../../../../entities/role");
 
-  const userRoleRepo = AppDataSource.getRepository(UserRole);
-  const userRepo = AppDataSource.getRepository(User);
-  const roleRepo = AppDataSource.getRepository(Role);
+  const userRoleRepo = ds.getRepository(UserRole);
+  const userRepo = ds.getRepository(User);
+  const roleRepo = ds.getRepository(Role);
 
   const userRole = await userRoleRepo.findOne({ where: { id_userRole }, relations: ["user", "role"] });
   if (!userRole)
@@ -61,9 +59,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const id_userRole = params.id;
 
-  if (!AppDataSource.isInitialized) await AppDataSource.initialize();
+  const ds = await getConnection();
   const { UserRole } = await import("../../../../entities/userRole");
-  const userRoleRepo = AppDataSource.getRepository(UserRole);
+  const userRoleRepo = ds.getRepository(UserRole);
 
   const userRole = await userRoleRepo.findOne({ where: { id_userRole } });
   if (!userRole)

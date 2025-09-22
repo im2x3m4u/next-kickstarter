@@ -1,14 +1,14 @@
 // src/app/api/role/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../lib/typeorm";
+import { getConnection } from "../../../lib/typeorm";
 import { Role } from "../../../entities/role";
 import { ILike } from "typeorm";
 
 // Get All Role dengan pagination & search
 export async function GET(req: NextRequest) {
   try {
-    if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-    const roleRepo = AppDataSource.getRepository(Role);
+    const ds = await getConnection();
+    const roleRepo = ds.getRepository(Role);
 
     const { search, page = "1", pageSize = "10" } = Object.fromEntries(
       req.nextUrl.searchParams
@@ -51,8 +51,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    if (!AppDataSource.isInitialized) await AppDataSource.initialize();
-    const roleRepo = AppDataSource.getRepository(Role);
+    const ds = await getConnection();
+    const roleRepo = ds.getRepository(Role);
 
     const newRole = roleRepo.create(body);
     await roleRepo.save(newRole);

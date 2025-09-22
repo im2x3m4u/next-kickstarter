@@ -29,15 +29,7 @@ import {
   Check,
   X
 } from "lucide-react"
-
-// Role interface based on API response
-interface Role {
-  id_role: string
-  nama_role: string
-  is_aktif: number
-  created_at: string
-  updated_at: string
-}
+import { Role } from "@/app/state/roleState"
 
 interface RoleFormProps {
   role?: Role
