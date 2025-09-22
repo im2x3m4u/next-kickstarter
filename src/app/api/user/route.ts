@@ -21,19 +21,16 @@ export async function GET(req: NextRequest) {
     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
     const search = searchParams.get("search") || "";
 
-<<<<<<< HEAD
     const where = search
       ? [
           { nama: ILike(`%${search}%`) },
           { username: ILike(`%${search}%`) },
         ]
       : {};
-=======
     // Buat query builder untuk pencarian + pagination dengan relasi roles
     const qb = userRepo.createQueryBuilder("user")
       .leftJoinAndSelect("user.userRoles", "userRoles")
       .leftJoinAndSelect("userRoles.role", "role");
->>>>>>> cc4c140 (add: CRUD user management, change password)
 
     const [users, total] = await userRepo.findAndCount({
       where,
