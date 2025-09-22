@@ -34,35 +34,35 @@ import {
 interface RoleToolbarProps {
   onAddRole: () => void
   onSearch: (query: string) => void
-  onFilterType: (type: string) => void
+  onFilterStatus: (status: string) => void
   onExport: () => void
   onImport: () => void
   totalRoles: number
-  defaultRoles: number
-  customRoles: number
+  activeRoles: number
+  inactiveRoles: number
 }
 
 export function RoleToolbar({
   onAddRole,
   onSearch,
-  onFilterType,
+  onFilterStatus,
   onExport,
   onImport,
   totalRoles,
-  defaultRoles,
-  customRoles
+  activeRoles,
+  inactiveRoles
 }: RoleToolbarProps) {
   const [searchQuery, setSearchQuery] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   const handleSearch = (value: string) => {
     setSearchQuery(value)
     onSearch(value)
   }
 
-  const handleTypeFilter = (value: string) => {
-    setTypeFilter(value)
-    onFilterType(value)
+  const handleStatusFilter = (value: string) => {
+    setStatusFilter(value)
+    onFilterStatus(value)
   }
 
   return (
@@ -85,8 +85,8 @@ export function RoleToolbar({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Default Roles</p>
-                <p className="text-2xl font-bold text-green-600">{defaultRoles}</p>
+                <p className="text-sm font-medium text-gray-700">Active Roles</p>
+                <p className="text-2xl font-bold text-green-600">{activeRoles}</p>
               </div>
               <Settings className="h-8 w-8 text-green-500" />
             </div>
@@ -97,10 +97,10 @@ export function RoleToolbar({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Custom Roles</p>
-                <p className="text-2xl font-bold text-purple-600">{customRoles}</p>
+                <p className="text-sm font-medium text-gray-700">Inactive Roles</p>
+                <p className="text-2xl font-bold text-red-600">{inactiveRoles}</p>
               </div>
-              <Users className="h-8 w-8 text-purple-500" />
+              <Users className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -122,14 +122,14 @@ export function RoleToolbar({
                 />
               </div>
               
-              <Select value={typeFilter} onValueChange={handleTypeFilter}>
+              <Select value={statusFilter} onValueChange={handleStatusFilter}>
                 <SelectTrigger className="w-[140px] bg-white border-gray-200 text-gray-900">
-                  <SelectValue placeholder="All Types" />
+                  <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                  <SelectItem value="all" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">All Types</SelectItem>
-                  <SelectItem value="default" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Default</SelectItem>
-                  <SelectItem value="custom" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Custom</SelectItem>
+                  <SelectItem value="all" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">All Status</SelectItem>
+                  <SelectItem value="active" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Active</SelectItem>
+                  <SelectItem value="inactive" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>

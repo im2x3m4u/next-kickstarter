@@ -29,13 +29,17 @@ export function AppHeader() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 p-2">
+            <Button 
+              variant="ghost" 
+              className="flex items-center gap-2 p-2"
+              suppressHydrationWarning
+            >
               <div className="h-10 w-10 rounded-full border flex items-center justify-center">
                 👤
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
+          <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg" suppressHydrationWarning>
             <DropdownMenuLabel className="text-gray-900 bg-white">My Account</DropdownMenuLabel>
             <DropdownMenuItem asChild className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">
               <Link href="/profile" className="flex items-center">

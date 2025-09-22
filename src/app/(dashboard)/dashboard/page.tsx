@@ -1,65 +1,58 @@
+"use client"
+
+import { Suspense, useEffect } from "react"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import dynamic from "next/dynamic"
 import AdminLayout from "@/app/components/layout/layout"
 import { StatsCard } from "@/app/components/dashboard/stats-card"
-import { RecentActivity } from "@/app/components/dashboard/recent-activity"
-import { ChartPlaceholder } from "@/app/components/dashboard/chart-placeholder"
-import { Users, UserCheck, Shield, TrendingUp } from "lucide-react"
+import { DashboardSkeleton } from "@/app/components/loading-skeleton"
+import { Users, UserCheck, Shield, Activity } from "lucide-react"
+import { 
+  dashboardStatsAtom, 
+  dashboardActivitiesAtom, 
+  dashboardLoadingAtom, 
+  dashboardErrorAtom,
+  statsCardsAtom,
+  fetchDashboardDataAtom 
+} from "@/app/state/dashboardState"
 
-// Mock data
-const statsData = [
-  {
-    title: "Total Users",
-    value: "2,543",
-    icon: Users,
-    change: "+12% from last month",
-    changeType: "positive" as const,
-    description: "Active users in the system"
-  },
-  {
-    title: "Active Sessions",
-    value: "1,234",
-    icon: UserCheck,
-    change: "+8% from last week",
-    changeType: "positive" as const,
-    description: "Currently online users"
-  },
-  {
-    title: "Admin Roles",
-    value: "15",
-    icon: Shield,
-    change: "No change",
-    changeType: "neutral" as const,
-    description: "Total admin roles configured"
-  }
-]
+// Lazy load heavy components
+const RecentActivity = dynamic(() => import("@/app/components/dashboard/recent-activity").then(mod => ({ default: mod.RecentActivity })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+})
 
-const recentActivities = [
-  {
-    id: "1",
-    user: "John Doe",
-    action: "Created new user account",
-    time: "2 minutes ago"
-  },
-  {
-    id: "2", 
-    user: "Jane Smith",
-    action: "Updated role permissions",
-    time: "15 minutes ago"
-  },
-  {
-    id: "3",
-    user: "Mike Johnson", 
-    action: "Logged into dashboard",
-    time: "1 hour ago"
-  },
-  {
-    id: "4",
-    user: "Sarah Wilson",
-    action: "Deleted inactive user",
-    time: "2 hours ago"
-  }
-]
+
 
 export default function DashboardPage() {
+  // Jotai state management
+  const stats = useAtomValue(dashboardStatsAtom)
+  const activities = useAtomValue(dashboardActivitiesAtom)
+  const loading = useAtomValue(dashboardLoadingAtom)
+  const error = useAtomValue(dashboardErrorAtom)
+  const statsCards = useAtomValue(statsCardsAtom)
+  const fetchDashboardData = useSetAtom(fetchDashboardDataAtom)
+
+  // Fetch dashboard data on component mount
+  useEffect(() => {
+    fetchDashboardData()
+  }, [fetchDashboardData])
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 mt-1">Loading dashboard data...</p>
+            </div>
+          </div>
+          <DashboardSkeleton />
+        </div>
+      </AdminLayout>
+    )
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -73,42 +66,30 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {statsData.map((stat, index) => (
-            <StatsCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-              change={stat.change}
-              changeType={stat.changeType}
-              description={stat.description}
-            />
-          ))}
+          {statsCards.map((stat, index) => {
+            const icons = [Users, Shield, Activity]
+            return (
+              <StatsCard
+                key={index}
+                title={stat.title}
+                value={stat.value}
+                icon={icons[index]}
+                change={stat.change}
+                changeType={stat.changeType}
+                description={stat.description}
+              />
+            )
+          })}
         </div>
 
-        {/* Charts and Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartPlaceholder
-            title="User Growth Trend"
-            type="line"
-            description="Monthly user registration trends over the past 12 months"
-          />
-          <RecentActivity activities={recentActivities} />
-        </div>
+        {/* Charts and Activity - Lazy loaded */}
+        <Suspense fallback={<DashboardSkeleton />}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentActivity activities={activities} />
+          </div>
+        </Suspense>
 
-        {/* Additional Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartPlaceholder
-            title="Role Distribution"
-            type="pie"
-            description="Breakdown of users by role type"
-          />
-          <ChartPlaceholder
-            title="Activity Overview"
-            type="bar"
-            description="Daily activity metrics for the past 30 days"
-          />
-        </div>
+
       </div>
     </AdminLayout>
   )

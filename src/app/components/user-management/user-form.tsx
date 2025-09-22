@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAtomValue } from "jotai"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { 
-  User, 
+  User as UserIcon, 
   Mail, 
   Phone, 
   Shield, 
@@ -30,21 +31,8 @@ import {
   MapPin,
   Building
 } from "lucide-react"
-
-interface User {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: "active" | "inactive" | "pending"
-  lastLogin: string
-  createdAt: string
-  avatar?: string
-  phone?: string
-  department?: string
-  position?: string
-  location?: string
-}
+import { type User } from "@/app/state/userState"
+import { selectedUserAtom, formModeAtom, isFormOpenAtom } from "@/app/state/userState"
 
 interface UserFormProps {
   user?: User
@@ -56,38 +44,37 @@ interface UserFormProps {
 
 export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProps) {
   const [formData, setFormData] = useState({
-    name: "",
+    nama: "",
+    username: "",
     email: "",
-    role: "employee",
-    status: "active" as const,
-    phone: "",
-    department: "",
-    position: "",
-    location: ""
+    no_telepon: "",
+    password: "",
+    is_aktif: 1,
+    role: "user"
   })
 
   useEffect(() => {
     if (user && mode !== "create") {
+      // Get role from user.userRoles array
+      const userRole = user.userRoles && user.userRoles.length > 0 && user.userRoles[0]?.role?.nama_role ? user.userRoles[0].role.nama_role : "user"
       setFormData({
-        name: user.name || "",
+        nama: user.nama || "",
+        username: user.username || "",
         email: user.email || "",
-        role: user.role || "employee",
-        status: user.status || "active",
-        phone: user.phone || "",
-        department: user.department || "",
-        position: user.position || "",
-        location: user.location || ""
+        no_telepon: user.no_telepon || "",
+        password: "",
+        is_aktif: user.is_aktif || 1,
+        role: userRole
       })
     } else {
       setFormData({
-        name: "",
+        nama: "",
+        username: "",
         email: "",
-        role: "employee",
-        status: "active",
-        phone: "",
-        department: "",
-        position: "",
-        location: ""
+        no_telepon: "",
+        password: "",
+        is_aktif: 1,
+        role: "user"
       })
     }
   }, [user, mode])
@@ -128,10 +115,10 @@ export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            {getTitle()}
-          </DialogTitle>
+        <DialogTitle className="flex items-center gap-2">
+          <UserIcon className="h-5 w-5" />
+          {getTitle()}
+        </DialogTitle>
           <DialogDescription>
             {getDescription()}
           </DialogDescription>
@@ -142,23 +129,37 @@ export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProp
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <User className="h-4 w-4" />
+                <UserIcon className="h-4 w-4" />
                 Basic Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="nama">Full Name *</Label>
                   <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    id="nama"
+                    value={formData.nama}
+                    onChange={(e) => handleInputChange("nama", e.target.value)}
                     placeholder="Enter full name"
                     required
                     disabled={isReadOnly}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username *</Label>
+                  <Input
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => handleInputChange("username", e.target.value)}
+                    placeholder="Enter username"
+                    required
+                    disabled={isReadOnly}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
                   <Input
@@ -171,66 +172,52 @@ export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProp
                     disabled={isReadOnly}
                   />
                 </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="no_telepon">Phone Number</Label>
                   <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    id="no_telepon"
+                    value={formData.no_telepon}
+                    onChange={(e) => handleInputChange("no_telepon", e.target.value)}
                     placeholder="Enter phone number"
                     disabled={isReadOnly}
                   />
                 </div>
+              </div>
+
+              {mode === "create" && (
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="password">Password *</Label>
                   <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
-                    placeholder="Enter location"
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    placeholder="Enter password"
+                    required
                     disabled={isReadOnly}
                   />
                 </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="role">Role *</Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => handleInputChange("role", value)}
+                  disabled={isReadOnly}
+                >
+                  <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                    <SelectItem value="user" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">User</SelectItem>
+                    <SelectItem value="admin" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
 
-          {/* Work Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                Work Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Input
-                    id="department"
-                    value={formData.department}
-                    onChange={(e) => handleInputChange("department", e.target.value)}
-                    placeholder="Enter department"
-                    disabled={isReadOnly}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="position">Position</Label>
-                  <Input
-                    id="position"
-                    value={formData.position}
-                    onChange={(e) => handleInputChange("position", e.target.value)}
-                    placeholder="Enter position"
-                    disabled={isReadOnly}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* System Information */}
           <Card>
@@ -241,41 +228,21 @@ export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProp
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role *</Label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) => handleInputChange("role", value)}
-                    disabled={isReadOnly}
-                  >
-                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                      <SelectItem value="admin" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Admin</SelectItem>
-                      <SelectItem value="manager" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Manager</SelectItem>
-                      <SelectItem value="employee" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Employee</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status *</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleInputChange("status", value)}
-                    disabled={isReadOnly}
-                  >
-                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                      <SelectItem value="active" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Active</SelectItem>
-                      <SelectItem value="inactive" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Inactive</SelectItem>
-                      <SelectItem value="pending" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Pending</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="is_aktif">Status *</Label>
+                <Select
+                  value={formData.is_aktif.toString()}
+                  onValueChange={(value) => handleInputChange("is_aktif", parseInt(value))}
+                  disabled={isReadOnly}
+                >
+                  <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                    <SelectItem value="1" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Active</SelectItem>
+                    <SelectItem value="0" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {mode === "view" && user && (
@@ -284,14 +251,14 @@ export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProp
                     <Label>Created At</Label>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="h-4 w-4" />
-                      {new Date(user.createdAt).toLocaleDateString("id-ID")}
+                      {new Date(user.created_at).toLocaleDateString("id-ID")}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Last Login</Label>
+                    <Label>Updated At</Label>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="h-4 w-4" />
-                      {new Date(user.lastLogin).toLocaleDateString("id-ID")}
+                      {new Date(user.updated_at).toLocaleDateString("id-ID")}
                     </div>
                   </div>
                 </div>

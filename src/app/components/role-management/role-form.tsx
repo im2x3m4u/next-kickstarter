@@ -4,7 +4,13 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -24,14 +30,13 @@ import {
   X
 } from "lucide-react"
 
+// Role interface based on API response
 interface Role {
-  id: string
-  name: string
-  description: string
-  permissions: string[]
-  userCount: number
-  createdAt: string
-  isDefault: boolean
+  id_role: string
+  nama_role: string
+  is_aktif: number
+  created_at: string
+  updated_at: string
 }
 
 interface RoleFormProps {
@@ -42,41 +47,22 @@ interface RoleFormProps {
   mode: "create" | "edit" | "view"
 }
 
-const availablePermissions = [
-  { id: "user.read", name: "View Users", category: "User Management" },
-  { id: "user.create", name: "Create Users", category: "User Management" },
-  { id: "user.update", name: "Edit Users", category: "User Management" },
-  { id: "user.delete", name: "Delete Users", category: "User Management" },
-  { id: "role.read", name: "View Roles", category: "Role Management" },
-  { id: "role.create", name: "Create Roles", category: "Role Management" },
-  { id: "role.update", name: "Edit Roles", category: "Role Management" },
-  { id: "role.delete", name: "Delete Roles", category: "Role Management" },
-  { id: "dashboard.read", name: "View Dashboard", category: "Dashboard" },
-  { id: "reports.read", name: "View Reports", category: "Reports" },
-  { id: "reports.create", name: "Create Reports", category: "Reports" },
-  { id: "settings.read", name: "View Settings", category: "Settings" },
-  { id: "settings.update", name: "Edit Settings", category: "Settings" }
-]
-
 export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    permissions: [] as string[]
+    nama_role: "",
+    is_aktif: 1
   })
 
   useEffect(() => {
     if (role && mode !== "create") {
       setFormData({
-        name: role.name || "",
-        description: role.description || "",
-        permissions: role.permissions || []
+        nama_role: role.nama_role || "",
+        is_aktif: role.is_aktif || 1
       })
     } else {
       setFormData({
-        name: "",
-        description: "",
-        permissions: []
+        nama_role: "",
+        is_aktif: 1
       })
     }
   }, [role, mode])
@@ -86,25 +72,16 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
     onSubmit(formData)
   }
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }))
   }
 
-  const handlePermissionToggle = (permissionId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      permissions: prev.permissions.includes(permissionId)
-        ? prev.permissions.filter(p => p !== permissionId)
-        : [...prev.permissions, permissionId]
-    }))
-  }
-
   const getTitle = () => {
     switch (mode) {
-      case "create": return "Create New Role"
+      case "create": return "Add New Role"
       case "edit": return "Edit Role"
       case "view": return "Role Details"
       default: return "Role"
@@ -113,7 +90,7 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
 
   const getDescription = () => {
     switch (mode) {
-      case "create": return "Create a new role with specific permissions."
+      case "create": return "Create a new role in the system."
       case "edit": return "Update role information and permissions."
       case "view": return "View detailed information about this role."
       default: return ""
@@ -122,18 +99,9 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
 
   const isReadOnly = mode === "view"
 
-  // Group permissions by category
-  const groupedPermissions = availablePermissions.reduce((acc, permission) => {
-    if (!acc[permission.category]) {
-      acc[permission.category] = []
-    }
-    acc[permission.category].push(permission)
-    return acc
-  }, {} as Record<string, typeof availablePermissions>)
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
@@ -155,11 +123,11 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Role Name *</Label>
+                <Label htmlFor="nama_role">Role Name *</Label>
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  id="nama_role"
+                  value={formData.nama_role}
+                  onChange={(e) => handleInputChange("nama_role", e.target.value)}
                   placeholder="Enter role name"
                   required
                   disabled={isReadOnly}
@@ -167,115 +135,53 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  placeholder="Enter role description"
-                  required
+                <Label htmlFor="is_aktif">Status *</Label>
+                <Select
+                  value={formData.is_aktif.toString()}
+                  onValueChange={(value) => handleInputChange("is_aktif", parseInt(value))}
                   disabled={isReadOnly}
-                  rows={3}
-                />
+                >
+                  <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                    <SelectItem value="1" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Active</SelectItem>
+                    <SelectItem value="0" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
 
-          {/* Permissions */}
+          {/* System Information */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Permissions
+                System Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(groupedPermissions).map(([category, permissions]) => (
-                <div key={category} className="space-y-3">
-                  <h4 className="font-medium text-gray-900">{category}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {permissions.map((permission) => (
-                      <div
-                        key={permission.id}
-                        className={`flex items-center space-x-2 p-2 rounded border cursor-pointer transition-colors ${
-                          formData.permissions.includes(permission.id)
-                            ? "bg-blue-50 border-blue-200"
-                            : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-                        } ${isReadOnly ? "cursor-not-allowed" : ""}`}
-                        onClick={() => !isReadOnly && handlePermissionToggle(permission.id)}
-                      >
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-                          formData.permissions.includes(permission.id)
-                            ? "bg-blue-500 border-blue-500"
-                            : "border-gray-300"
-                        }`}>
-                          {formData.permissions.includes(permission.id) && (
-                            <Check className="w-3 h-3 text-white" />
-                          )}
-                        </div>
-                        <span className="text-sm">{permission.name}</span>
-                      </div>
-                    ))}
+              {mode === "view" && role && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                  <div className="space-y-2">
+                    <Label>Created At</Label>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      {new Date(role.created_at).toLocaleDateString("id-ID")}
+                    </div>
                   </div>
-                </div>
-              ))}
-              
-              {formData.permissions.length > 0 && (
-                <div className="pt-4 border-t">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="text-sm font-medium text-gray-700">Selected permissions:</span>
-                    {formData.permissions.map((permissionId) => {
-                      const permission = availablePermissions.find(p => p.id === permissionId)
-                      return (
-                        <Badge key={permissionId} variant="secondary" className="text-xs">
-                          {permission?.name}
-                        </Badge>
-                      )
-                    })}
+                  <div className="space-y-2">
+                    <Label>Updated At</Label>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      {new Date(role.updated_at).toLocaleDateString("id-ID")}
+                    </div>
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* Role Information (View Mode) */}
-          {mode === "view" && role && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Role Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Users with this role</Label>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="h-4 w-4" />
-                      {role.userCount} users
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Created At</Label>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(role.createdAt).toLocaleDateString("id-ID")}
-                    </div>
-                  </div>
-                </div>
-                
-                {role.isDefault && (
-                  <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                    <Shield className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm text-blue-700 font-medium">
-                      This is a default system role and cannot be deleted
-                    </span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>

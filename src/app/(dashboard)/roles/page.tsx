@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RoleTable } from "@/app/components/role-management/role-table"
@@ -24,102 +24,101 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+// Role interface based on API response
 interface Role {
-  id: string
-  name: string
-  description: string
-  permissions: string[]
-  userCount: number
-  createdAt: string
-  isDefault: boolean
+  id_role: string
+  nama_role: string
+  is_aktif: number
+  created_at: string
+  updated_at: string
 }
 
-// Mock data
-const mockRoles: Role[] = [
-  {
-    id: "1",
-    name: "Admin",
-    description: "Full system access with all permissions",
-    permissions: ["user.read", "user.create", "user.update", "user.delete", "role.read", "role.create", "role.update", "role.delete", "dashboard.read", "reports.read", "reports.create", "settings.read", "settings.update"],
-    userCount: 3,
-    createdAt: "2023-01-15",
-    isDefault: true
-  },
-  {
-    id: "2", 
-    name: "Manager",
-    description: "Management access with user and report permissions",
-    permissions: ["user.read", "user.create", "user.update", "role.read", "dashboard.read", "reports.read", "reports.create"],
-    userCount: 8,
-    createdAt: "2023-02-20",
-    isDefault: true
-  },
-  {
-    id: "3",
-    name: "Employee",
-    description: "Basic access for regular employees",
-    permissions: ["dashboard.read", "reports.read"],
-    userCount: 45,
-    createdAt: "2023-03-10",
-    isDefault: true
-  },
-  {
-    id: "4",
-    name: "HR Specialist",
-    description: "Human resources specialist with user management access",
-    permissions: ["user.read", "user.create", "user.update", "dashboard.read", "reports.read"],
-    userCount: 5,
-    createdAt: "2023-06-05",
-    isDefault: false
-  },
-  {
-    id: "5",
-    name: "Finance Manager",
-    description: "Financial management with reporting access",
-    permissions: ["dashboard.read", "reports.read", "reports.create", "settings.read"],
-    userCount: 2,
-    createdAt: "2023-08-15",
-    isDefault: false
-  }
-]
-
 export default function RoleManagementPage() {
-  const [roles, setRoles] = useState<Role[]>(mockRoles)
-  const [filteredRoles, setFilteredRoles] = useState<Role[]>(mockRoles)
+  // State management with useState (simplified approach)
+  const [roles, setRoles] = useState<Role[]>([])
+  const [filteredRoles, setFilteredRoles] = useState<Role[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">("create")
   const [selectedRole, setSelectedRole] = useState<Role | undefined>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+
+  // Calculate stats
+  const stats = {
+    total: roles.length,
+    active: roles.filter(role => role.is_aktif === 1).length,
+    inactive: roles.filter(role => role.is_aktif === 0).length
+  }
+
+  // Load roles from API
+  const loadRoles = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch('/api/role')
+      const data = await response.json()
+      
+      // Handle different response formats
+      let rolesData = []
+      if (Array.isArray(data)) {
+        rolesData = data
+      } else if (data && Array.isArray(data.value)) {
+        rolesData = data.value
+      } else {
+        setError('Failed to fetch roles')
+        return
+      }
+      
+      setRoles(rolesData)
+      setFilteredRoles(rolesData)
+    } catch (err) {
+      setError('Error loading roles')
+      console.error('Error fetching roles:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load roles on component mount
+  useEffect(() => {
+    loadRoles()
+  }, [])
 
   // Filter and search logic
   const handleSearch = (query: string) => {
-    if (!query.trim()) {
-      setFilteredRoles(roles)
-      return
-    }
-    
-    const filtered = roles.filter(role =>
-      role.name.toLowerCase().includes(query.toLowerCase()) ||
-      role.description.toLowerCase().includes(query.toLowerCase()) ||
-      role.permissions.some(permission => 
-        permission.toLowerCase().includes(query.toLowerCase())
-      )
-    )
-    setFilteredRoles(filtered)
+    setSearchQuery(query)
+    filterRoles(query, statusFilter)
   }
 
-  const handleFilterType = (type: string) => {
-    if (type === "all") {
-      setFilteredRoles(roles)
-      return
+  const handleFilterStatus = (status: string) => {
+    setStatusFilter(status)
+    filterRoles(searchQuery, status)
+  }
+
+  const filterRoles = (searchQuery: string, statusFilter: string) => {
+    let filtered = roles
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(role =>
+        role.nama_role.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     }
     
-    const filtered = roles.filter(role => {
-      if (type === "default") return role.isDefault
-      if (type === "custom") return !role.isDefault
-      return true
-    })
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(role => {
+        if (statusFilter === "active") return role.is_aktif === 1
+        if (statusFilter === "inactive") return role.is_aktif === 0
+        return true
+      })
+    }
+    
     setFilteredRoles(filtered)
   }
 
@@ -147,34 +146,51 @@ export default function RoleManagementPage() {
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (roleToDelete) {
-      setRoles(prev => prev.filter(role => role.id !== roleToDelete))
-      setFilteredRoles(prev => prev.filter(role => role.id !== roleToDelete))
+      try {
+        const response = await fetch(`/api/role/${roleToDelete}`, {
+          method: 'DELETE'
+        })
+        const result = await response.json()
+        if (result.ok) {
+          loadRoles() // Refresh the list
+        }
+      } catch (error) {
+        console.error('Error deleting role:', error)
+      }
       setRoleToDelete(null)
       setDeleteDialogOpen(false)
     }
   }
 
-  const handleFormSubmit = (roleData: Partial<Role>) => {
-    if (formMode === "create") {
-      const newRole: Role = {
-        id: Date.now().toString(),
-        name: roleData.name || "",
-        description: roleData.description || "",
-        permissions: roleData.permissions || [],
-        userCount: 0,
-        createdAt: new Date().toISOString().split('T')[0],
-        isDefault: false
+  const handleFormSubmit = async (roleData: Partial<Role>) => {
+    try {
+      if (formMode === "create") {
+        const response = await fetch('/api/role', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(roleData)
+        })
+        const result = await response.json()
+        if (result.ok) {
+          loadRoles() // Refresh the list
+        }
+      } else if (formMode === "edit" && selectedRole) {
+        const response = await fetch(`/api/role/${selectedRole.id_role}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(roleData)
+        })
+        const result = await response.json()
+        if (result.ok) {
+          loadRoles() // Refresh the list
+        }
       }
-      setRoles(prev => [...prev, newRole])
-      setFilteredRoles(prev => [...prev, newRole])
-    } else if (formMode === "edit" && selectedRole) {
-      const updatedRole = { ...selectedRole, ...roleData }
-      setRoles(prev => prev.map(role => role.id === selectedRole.id ? updatedRole : role))
-      setFilteredRoles(prev => prev.map(role => role.id === selectedRole.id ? updatedRole : role))
+      setIsFormOpen(false)
+    } catch (error) {
+      console.error('Error saving role:', error)
     }
-    setIsFormOpen(false)
   }
 
   const handleExport = () => {
@@ -186,14 +202,6 @@ export default function RoleManagementPage() {
     // Implement import functionality
     console.log("Importing roles...")
   }
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const total = roles.length
-    const defaultRoles = roles.filter(role => role.isDefault).length
-    const customRoles = roles.filter(role => !role.isDefault).length
-    return { total, defaultRoles, customRoles }
-  }, [roles])
 
   return (
     <div className="space-y-6">
@@ -224,12 +232,12 @@ export default function RoleManagementPage() {
       <RoleToolbar
         onAddRole={handleAddRole}
         onSearch={handleSearch}
-        onFilterType={handleFilterType}
+        onFilterStatus={handleFilterStatus}
         onExport={handleExport}
         onImport={handleImport}
         totalRoles={stats.total}
-        defaultRoles={stats.defaultRoles}
-        customRoles={stats.customRoles}
+        activeRoles={stats.active}
+        inactiveRoles={stats.inactive}
       />
 
       {/* Role Table */}
@@ -241,7 +249,21 @@ export default function RoleManagementPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredRoles.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-500">Loading roles...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading roles</h3>
+              <p className="text-gray-500 mb-4">{error}</p>
+              <Button onClick={loadRoles} className="flex items-center gap-2">
+                Try Again
+              </Button>
+            </div>
+          ) : filteredRoles.length > 0 ? (
             <RoleTable
               roles={filteredRoles}
               onEdit={handleEditRole}

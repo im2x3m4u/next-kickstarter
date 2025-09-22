@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../../lib/typeorm";
+import { AppDataSource} from "../../../../lib/typeorm";
 import { User } from "../../../../entities/user";
+import { UserRole } from "../../../../entities/userRole";
+import { Role } from "../../../../entities/role";
 import CryptoJS from "crypto-js";
 
 async function initDB() {
@@ -30,7 +32,7 @@ export async function PUT(
 ) {
   try {
     const body = await req.json();
-    const { nama, username, email, no_telepon, is_aktif, password } = body;
+    const { nama, username, email, no_telepon, is_aktif, password, role } = body;
 
     const userRepo = await initDB();
     const user = await userRepo.findOneBy({ id_user: params.id });
@@ -58,7 +60,7 @@ export async function PUT(
       user.username = username;
     }
 
-    // Kalau password dikirim, enkripsi baru
+    // Kalau password dikirim, enkripsi password baru
     if (password) {
       user.password = CryptoJS.AES.encrypt(
         password,
@@ -67,6 +69,27 @@ export async function PUT(
     }
 
     const saved = await userRepo.save(user);
+
+    // Update role if provided
+    if (role) {
+      const userRoleRepo = AppDataSource.getRepository(UserRole);
+      const roleRepo = AppDataSource.getRepository(Role);
+
+      // Find the new role
+      const newRole = await roleRepo.findOne({ where: { nama_role: role } });
+      
+      if (newRole) {
+        // Delete existing user roles
+        await userRoleRepo.delete({ user: { id_user: params.id } });
+        
+        // Create new user role
+        const newUserRole = userRoleRepo.create({
+          user: saved,
+          role: newRole,
+        });
+        await userRoleRepo.save(newUserRole);
+      }
+    }
 
     const withRelations = await userRepo.findOne({
       where: { id_user: saved.id_user },

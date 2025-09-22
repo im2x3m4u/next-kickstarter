@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AppDataSource } from "../../../lib/typeorm";
+import { AppDataSource} from "../../../lib/typeorm";
 import { User } from "../../../entities/user";
+import { UserRole } from "../../../entities/userRole";
+import { Role } from "../../../entities/role";
 import CryptoJS from "crypto-js";
 import { ILike } from "typeorm";
 
@@ -10,6 +12,7 @@ async function initDB() {
   }
   return AppDataSource.getRepository(User);
 }
+
 
 // GET All Users pagination dan search
 export async function GET(req: NextRequest) {
@@ -27,6 +30,10 @@ export async function GET(req: NextRequest) {
           { username: ILike(`%${search}%`) },
         ]
       : {};
+    // Buat query builder untuk pencarian + pagination dengan relasi roles
+    const qb = userRepo.createQueryBuilder("user")
+      .leftJoinAndSelect("user.userRoles", "userRoles")
+      .leftJoinAndSelect("userRoles.role", "role");
 
     const [users, total] = await userRepo.findAndCount({
       where,
@@ -44,9 +51,13 @@ export async function GET(req: NextRequest) {
       users,
     });
   } catch (err) {
-    console.error(err);
+    console.error('GET /api/user error:', err);
     return NextResponse.json(
-      { ok: false, message: "Internal Server Error" },
+      { 
+        ok: false, 
+        message: "Internal Server Error",
+        error: err instanceof Error ? err.message : "Unknown error"
+      },
       { status: 500 }
     );
   }
@@ -56,7 +67,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nama, username, password, email, no_telepon, is_aktif } = body;
+    const { nama, username, password, email, no_telepon, is_aktif, role } = body;
 
     const userRepo = await initDB();
 
@@ -76,6 +87,24 @@ export async function POST(req: NextRequest) {
     });
 
     const savedUser = await userRepo.save(newUser);
+
+    // Assign role to the new user
+    if (role) {
+      const userRoleRepo = AppDataSource.getRepository(UserRole);
+      const roleRepo = AppDataSource.getRepository(Role);
+
+      // Find the role
+      const selectedRole = await roleRepo.findOne({ where: { nama_role: role } });
+      
+      if (selectedRole) {
+        const newUserRole = userRoleRepo.create({
+          user: savedUser,
+          role: selectedRole,
+        });
+        await userRoleRepo.save(newUserRole);
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       message: "User berhasil dibuat",

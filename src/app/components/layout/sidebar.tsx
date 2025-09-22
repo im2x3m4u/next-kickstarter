@@ -30,7 +30,7 @@ export function AppSidebar() {
   return (
     <div className="w-64 bg-gray-900 text-white min-h-screen">
       <div className="p-6">
-        <h2 className="text-xl font-bold text-white">{displayName ? `Halo, ${displayName}!` : "Halo, Pengguna!"}</h2>
+        <h2 className="text-xl font-bold text-white" suppressHydrationWarning>{displayName ? `Halo, ${displayName}!` : "Halo, Pengguna!"}</h2>
       <p className="italic text-gray-300">Admin</p>
       </div>
       <nav className="px-4">

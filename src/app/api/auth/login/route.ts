@@ -39,7 +39,10 @@ export async function POST(req: NextRequest) {
 
 
     // decrypt password dari DB
-    const bytes = CryptoJS.AES.decrypt(user.password, process.env.PASSWORD_SECRET!);
+    const bytes = CryptoJS.AES.decrypt(
+      user.password,
+      process.env.PASSWORD_SECRET!
+    );
     const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
 
     if (decryptedPassword !== password) {
@@ -91,4 +94,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

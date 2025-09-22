@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/app/components/user-management/data-table"
@@ -23,133 +23,132 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
+// User interface
 interface User {
-  id: string
-  name: string
+  id_user: string
+  nama: string
+  username: string
   email: string
-  role: string
-  status: "active" | "inactive" | "pending"
-  lastLogin: string
-  createdAt: string
-  avatar?: string
-  phone?: string
-  department?: string
-  position?: string
-  location?: string
+  no_telepon: string
+  is_aktif: number
+  reset_token?: string | null
+  login_token?: string | null
+  created_at: string
+  updated_at: string
+  userRoles?: Array<{
+    id_userRole: string
+    created_at: string
+    updated_at: string
+    role: {
+      id_role: string
+      nama_role: string
+      is_aktif: number
+      created_at: string
+      updated_at: string
+    }
+  }>
 }
 
-// Mock data
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@company.com",
-    role: "admin",
-    status: "active",
-    lastLogin: "2024-01-15",
-    createdAt: "2023-06-15",
-    phone: "+62 812-3456-7890",
-    department: "IT",
-    position: "System Administrator",
-    location: "Jakarta"
-  },
-  {
-    id: "2", 
-    name: "Jane Smith",
-    email: "jane.smith@company.com",
-    role: "manager",
-    status: "active",
-    lastLogin: "2024-01-14",
-    createdAt: "2023-07-20",
-    phone: "+62 813-4567-8901",
-    department: "HR",
-    position: "HR Manager",
-    location: "Surabaya"
-  },
-  {
-    id: "3",
-    name: "Mike Johnson",
-    email: "mike.johnson@company.com", 
-    role: "employee",
-    status: "active",
-    lastLogin: "2024-01-13",
-    createdAt: "2023-08-10",
-    phone: "+62 814-5678-9012",
-    department: "Marketing",
-    position: "Marketing Specialist",
-    location: "Bandung"
-  },
-  {
-    id: "4",
-    name: "Sarah Wilson",
-    email: "sarah.wilson@company.com",
-    role: "employee", 
-    status: "inactive",
-    lastLogin: "2023-12-20",
-    createdAt: "2023-09-05",
-    phone: "+62 815-6789-0123",
-    department: "Finance",
-    position: "Accountant",
-    location: "Medan"
-  },
-  {
-    id: "5",
-    name: "David Brown",
-    email: "david.brown@company.com",
-    role: "manager",
-    status: "pending",
-    lastLogin: "2024-01-10",
-    createdAt: "2024-01-01",
-    phone: "+62 816-7890-1234",
-    department: "Operations",
-    position: "Operations Manager", 
-    location: "Yogyakarta"
-  }
-]
-
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers)
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers)
+  // State management with useState (simplified approach)
+  const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">("create")
   const [selectedUser, setSelectedUser] = useState<User | undefined>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [userToDelete, setUserToDelete] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [roleFilter, setRoleFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
+
+  // Calculate stats
+  const stats = {
+    total: users.length,
+    active: users.filter(user => user.is_aktif === 1).length,
+    inactive: users.filter(user => user.is_aktif === 0).length
+  }
+
+  // Load users from API
+  const loadUsers = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch('/api/user')
+      const data = await response.json()
+      
+      if (data.ok) {
+        setUsers(data.users)
+        setFilteredUsers(data.users)
+      } else {
+        setError('Failed to fetch users')
+      }
+    } catch (err) {
+      setError('Error loading users')
+      console.error('Error fetching users:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load users on component mount
+  useEffect(() => {
+    loadUsers()
+  }, [])
 
   // Filter and search logic
   const handleSearch = (query: string) => {
-    if (!query.trim()) {
-      setFilteredUsers(users)
-      return
-    }
-    
-    const filtered = users.filter(user =>
-      user.name.toLowerCase().includes(query.toLowerCase()) ||
-      user.email.toLowerCase().includes(query.toLowerCase()) ||
-      user.department?.toLowerCase().includes(query.toLowerCase()) ||
-      user.position?.toLowerCase().includes(query.toLowerCase())
-    )
-    setFilteredUsers(filtered)
+    setSearchQuery(query)
+    filterUsers(query, roleFilter, statusFilter)
   }
 
   const handleFilterRole = (role: string) => {
-    if (role === "all") {
-      setFilteredUsers(users)
-      return
-    }
-    
-    const filtered = users.filter(user => user.role === role)
-    setFilteredUsers(filtered)
+    setRoleFilter(role)
+    filterUsers(searchQuery, role, statusFilter)
   }
 
   const handleFilterStatus = (status: string) => {
-    if (status === "all") {
-      setFilteredUsers(users)
-      return
+    setStatusFilter(status)
+    filterUsers(searchQuery, roleFilter, status)
+  }
+
+  const filterUsers = (searchQuery: string, roleFilter: string, statusFilter: string) => {
+    let filtered = users
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(user =>
+        user.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.no_telepon.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     }
     
-    const filtered = users.filter(user => user.status === status)
+    // Apply role filter
+    if (roleFilter !== "all") {
+      filtered = filtered.filter(user => {
+        if (roleFilter === "admin") {
+          return user.userRoles?.some(ur => ur.role?.nama_role === "admin")
+        } else if (roleFilter === "user") {
+          return !user.userRoles || user.userRoles.length === 0 || !user.userRoles[0]?.role?.nama_role
+        }
+        return true
+      })
+    }
+    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(user => {
+        if (statusFilter === "active") return user.is_aktif === 1
+        if (statusFilter === "inactive") return user.is_aktif === 0
+        return true
+      })
+    }
+    
     setFilteredUsers(filtered)
   }
 
@@ -177,38 +176,51 @@ export default function UserManagementPage() {
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (userToDelete) {
-      setUsers(prev => prev.filter(user => user.id !== userToDelete))
-      setFilteredUsers(prev => prev.filter(user => user.id !== userToDelete))
+      try {
+        const response = await fetch(`/api/user/${userToDelete}`, {
+          method: 'DELETE'
+        })
+        const result = await response.json()
+        if (result.ok) {
+          loadUsers() // Refresh the list
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error)
+      }
       setUserToDelete(null)
       setDeleteDialogOpen(false)
     }
   }
 
-  const handleFormSubmit = (userData: Partial<User>) => {
-    if (formMode === "create") {
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: userData.name || "",
-        email: userData.email || "",
-        role: userData.role || "employee",
-        status: userData.status || "active",
-        lastLogin: new Date().toISOString().split('T')[0],
-        createdAt: new Date().toISOString().split('T')[0],
-        phone: userData.phone || "",
-        department: userData.department || "",
-        position: userData.position || "",
-        location: userData.location || ""
+  const handleFormSubmit = async (userData: Partial<User>) => {
+    try {
+      if (formMode === "create") {
+        const response = await fetch('/api/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        })
+        const result = await response.json()
+        if (result.ok) {
+          loadUsers() // Refresh the list
+        }
+      } else if (formMode === "edit" && selectedUser) {
+        const response = await fetch(`/api/user/${selectedUser.id_user}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        })
+        const result = await response.json()
+        if (result.ok) {
+          loadUsers() // Refresh the list
+        }
       }
-      setUsers(prev => [...prev, newUser])
-      setFilteredUsers(prev => [...prev, newUser])
-    } else if (formMode === "edit" && selectedUser) {
-      const updatedUser = { ...selectedUser, ...userData }
-      setUsers(prev => prev.map(user => user.id === selectedUser.id ? updatedUser : user))
-      setFilteredUsers(prev => prev.map(user => user.id === selectedUser.id ? updatedUser : user))
+      setIsFormOpen(false)
+    } catch (error) {
+      console.error('Error saving user:', error)
     }
-    setIsFormOpen(false)
   }
 
   const handleExport = () => {
@@ -220,14 +232,6 @@ export default function UserManagementPage() {
     // Implement import functionality
     console.log("Importing users...")
   }
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const total = users.length
-    const active = users.filter(user => user.status === "active").length
-    const inactive = users.filter(user => user.status === "inactive").length
-    return { total, active, inactive }
-  }, [users])
 
   return (
     <div className="space-y-6">
@@ -276,7 +280,21 @@ export default function UserManagementPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredUsers.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-500">Loading users...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading users</h3>
+              <p className="text-gray-500 mb-4">{error}</p>
+              <Button onClick={loadUsers} className="flex items-center gap-2">
+                Try Again
+              </Button>
+            </div>
+          ) : filteredUsers.length > 0 ? (
             <DataTable
               users={filteredUsers}
               onEdit={handleEditUser}
