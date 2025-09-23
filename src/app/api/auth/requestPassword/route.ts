@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     await userRepo.save(user);
 
     // Buat link reset password
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetLink = `${process.env.FRONTEND_URL}?token=${token}`;
 
     // Kirim email
     await sendEmail(

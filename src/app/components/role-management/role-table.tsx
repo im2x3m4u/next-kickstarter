@@ -26,14 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-// Role interface based on API response
-interface Role {
-  id_role: string
-  nama_role: string
-  is_aktif: number
-  created_at: string
-  updated_at: string
-}
+import { Role } from "@/app/state/roleState"
 
 interface RoleTableProps {
   roles: Role[]

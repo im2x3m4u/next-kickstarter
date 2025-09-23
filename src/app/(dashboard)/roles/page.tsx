@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { RoleTable } from "@/app/components/role-management/role-table"
-import { RoleForm } from "@/app/components/role-management/role-form"
 import { RoleToolbar } from "@/app/components/role-management/role-toolbar"
 import { 
   Shield, 
@@ -23,15 +22,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Role } from "@/app/state/roleState"
 
-// Role interface based on API response
-interface Role {
-  id_role: string
-  nama_role: string
-  is_aktif: number
-  created_at: string
-  updated_at: string
-}
+// Lazy load heavy components
+const RoleTable = dynamic(() => import("@/app/components/role-management/role-table").then(mod => ({ default: mod.RoleTable })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+})
+
+const RoleForm = dynamic(() => import("@/app/components/role-management/role-form").then(mod => ({ default: mod.RoleForm })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />
+})
 
 export default function RoleManagementPage() {
   // State management with useState (simplified approach)
@@ -67,6 +67,8 @@ export default function RoleManagementPage() {
       let rolesData = []
       if (Array.isArray(data)) {
         rolesData = data
+      } else if (data && Array.isArray(data.data)) {
+        rolesData = data.data
       } else if (data && Array.isArray(data.value)) {
         rolesData = data.value
       } else {
@@ -264,12 +266,14 @@ export default function RoleManagementPage() {
               </Button>
             </div>
           ) : filteredRoles.length > 0 ? (
-            <RoleTable
-              roles={filteredRoles}
-              onEdit={handleEditRole}
-              onDelete={handleDeleteRole}
-              onView={handleViewRole}
-            />
+            <Suspense fallback={<div className="animate-pulse bg-gray-200 h-64 rounded-lg" />}>
+              <RoleTable
+                roles={filteredRoles}
+                onEdit={handleEditRole}
+                onDelete={handleDeleteRole}
+                onView={handleViewRole}
+              />
+            </Suspense>
           ) : (
             <div className="text-center py-8">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -287,13 +291,15 @@ export default function RoleManagementPage() {
       </Card>
 
       {/* Role Form Modal */}
-      <RoleForm
-        role={selectedRole}
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        mode={formMode}
-      />
+      <Suspense fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg" />}>
+        <RoleForm
+          role={selectedRole}
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleFormSubmit}
+          mode={formMode}
+        />
+      </Suspense>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

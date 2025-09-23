@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { DataTable } from "@/app/components/user-management/data-table"
-import { UserForm } from "@/app/components/user-management/user-form"
 import { Toolbar } from "@/app/components/user-management/toolbar"
 import { 
   Users, 
@@ -23,31 +22,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-// User interface
-interface User {
-  id_user: string
-  nama: string
-  username: string
-  email: string
-  no_telepon: string
-  is_aktif: number
-  reset_token?: string | null
-  login_token?: string | null
-  created_at: string
-  updated_at: string
-  userRoles?: Array<{
-    id_userRole: string
-    created_at: string
-    updated_at: string
-    role: {
-      id_role: string
-      nama_role: string
-      is_aktif: number
-      created_at: string
-      updated_at: string
-    }
-  }>
-}
+import { User } from "@/app/state/userState"
+
+// Lazy load heavy components
+const DataTable = dynamic(() => import("@/app/components/user-management/data-table").then(mod => ({ default: mod.DataTable })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+})
+
+const UserForm = dynamic(() => import("@/app/components/user-management/user-form").then(mod => ({ default: mod.UserForm })), {
+  loading: () => <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />
+})
 
 export default function UserManagementPage() {
   // State management with useState (simplified approach)
@@ -295,12 +279,14 @@ export default function UserManagementPage() {
               </Button>
             </div>
           ) : filteredUsers.length > 0 ? (
-            <DataTable
-              users={filteredUsers}
-              onEdit={handleEditUser}
-              onDelete={handleDeleteUser}
-              onView={handleViewUser}
-            />
+            <Suspense fallback={<div className="animate-pulse bg-gray-200 h-64 rounded-lg" />}>
+              <DataTable
+                users={filteredUsers}
+                onEdit={handleEditUser}
+                onDelete={handleDeleteUser}
+                onView={handleViewUser}
+              />
+            </Suspense>
           ) : (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -318,13 +304,15 @@ export default function UserManagementPage() {
       </Card>
 
       {/* User Form Modal */}
-      <UserForm
-        user={selectedUser}
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        mode={formMode}
-      />
+      <Suspense fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg" />}>
+        <UserForm
+          user={selectedUser}
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleFormSubmit}
+          mode={formMode}
+        />
+      </Suspense>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

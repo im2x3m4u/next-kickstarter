@@ -44,13 +44,6 @@ export const statsCardsAtom = atom((get) => {
       description: "Total registered users"
     },
     {
-      title: "Admin Users",
-      value: stats.adminUsers.toString(),
-      change: `${stats.userUsers} regular users`,
-      changeType: "neutral" as const,
-      description: "Users with admin privileges"
-    },
-    {
       title: "Total Roles",
       value: stats.totalRoles.toString(),
       change: "Role management",
@@ -80,15 +73,17 @@ export const fetchDashboardDataAtom = atom(
       const users = usersData.users || []
       const totalUsers = users.length
       const activeUsers = users.filter((user: any) => user.is_aktif === 1).length
-      const adminUsers = users.filter((user: any) => 
-        user.userRoles && user.userRoles.length > 0 && user.userRoles[0]?.role?.nama_role === "admin"
-      ).length
-      const userUsers = users.filter((user: any) => 
-        !user.userRoles || user.userRoles.length === 0 || !user.userRoles[0]?.role?.nama_role
-      ).length
+      const adminUsers = users.filter((user: any) => {
+        if (!user.userRoles || user.userRoles.length === 0) return false
+        return user.userRoles.some((ur: any) => ur.role?.nama_role === "admin")
+      }).length
+      const userUsers = users.filter((user: any) => {
+        if (!user.userRoles || user.userRoles.length === 0) return true
+        return !user.userRoles.some((ur: any) => ur.role?.nama_role === "admin")
+      }).length
       
       // Process roles data
-      const roles = Array.isArray(rolesData) ? rolesData : rolesData.value || []
+      const roles = Array.isArray(rolesData) ? rolesData : rolesData.data || rolesData.value || []
       const totalRoles = roles.length
       
       set(dashboardStatsAtom, {
