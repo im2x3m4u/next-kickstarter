@@ -1,32 +1,21 @@
-// GET all UserRole & POST create new UserRole
-import { NextRequest, NextResponse } from "next/server";
-import { getConnection } from "../../../lib/typeorm";
+import { getAllEntities, createEntity } from "../../../function/entityHelp";
+import { UserRole } from "@/entities/userRole";
 
-export async function GET() {
-  const ds = await getConnection();
-  const { UserRole } = await import("../../../entities/userRole");
-  const userRoleRepo = ds.getRepository(UserRole);
+export async function GET(req: Request) {
+  const { page, pageSize } = Object.fromEntries(new URL(req.url).searchParams);
 
-  const userRoles = await userRoleRepo.find({ relations: ["user", "role"] });
-  return NextResponse.json({ ok: true, userRoles });
+  const result = await getAllEntities(
+    UserRole,
+    Number(page),
+    Number(pageSize),
+    "id_userRole"
+  );
+
+  return Response.json(result);
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const body = await req.json();
-  const { id_user, id_role } = body;
-
-  if (!id_user || !id_role)
-    return NextResponse.json(
-      { ok: false, message: "id_user dan id_role wajib diisi" },
-      { status: 400 }
-    );
-
-  const ds = await getConnection();
-  const { UserRole } = await import("../../../entities/userRole");
-  const userRoleRepo = ds.getRepository(UserRole);
-
-  const userRole = userRoleRepo.create({ user: { id_user }, role: { id_role } });
-  await userRoleRepo.save(userRole);
-
-  return NextResponse.json({ ok: true, message: "Role berhasil diberikan ke user", userRole });
+  const newUserRole = await createEntity(UserRole, body);
+  return Response.json(newUserRole, { status: 201 });
 }

@@ -17,7 +17,6 @@ export const AppDataSource = new DataSource({
   entities: [User, Role, UserRole],
 });
 
-// Reusable connection getter to avoid multiple initializations
 let connectionPromise: Promise<DataSource> | null = null;
 
 export async function getConnection(): Promise<DataSource> {
