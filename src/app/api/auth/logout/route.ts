@@ -1,63 +1,59 @@
 // src/app/api/auth/logout/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { getConnection } from "../../../../lib/typeorm";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = "123";
+import { verifyToken } from "../../../../function/jwt";
 
 export async function POST(req: NextRequest) {
   try {
-    const ds = await getConnection();
-    const { User } = await import("../../../../entities/user");
-    const userRepo = ds.getRepository(User);
-    
     const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+
+    // 1. Cek apakah header Authorization ada dan diawali Bearer
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { ok: false, status: 401, message: "Token tidak ditemukan" },
+        { ok: false, message: "Token tidak ditemukan" },
         { status: 401 }
       );
     }
 
     const token = authHeader.split(" ")[1];
 
-    // Verifikasi token
+    // 2. Verifikasi token
     let decoded: any;
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
+      decoded = verifyToken(token);
     } catch (err) {
       return NextResponse.json(
-        { ok: false, status: 401, message: "Token tidak valid" },
+        { ok: false, message: "Token tidak valid atau expired" },
         { status: 401 }
       );
     }
 
-    // Cari user berdasarkan id + token
+    // 3. Inisialisasi DB
+    const ds = await getConnection();
+    const { User } = await import("../../../../entities/user");
+    const userRepo = ds.getRepository(User);
+
+    // 4. Cari user dengan id dan login_token dari token
     const user = await userRepo.findOne({
       where: { id_user: decoded.id_user, login_token: token },
     });
 
     if (!user) {
       return NextResponse.json(
-        { ok: false, status: 404, message: "User tidak ditemukan" },
+        { ok: false, message: "User tidak ditemukan atau token tidak cocok" },
         { status: 404 }
       );
     }
 
-    // Hapus login_token (destroy session)
+    // 5. Hapus login_token (logout)
     user.login_token = null;
     await userRepo.save(user);
 
-    return NextResponse.json({
-      ok: true,
-      status: 200,
-      message: "Logout berhasil",
-    });
-  } catch (err) {
+    return NextResponse.json({ ok: true, message: "Logout berhasil" });
+  } catch (err: any) {
     console.error("Logout error:", err);
     return NextResponse.json(
-      { ok: false, status: 500, message: "Internal Server Error" },
+      { ok: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }

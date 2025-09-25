@@ -1,72 +1,21 @@
-// CRUD by ID: GET by ID, PUT update, DELETE
-import { NextRequest, NextResponse } from "next/server";
-import { getConnection } from "../../../../lib/typeorm";
+import { getEntityById, updateEntityById, deleteEntityById } from "../../../../function/entityHelp";
+import { UserRole } from "@/entities/userRole";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const id_userRole = params.id;
-  const ds = await getConnection();
-  const { UserRole } = await import("../../../../entities/userRole");
-  const userRoleRepo = ds.getRepository(UserRole);
-
-  const userRole = await userRoleRepo.findOne({
-    where: { id_userRole },
-    relations: ["user", "role"],
-  });
-
-  if (!userRole)
-    return NextResponse.json({ ok: false, message: "UserRole tidak ditemukan" }, { status: 404 });
-
-  return NextResponse.json({ ok: true, userRole });
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  const userRole = await getEntityById(UserRole, "id_userRole", params.id, ["user", "role"]);
+  if (!userRole) return new Response("UserRole not found", { status: 404 });
+  return Response.json(userRole);
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const id_userRole = params.id;
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const body = await req.json();
-  const { id_user, id_role } = body;
-
-  const ds = await getConnection();
-  const { UserRole } = await import("../../../../entities/userRole");
-  const { User } = await import("../../../../entities/user");
-  const { Role } = await import("../../../../entities/role");
-
-  const userRoleRepo = ds.getRepository(UserRole);
-  const userRepo = ds.getRepository(User);
-  const roleRepo = ds.getRepository(Role);
-
-  const userRole = await userRoleRepo.findOne({ where: { id_userRole }, relations: ["user", "role"] });
-  if (!userRole)
-    return NextResponse.json({ ok: false, message: "UserRole tidak ditemukan" }, { status: 404 });
-
-  if (id_user) {
-    const userEntity = await userRepo.findOne({ where: { id_user } });
-    if (!userEntity)
-      return NextResponse.json({ ok: false, message: "User tidak ditemukan" }, { status: 404 });
-    userRole.user = userEntity;
-  }
-
-  if (id_role) {
-    const roleEntity = await roleRepo.findOne({ where: { id_role } });
-    if (!roleEntity)
-      return NextResponse.json({ ok: false, message: "Role tidak ditemukan" }, { status: 404 });
-    userRole.role = roleEntity;
-  }
-
-  await userRoleRepo.save(userRole);
-
-  return NextResponse.json({ ok: true, message: "UserRole berhasil diupdate", userRole });
+  const updated = await updateEntityById(UserRole, "id_userRole", params.id, body);
+  if (!updated) return new Response("UserRole not found", { status: 404 });
+  return Response.json(updated);
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const id_userRole = params.id;
-
-  const ds = await getConnection();
-  const { UserRole } = await import("../../../../entities/userRole");
-  const userRoleRepo = ds.getRepository(UserRole);
-
-  const userRole = await userRoleRepo.findOne({ where: { id_userRole } });
-  if (!userRole)
-    return NextResponse.json({ ok: false, message: "UserRole tidak ditemukan" }, { status: 404 });
-
-  await userRoleRepo.remove(userRole);
-  return NextResponse.json({ ok: true, message: "UserRole berhasil dihapus" });
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+  const deleted = await deleteEntityById(UserRole, "id_userRole", params.id);
+  if (!deleted) return new Response("UserRole not found", { status: 404 });
+  return new Response("Deleted successfully");
 }
