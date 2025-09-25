@@ -85,53 +85,53 @@ export const fetchUsersAtom = atom(
 )
 
 // Helper functions for API calls
-// export const fetchUsers = async () => {
-//   try {
-//     const response = await fetch('/api/user')
-//     const data: ApiResponse = await response.json()
-//     return data
-//   } catch (err) {
-//     console.error('Error fetching users:', err)
-//     throw err
-//   }
-// }
+export const fetchUsers = async () => {
+  try {
+    const response = await fetch('/api/user')
+    const data: ApiResponse = await response.json()
+    return data
+  } catch (err) {
+    console.error('Error fetching users:', err)
+    throw err
+  }
+}
 
-// export const createUser = async (userData: Partial<User>) => {
-//   try {
-//     const response = await fetch('/api/user', {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(userData)
-//     })
-//     return await response.json()
-//   } catch (error) {
-//     console.error('Error creating user:', error)
-//     throw error
-//   }
-// }
+export const createUser = async (userData: Partial<User>) => {
+  try {
+    const response = await fetch('/api/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    })
+    return await response.json()
+  } catch (error) {
+    console.error('Error creating user:', error)
+    throw error
+  }
+}
 
-// export const updateUser = async (userId: string, userData: Partial<User>) => {
-//   try {
-//     const response = await fetch(`/api/user/${userId}`, {
-//       method: 'PUT',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(userData)
-//     })
-//     return await response.json()
-//   } catch (error) {
-//     console.error('Error updating user:', error)
-//     throw error
-//   }
-// }
+export const updateUser = async (userId: string, userData: Partial<User>) => {
+  try {
+    const response = await fetch(`/api/user/${userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    })
+    return await response.json()
+  } catch (error) {
+    console.error('Error updating user:', error)
+    throw error
+  }
+}
 
-// export const deleteUser = async (userId: string) => {
-//   try {
-//     const response = await fetch(`/api/user/${userId}`, {
-//       method: 'DELETE'
-//     })
-//     return await response.json()
-//   } catch (error) {
-//     console.error('Error deleting user:', error)
-//     throw error
-//   }
-// }
+export const deleteUser = async (userId: string) => {
+  try {
+    const response = await fetch(`/api/user/${userId}`, {
+      method: 'DELETE'
+    })
+    return await response.json()
+  } catch (error) {
+    console.error('Error deleting user:', error)
+    throw error
+  }
+}

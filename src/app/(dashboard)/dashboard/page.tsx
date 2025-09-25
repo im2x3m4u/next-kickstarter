@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAtomValue, useSetAtom } from "jotai"
 import dynamic from "next/dynamic"
 import AdminLayout from "@/app/components/layout/layout"
@@ -32,10 +33,26 @@ export default function DashboardPage() {
   const statsCards = useAtomValue(statsCardsAtom)
   const fetchDashboardData = useSetAtom(fetchDashboardDataAtom)
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tokenFromUrl = searchParams.get("token");
+
+
   // Fetch dashboard data on component mount
+  // useEffect(() => {
+  //   fetchDashboardData()
+  // }, [fetchDashboardData])
+
   useEffect(() => {
-    fetchDashboardData()
-  }, [fetchDashboardData])
+    const token = tokenFromUrl || localStorage.getItem("token");
+    if (!token) {
+      router.replace("/login"); // redirect ke login
+    } else if (tokenFromUrl && !localStorage.getItem("token")) {
+      localStorage.setItem("token", tokenFromUrl); // simpan token dari URL
+    } else {
+      fetchDashboardData(); // baru fetch data kalau sudah login
+    }
+  }, [router, tokenFromUrl, fetchDashboardData]);
 
   if (loading) {
     return (

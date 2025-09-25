@@ -46,7 +46,9 @@ export default function LoginForm() {
         description: `Selamat datang ${data.user.nama}!`,
       });
 
-      setTimeout(() => (window.location.href = "/dashboard"), 1500);
+      setTimeout(() => {
+        window.location.href = `/dashboard?token=${data.token}`;
+      }, 1500);
     } catch (err) {
       toast.error("Login gagal!", {
         description: "Silakan cek username & password",
