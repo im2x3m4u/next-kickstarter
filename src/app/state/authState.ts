@@ -4,6 +4,12 @@ import { atom } from "jotai";
 export const usernameAtom = atom("");
 export const passwordAtom = atom("");
 
+//untuk konfirmasi password
+export const confirmAtom = atom("");
+
+//menyimpan status submit form (false=tidak submit, true=sedang submit)
+export const submittingAtom = atom(false);
+
 //menyimpan status login (false=sudah login, true=belum login)
 export const isLoggedInAtom = atom(false);
 
@@ -14,7 +20,7 @@ export const forgotPasswordAtom = atom("");
 export type AuthUser = {
   id_user: number;
   username: string;
-  nama?: string;
+  nama?: string;  
   email?: string;
   no_telepon?: string;
   roles?: Array<{ id_userRole: number; id_role?: string; role_name: string }>;
