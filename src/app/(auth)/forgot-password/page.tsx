@@ -1,46 +1,60 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import * as React from "react";
+import { useAtom } from "jotai";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { useAtom } from "jotai";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
 import { forgotPasswordAtom } from "@/app/state/authState";
-import { toast } from "sonner";
+import { globalLoadingAtom } from "@/app/state/uiState";
+import { requestPasswordReset } from "@/app/lib/services/authService";
+import { notify } from "@/app/utils/notify";
+
+// Schema validasi pakai Zod
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Format email tidak valid"),
+});
+
+type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useAtom(forgotPasswordAtom);
+  const [_, setEmail] = useAtom(forgotPasswordAtom);
+  const [isLoading, setIsLoading] = useAtom(globalLoadingAtom);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<ForgotPasswordForm>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
 
-    // Validasi email sederhana
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Format email tidak valid!");
-      return;
-    }
+  const onSubmit = async (values: ForgotPasswordForm) => {
+    setIsLoading(true);
+    setEmail(values.email);
 
     try {
-      const res = await fetch("/api/auth/requestPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(
-          data.message || "Link reset password telah dikirim ke email Anda."
-        );
-      } else {
-        toast.error(data.message || "Gagal mengirim link reset password.");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        "Terjadi kesalahan saat mengirim permintaan. Silakan coba lagi."
+      const data = await requestPasswordReset(values.email);
+      notify.success(
+        "Berhasil!",
+        data.message || "Link reset password telah dikirim!"
       );
+    } catch (err: any) {
+      notify.error("Gagal!", err.message || "Terjadi kesalahan, coba lagi.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -57,39 +71,46 @@ export default function ForgotPasswordPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <Label htmlFor="email" className="text-gray-900">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="mt-1 text-gray-800"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Email Field */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-800">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="you@example.com"
+                        className="text-gray-800"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Reset Button */}
-            <Button
-              type="submit"
-              className="w-full h-10 sm:h-11"
-            >
-              Kirim Link Reset
-            </Button>
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-10 sm:h-11"
+              >
+                {isLoading ? "Memproses..." : "Kirim Link Reset"}
+              </Button>
 
-            {/* Back to Login */}
-            <p className="text-center text-sm text-gray-500 mt-2">
-              Ingat password Anda?{" "}
-              <a href="/login" className="text-blue-600 hover:underline">
-                Masuk
-              </a>
-            </p>
-          </form>
+              {/* Back to Login */}
+              <p className="text-center text-sm text-gray-500 mt-2">
+                Ingat password Anda?{" "}
+                <a href="/login" className="text-blue-600 hover:underline">
+                  Masuk
+                </a>
+              </p>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

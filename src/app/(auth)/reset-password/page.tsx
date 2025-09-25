@@ -1,134 +1,169 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { Eye, EyeOff } from "lucide-react"
-import { useAtom } from "jotai"
-import { showPasswordAtom } from "@/app/state/uiState"
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAtom } from "jotai";
+import {
+  passwordAtom,
+  confirmAtom,
+  submittingAtom,
+} from "@/app/state/authState";
+import { resetPassword, verifyResetToken } from "@/app/lib/services/authService";
+import { notify } from "@/app/utils/notify";
+import { validateResetPassword } from "@/app/lib/validation/authValidation";
+import { showPasswordAtom } from "@/app/state/uiState";
+import { Eye, EyeOff } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function ResetPasswordPage() {
-  const searchParams = useSearchParams()
-  const token = searchParams.get("token") || ""
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const token = searchParams.get("token") || "";
   
-  const [showPassword, setShowPassword] = useAtom(showPasswordAtom)
-  const [password, setPassword] = useState("")
-  const [confirm, setConfirm] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [showConfirm, setShowConfirm] = useState(false)
+
+  const [password, setPassword] = useAtom(passwordAtom);
+  const [confirm, setConfirm] = useAtom(confirmAtom);
+  const [submitting, setSubmitting] = useAtom(submittingAtom);
+  const [showPassword, setShowPassword] = useAtom(showPasswordAtom);
+
+  const [namaUser, setNamaUser] = useState<string>("");
 
   useEffect(() => {
-    if (!token) setError("Token tidak ditemukan pada URL.")
-  }, [token])
+    if (!token) {
+      notify.error("Token reset password tidak ditemukan. Silakan cek email Anda.");
+      router.push("/forgot-password");
+      return;
+    }
+
+    // verifikasi token ke backend untuk ambil nama user
+    verifyResetToken(token)
+      .then((res) => {
+        if (res.ok) {
+          setNamaUser(res.nama);
+        } else {
+          notify.error(res.message || "Token tidak valid.");
+          router.push("/forgot-password");
+        }
+      })
+      .catch(() => {
+        notify.error("Link reset password tidak valid atau sudah kadaluarsa.");
+        router.push("/forgot-password");
+      });
+  }, [token, router]);
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setMessage(null)
-    setError(null)
+    e.preventDefault();
 
-    if (!token) {
-      setError("Token tidak ditemukan.")
-      return
-    }
-    if (!password || password.length < 6) {
-      setError("Password minimal 6 karakter.")
-      return
-    }
-    if (password !== confirm) {
-      setError("Konfirmasi password tidak sama.")
-      return
+    const error = validateResetPassword(password, confirm, token);
+    if (error) {
+      notify.error(error);
+      return;
     }
 
     try {
-      setSubmitting(true)
-      const res = await fetch("/api/auth/resetPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword: password })
-      })
-      const data = await res.json()
-      if (data.ok) {
-        setMessage("Password berhasil diubah. Silakan login.")
+      setSubmitting(true);
+      await resetPassword(token, password);
+      notify.success("Password berhasil diubah", "Silakan login.");
+      router.push("/login");
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        notify.error("Link reset password sudah kadaluarsa. Silakan minta link baru.");
+        router.push("/forgot-password");
       } else {
-        setError(data.message || "Gagal mengubah password.")
+        notify.error("Gagal!", err.message || "Terjadi kesalahan.");
       }
-    } catch (err) {
-      setError("Terjadi kesalahan jaringan.")
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">Reset Password</h1>
-        <p className="mt-1 text-sm text-gray-500">Masukkan password baru Anda.</p>
-
-        {error && (
-          <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
-        )}
-        {message && (
-          <div className="mt-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div>
-        )}
-
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password Baru</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-gray-900 focus:border-indigo-500 focus:outline-none"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl text-gray-900">
+            Reset Password
+          </CardTitle>
+          <CardDescription className="text-gray-500">
+            {namaUser
+              ? `Hai ${namaUser}, silakan buat password baru Anda.`
+              : "Memvalidasi link reset password..."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-4">
+            {/* Password baru */}
+            <div className="space-y-2 text-gray-800">
+              <Label htmlFor="password">Password Baru</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Masukkan password baru"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
-            <div className="relative">
-              <input
-                type={showConfirm ? "text" : "password"}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-gray-900 focus:border-indigo-500 focus:outline-none"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showConfirm ? "Sembunyikan password" : "Tampilkan password"}
-              >
-                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+
+            {/* Konfirmasi password */}
+            <div className="space-y-2 text-gray-800">
+              <Label htmlFor="confirm">Konfirmasi Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirm"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Ulangi password baru"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
-            {submitting ? "Menyimpan..." : "Ubah Password"}
-          </button>
+            {/* Submit button */}
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full h-10 sm:h-11"
+            >
+              {submitting ? "Menyimpan..." : "Ubah Password"}
+            </Button>
 
-          <div className="text-center text-sm text-gray-500">
-            <Link href="/login" className="text-indigo-600 hover:underline">Kembali ke Login</Link>
-          </div>
-        </form>
-      </div>
+            {/* Back to login */}
+            <p className="text-center text-sm text-gray-500">
+              <Link href="/login" className="text-indigo-600 hover:underline">
+                Kembali ke Login
+              </Link>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

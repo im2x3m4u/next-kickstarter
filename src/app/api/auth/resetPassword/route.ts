@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       return NextResponse.json(
         { ok: false, message: "Token tidak valid atau sudah expired" },
-        { status: 401 }
+        { status: 401 } 
       );
     }
 
