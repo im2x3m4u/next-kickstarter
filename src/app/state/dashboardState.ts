@@ -70,7 +70,7 @@ export const fetchDashboardDataAtom = atom(
       const rolesData = await rolesResponse.json()
       
       // Process users data
-      const users = usersData.users || []
+      const users = usersData.data || []
       const totalUsers = users.length
       const activeUsers = users.filter((user: any) => user.is_aktif === 1).length
       const adminUsers = users.filter((user: any) => {
@@ -118,4 +118,3 @@ export const fetchDashboardDataAtom = atom(
     }
   }
 )
-

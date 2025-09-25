@@ -1,12 +1,12 @@
 "use client"
 
 import { Suspense, useEffect } from "react"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import dynamic from "next/dynamic"
 import AdminLayout from "@/app/components/layout/layout"
 import { StatsCard } from "@/app/components/dashboard/stats-card"
 import { DashboardSkeleton } from "@/app/components/loading-skeleton"
-import { Users, UserCheck, Shield, Activity } from "lucide-react"
+import { Users, Shield, Activity } from "lucide-react"
 import { 
   dashboardStatsAtom, 
   dashboardActivitiesAtom, 

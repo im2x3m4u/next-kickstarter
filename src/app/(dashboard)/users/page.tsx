@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, Suspense } from "react"
+import { useAtom } from "jotai"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Toolbar } from "@/app/components/user-management/toolbar"
+import { Toolbar } from "@/app/components/user-management/role-toolbar"
 import { 
   Users, 
   UserPlus, 
@@ -22,10 +23,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { User } from "@/app/state/userState"
+import type { User } from "@/app/state/userState"
+import {
+  usersAtom,
+  filteredUsersAtom,
+  loadingAtom,
+  errorAtom,
+  isFormOpenAtom,
+  formModeAtom,
+  selectedUserAtom,
+  deleteDialogOpenAtom,
+  userToDeleteAtom,
+  searchQueryAtom,
+  roleFilterAtom,
+  statusFilterAtom,
+  statsAtom,
+  fetchUsersAtom,
+} from "@/app/state/userState"
+
 
 // Lazy load heavy components
-const DataTable = dynamic(() => import("@/app/components/user-management/data-table").then(mod => ({ default: mod.DataTable })), {
+const DataTable = dynamic(() => import("@/app/components/user-management/user-table").then(mod => ({ default: mod.DataTable })), {
   loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
 })
 
@@ -34,54 +52,31 @@ const UserForm = dynamic(() => import("@/app/components/user-management/user-for
 })
 
 export default function UserManagementPage() {
-  // State management with useState (simplified approach)
-  const [users, setUsers] = useState<User[]>([])
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [formMode, setFormMode] = useState<"create" | "edit" | "view">("create")
-  const [selectedUser, setSelectedUser] = useState<User | undefined>()
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [roleFilter, setRoleFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [users] = useAtom(usersAtom)
+  const [filteredUsers, setFilteredUsers] = useAtom(filteredUsersAtom)
+  const [loading] = useAtom(loadingAtom)
+  const [error] = useAtom(errorAtom)
 
-  // Calculate stats
-  const stats = {
-    total: users.length,
-    active: users.filter(user => user.is_aktif === 1).length,
-    inactive: users.filter(user => user.is_aktif === 0).length
-  }
+  const [isFormOpen, setIsFormOpen] = useAtom(isFormOpenAtom)
+  const [formMode, setFormMode] = useAtom(formModeAtom)
+  const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useAtom(deleteDialogOpenAtom)
+  const [userToDelete, setUserToDelete] = useAtom(userToDeleteAtom)
 
-  // Load users from API
-  const loadUsers = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/user')
-      const data = await response.json()
-      
-      if (data.ok) {
-        setUsers(data.users)
-        setFilteredUsers(data.users)
-      } else {
-        setError('Failed to fetch users')
-      }
-    } catch (err) {
-      setError('Error loading users')
-      console.error('Error fetching users:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom)
+  const [roleFilter, setRoleFilter] = useAtom(roleFilterAtom)
+  const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom)
+
+  // stats otomatis dihitung dari usersAtom
+  const [stats] = useAtom(statsAtom)
+
+  // fetchUsersAtom untuk load data
+  const [, fetchUsers] = useAtom(fetchUsersAtom)
 
   // Load users on component mount
   useEffect(() => {
-    loadUsers()
-  }, [])
+    fetchUsers()
+  }, [fetchUsers])
 
   // Filter and search logic
   const handleSearch = (query: string) => {
@@ -138,7 +133,7 @@ export default function UserManagementPage() {
 
   // CRUD operations
   const handleAddUser = () => {
-    setSelectedUser(undefined)
+    setSelectedUser(null)
     setFormMode("create")
     setIsFormOpen(true)
   }
@@ -164,14 +159,14 @@ export default function UserManagementPage() {
     if (userToDelete) {
       try {
         const response = await fetch(`/api/user/${userToDelete}`, {
-          method: 'DELETE'
+          method: "DELETE",
         })
         const result = await response.json()
         if (result.ok) {
-          loadUsers() // Refresh the list
+          fetchUsers() // refresh data dari Jotai
         }
       } catch (error) {
-        console.error('Error deleting user:', error)
+        console.error("Error deleting user:", error)
       }
       setUserToDelete(null)
       setDeleteDialogOpen(false)
@@ -188,7 +183,7 @@ export default function UserManagementPage() {
         })
         const result = await response.json()
         if (result.ok) {
-          loadUsers() // Refresh the list
+          fetchUsers()
         }
       } else if (formMode === "edit" && selectedUser) {
         const response = await fetch(`/api/user/${selectedUser.id_user}`, {
@@ -198,7 +193,7 @@ export default function UserManagementPage() {
         })
         const result = await response.json()
         if (result.ok) {
-          loadUsers() // Refresh the list
+          fetchUsers()
         }
       }
       setIsFormOpen(false)
@@ -208,12 +203,10 @@ export default function UserManagementPage() {
   }
 
   const handleExport = () => {
-    // Implement export functionality
     console.log("Exporting users...")
   }
 
   const handleImport = () => {
-    // Implement import functionality
     console.log("Importing users...")
   }
 
@@ -260,7 +253,7 @@ export default function UserManagementPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Users className="h-5 w-5" />
-            Users ({filteredUsers.length})
+            Users ({filteredUsers?.length ?? 0})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -274,11 +267,11 @@ export default function UserManagementPage() {
               <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading users</h3>
               <p className="text-gray-500 mb-4">{error}</p>
-              <Button onClick={loadUsers} className="flex items-center gap-2">
+              <Button onClick={fetchUsers} className="flex items-center gap-2">
                 Try Again
               </Button>
             </div>
-          ) : filteredUsers.length > 0 ? (
+          ) : (filteredUsers?.length ?? 0) > 0 ? (
             <Suspense fallback={<div className="animate-pulse bg-gray-200 h-64 rounded-lg" />}>
               <DataTable
                 users={filteredUsers}
