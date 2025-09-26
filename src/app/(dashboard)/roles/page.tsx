@@ -2,11 +2,10 @@
 
 import { useEffect, Suspense } from "react";
 import { useAtom } from "jotai";
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RoleToolbar } from "@/app/components/role-management/role-toolbar";
-import { Shield, Plus, Download, Upload, AlertCircle } from "lucide-react";
+import { Shield, Plus, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,40 +30,17 @@ import {
   searchQueryAtom,
   statusFilterAtom,
   statsAtom,
-  fetchRoles,
+  fetchRolesAtom,
   createRole,
   updateRole,
   deleteRole,
   Role,
 } from "@/app/state/roleState";
-
-// Lazy load heavy components
-const RoleTable = dynamic(
-  () =>
-    import("@/app/components/role-management/role-table").then((mod) => ({
-      default: mod.RoleTable,
-    })),
-  {
-    loading: () => (
-      <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
-    ),
-  }
-);
-
-const RoleForm = dynamic(
-  () =>
-    import("@/app/components/role-management/role-form").then((mod) => ({
-      default: mod.RoleForm,
-    })),
-  {
-    loading: () => (
-      <div className="animate-pulse bg-gray-200 h-96 rounded-lg" />
-    ),
-  }
-);
+import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { LazyRoleTable, LazyRoleForm } from "@/app/utils/lazyComponents";
 
 export default function RoleManagementPage() {
-  // 🔹 Atoms
+  useAuthGuard();
   const [roles, setRoles] = useAtom(rolesAtom);
   const [filteredRoles, setFilteredRoles] = useAtom(filteredRolesAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
@@ -76,9 +52,14 @@ export default function RoleManagementPage() {
   const [roleToDelete, setRoleToDelete] = useAtom(roleToDeleteAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom);
+
+  // stats otomatis dihitung dari usersAtom
   const [stats] = useAtom(statsAtom);
 
-  // 🔹 Load roles
+  // fetch roles untuk load data
+  const [, fetchRoles] = useAtom(fetchRolesAtom);
+
+  // Load roles
   const loadRoles = async () => {
     try {
       setLoading(true);
@@ -105,7 +86,7 @@ export default function RoleManagementPage() {
     loadRoles();
   }, []);
 
-  // 🔹 Filter + Search
+  // Filter + Search
   const filterRoles = (q: string, status: string) => {
     let filtered = roles;
 
@@ -134,7 +115,7 @@ export default function RoleManagementPage() {
     filterRoles(searchQuery, s);
   };
 
-  // 🔹 CRUD
+  // CRUD
   const handleAddRole = () => {
     setSelectedRole(undefined);
     setFormMode("create");
@@ -212,16 +193,17 @@ export default function RoleManagementPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : error ? (
-            <div className="text-center py-8 text-red-500">{error}</div>
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-500">Loading roles...</p>
+            </div>
           ) : filteredRoles.length > 0 ? (
             <Suspense
               fallback={
                 <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
               }
             >
-              <RoleTable
+              <LazyRoleTable
                 roles={filteredRoles}
                 onEdit={handleEditRole}
                 onDelete={handleDeleteRole}
@@ -231,7 +213,9 @@ export default function RoleManagementPage() {
           ) : (
             <div className="text-center py-8">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p>No roles found</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No roles found
+              </h3>
               <Button onClick={handleAddRole}>
                 <Plus className="h-4 w-4" /> Add First Role
               </Button>
@@ -244,7 +228,7 @@ export default function RoleManagementPage() {
       <Suspense
         fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg" />}
       >
-        <RoleForm
+        <LazyRoleForm
           role={selectedRole}
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}

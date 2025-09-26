@@ -16,7 +16,6 @@ import {
   Edit, 
   Trash2, 
   Eye,
-  Users
 } from "lucide-react"
 import {
   DropdownMenu,
