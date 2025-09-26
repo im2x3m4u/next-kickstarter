@@ -9,7 +9,10 @@ import {
   confirmAtom,
   submittingAtom,
 } from "@/app/state/authState";
-import { resetPassword, verifyResetToken } from "@/app/lib/services/authService";
+import {
+  resetPassword,
+  verifyResetToken,
+} from "@/app/lib/services/authService";
 import { notify } from "@/app/utils/notify";
 import { validateResetPassword } from "@/app/lib/validation/authValidation";
 import { showPasswordAtom } from "@/app/state/uiState";
@@ -29,7 +32,6 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token") || "";
-  
 
   const [password, setPassword] = useAtom(passwordAtom);
   const [confirm, setConfirm] = useAtom(confirmAtom);
@@ -40,7 +42,9 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!token) {
-      notify.error("Token reset password tidak ditemukan. Silakan cek email Anda.");
+      notify.error(
+        "Token reset password tidak ditemukan. Silakan cek email Anda."
+      );
       router.push("/forgot-password");
       return;
     }
@@ -77,7 +81,9 @@ export default function ResetPasswordPage() {
       router.push("/login");
     } catch (err: any) {
       if (err.response?.status === 401) {
-        notify.error("Link reset password sudah kadaluarsa. Silakan minta link baru.");
+        notify.error(
+          "Link reset password sudah kadaluarsa. Silakan minta link baru."
+        );
         router.push("/forgot-password");
       } else {
         notify.error("Gagal!", err.message || "Terjadi kesalahan.");
@@ -88,13 +94,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4">
+      <Card className="w-full max-w-md bg-white/5 backdrop-blur-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-gray-900">
-            Reset Password
-          </CardTitle>
-          <CardDescription className="text-gray-500">
+          <CardTitle className="text-2xl text-white">Reset Password</CardTitle>
+          <CardDescription className="text-white">
             {namaUser
               ? `Hai ${namaUser}, silakan buat password baru Anda.`
               : "Memvalidasi link reset password..."}
@@ -103,7 +107,7 @@ export default function ResetPasswordPage() {
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             {/* Password baru */}
-            <div className="space-y-2 text-gray-800">
+            <div className="space-y-2 text-white">
               <Label htmlFor="password">Password Baru</Label>
               <div className="relative">
                 <Input
@@ -125,7 +129,7 @@ export default function ResetPasswordPage() {
             </div>
 
             {/* Konfirmasi password */}
-            <div className="space-y-2 text-gray-800">
+            <div className="space-y-2 text-white">
               <Label htmlFor="confirm">Konfirmasi Password</Label>
               <div className="relative">
                 <Input
@@ -156,8 +160,8 @@ export default function ResetPasswordPage() {
             </Button>
 
             {/* Back to login */}
-            <p className="text-center text-sm text-gray-500">
-              <Link href="/login" className="text-indigo-600 hover:underline">
+            <p className="text-center text-sm text-white">
+              <Link href="/login" className="text-blue-400 hover:underline">
                 Kembali ke Login
               </Link>
             </p>

@@ -29,20 +29,26 @@ export default function Hero() {
             </h1>
 
             <p className="mt-6 text-base leading-relaxed text-gray-600 sm:text-lg">
-              Tingkatkan produktivitas, kembangkan potensi, dan capai target perusahaan
-              dengan platform manajemen talenta yang modern, terintegrasi, dan siap
-              skala untuk kebutuhan enterprise.
+              Tingkatkan produktivitas, kembangkan potensi, dan capai target
+              perusahaan dengan platform manajemen talenta yang modern,
+              terintegrasi, dan siap skala untuk kebutuhan enterprise.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-start sm:gap-4 md:items-stretch md:gap-5">
               <Button asChild className="h-11 px-6 text-base shadow-sm">
-                <a href="/register" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                <a
+                  href="/register"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                >
                   Mulai Sekarang
                   <span aria-hidden>→</span>
                 </a>
               </Button>
               <Button asChild variant="outline" className="h-11 px-6 text-base">
-                <a href="/about" className="inline-flex items-center gap-2">
+                <a
+                  href="/about"
+                  className="inline-flex items-center gap-2 bg-white hover:bg-gray-900 text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
+                >
                   Pelajari Lebih Lanjut
                 </a>
               </Button>

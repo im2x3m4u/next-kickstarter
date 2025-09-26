@@ -243,24 +243,6 @@ export default function UserManagementPage() {
             Manage user accounts, roles, and permissions
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleImport}
-            className="flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            Import
-          </Button>
-        </div>
       </div>
 
       {/* Toolbar and Stats */}

@@ -6,13 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb"
-import { ArrowLeft, Mail, Phone, User2, Shield, PencilLine, LogOut, Edit3, Lock, Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Mail, Phone, User2, Shield, PencilLine, Edit3, Lock, Eye, EyeOff } from "lucide-react"
 
 import { userAtom, profileDraftAtom, profileEditModeAtom } from "@/app/state/authState"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { logout } from "@/lib/auth"
 
 export default function ProfilePage() {
   const user = useAtomValue(userAtom)
@@ -395,17 +394,6 @@ export default function ProfilePage() {
                   <Button onClick={saveEdit} className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white">Simpan</Button>
                 </div>
               ) : null}
-              <Button
-                variant="destructive"
-                className="gap-2 rounded-lg"
-                onClick={async () => {
-                  const res = await logout()
-                  toast.success(res.message)
-                  window.location.href = "/"
-                }}
-              >
-                <LogOut className="h-4 w-4" /> Logout
-              </Button>
             </div>
           </div>
         </Card>
