@@ -1,4 +1,5 @@
 // src/function/authPermission.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { getConnection } from "../lib/typeorm";
 import { verifyToken } from "./jwt";

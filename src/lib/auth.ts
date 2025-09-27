@@ -108,3 +108,13 @@ export const logout = async (): Promise<{ ok: boolean; status: number; message: 
     return { ok: true, status: 200, message: "Logout lokal berhasil" };
   }
 };
+
+// server side
+import getServerSession from "next-auth"; 
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
+
+export async function getAuthSession() {
+  return await getServerSession(authOptions);
+}
+
+
