@@ -1,6 +1,3 @@
-import axios from "axios";
-
-
 //LOGIN
 export async function loginService(username: string, password: string) {
   const response = await fetch("/api/auth/login", {
@@ -18,7 +15,29 @@ export async function loginService(username: string, password: string) {
   return data;
 }
 
-// FORGOT PASSWORD  
+//REGISTER
+export async function registerService(
+  username: string,
+  password: string,
+  nama: string,
+  email: string,
+  telp: string,
+  role: "user" | "admin"
+) {
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password, nama, email, telp, role }),
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Registrasi gagal!");
+  }
+  return data;
+}
+
+// FORGOT PASSWORD
 export async function requestPasswordReset(email: string) {
   const res = await fetch("/api/auth/requestPassword", {
     method: "POST",

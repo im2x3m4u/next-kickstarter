@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useAtom, useSetAtom } from "jotai";
 import {
   Table,
   TableBody,
@@ -22,51 +21,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/app/state/userState";
-import {
-  selectedUserAtom,
-  formModeAtom,
-  isFormOpenAtom,
-  userToDeleteAtom,
-  deleteDialogOpenAtom,
-  filteredUsersAtom,
-} from "@/app/state/userState";
 
-export function DataTable() {
-  const [users] = useAtom(filteredUsersAtom);
-  const setSelectedUserFn = useSetAtom(selectedUserAtom as any);
-  const setFormModeFn = useSetAtom(formModeAtom as any);
-  const setIsFormOpenFn = useSetAtom(isFormOpenAtom as any);
-  const setUserToDeleteFn = useSetAtom(userToDeleteAtom as any);
-  const setIsDeleteDialogOpenFn = useSetAtom(deleteDialogOpenAtom as any);
+interface RoleUserProps {
+  users: User[]
+  onEdit: (user: User) => void
+  onDelete: (userId: string) => void
+  onView: (user: User) => void
+}
 
-  const [sortField, setSortField] = useState<keyof User>("nama");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+export function UserTable({users, onEdit, onDelete, onView}: RoleUserProps) {
+const [sortField, setSortField] = useState<keyof User>("created_at")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
 
   const handleSort = (field: keyof User) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
-      setSortField(field);
-      setSortDirection("asc");
+      setSortField(field)
+      setSortDirection("asc")
     }
-  };
+  }
 
-  const onView = (user: User) => {
-    setSelectedUserFn(user);
-    setFormModeFn("view");
-    setIsFormOpenFn(true);
-  };
-
-  const onEdit = (user: User) => {
-    setSelectedUserFn(user);
-    setFormModeFn("edit");
-    setIsFormOpenFn(true);
-  };
-
-  const onDelete = (userId: string) => {
-    setUserToDeleteFn(userId);
-    setIsDeleteDialogOpenFn(true);
-  };
 
   const getStatusBadge = (isAktif: number) => {
     const variants = {

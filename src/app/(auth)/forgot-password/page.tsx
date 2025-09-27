@@ -59,32 +59,32 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
-      <Card className="w-full max-w-md shadow-lg rounded-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-6">
+      <Card className="w-full max-w-md shadow-lg rounded-2xl bg-white/5 backdrop-blur-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-800">
+          <CardTitle className="text-2xl font-bold text-white">
             Lupa Password 🔑
           </CardTitle>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-white mt-1">
             Masukkan email Anda untuk menerima tautan reset password
           </p>
         </CardHeader>
 
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
               {/* Email Field */}
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-gray-800">Email</FormLabel>
+                    <FormLabel className="text-white">Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="you@example.com"
-                        className="text-gray-800"
+                        className="text-white"
                         {...field}
                       />
                     </FormControl>
@@ -103,9 +103,9 @@ export default function ForgotPasswordPage() {
               </Button>
 
               {/* Back to Login */}
-              <p className="text-center text-sm text-gray-500 mt-2">
+              <p className="text-center text-sm text-white mt-2">
                 Ingat password Anda?{" "}
-                <a href="/login" className="text-blue-600 hover:underline">
+                <a href="/login" className="text-blue-400 hover:underline">
                   Masuk
                 </a>
               </p>

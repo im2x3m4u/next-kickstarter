@@ -20,7 +20,7 @@ export const forgotPasswordAtom = atom("");
 export type AuthUser = {
   id_user: number;
   username: string;
-  nama?: string;  
+  nama?: string;
   email?: string;
   no_telepon?: string;
   roles?: Array<{ id_userRole: number; id_role?: string; role_name: string }>;
@@ -45,3 +45,15 @@ export const profileDraftAtom = atom<ProfileDraft>({
 });
 
 export const profileEditModeAtom = atom(false);
+
+// --- Register state ---
+export const regUsernameAtom = atom("");
+export const regNamaAtom = atom("");
+export const regEmailAtom = atom("");
+export const regTelpAtom = atom("");
+export const regPasswordAtom = atom("");
+export const regConfirmPasswordAtom = atom("");
+export const regRoleAtom = atom<"user" | "admin">("user");
+
+// status submit
+export const regSubmittingAtom = atom(false);

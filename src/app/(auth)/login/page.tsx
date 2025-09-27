@@ -1,35 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
-import IlustrationLogin from "@/assets/IlustrationLogin.png";
 import LoginForm from "@/app/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
-      <div className="hidden lg:flex w-1/2 bg-gray-100 items-center justify-center">
-        <Image
-          src={IlustrationLogin}
-          alt="Ilustration Login"
-          width={600}
-          height={800}
-          className="h-full w-full object-cover"
-        />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 px-4">
+      <div className="max-w-6xl w-full grid md:grid-cols-2 gap-12">
+        {/* Copywriting Section */}
+        <div className="text-white flex flex-col justify-center space-y-6">
+          <h1 className="text-4xl font-bold leading-snug">
+            Masuk ke <span className="text-blue-400">Management Talenta</span>{" "}
+          </h1>
+          <p className="text-gray-300">
+            Akses akun Anda untuk mulai mengelola data karyawan, memantau
+            aktivitas tim, dan menjaga kolaborasi tetap berjalan lancar. Semua
+            yang Anda butuhkan ada di satu tempat!
+          </p>
+        </div>
 
-      <div className="flex w-full lg:w-1/2 items-center justify-center bg-white p-6 sm:p-10">
-        <Card className="w-full max-w-sm sm:max-w-md shadow-lg rounded-xl sm:rounded-2xl">
-          <CardHeader className="text-center pb-4 sm:pb-6">
-            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-800">
-              Selamat Datang 👋
-            </CardTitle>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Masuk ke akun Anda untuk melanjutkan
-            </p>
-          </CardHeader>
-          <CardContent>
-            <LoginForm />
-          </CardContent>
-        </Card>
+        {/* Login Form Card */}
+        <div className="flex w-full items-center justify-center sm:p-10 bg-white/5 backdrop-blur-md  rounded-xl shadow-xl">
+          <Card className="w-full max-w-lg sm:max-w-xl shadow-lg rounded-xl sm:rounded-2xl">
+            <CardHeader className="text-center pb-4 sm:pb-6">
+              <CardTitle className="text-xl sm:text-2xl font-bold text-white">
+                Selamat Datang Kembali 👋
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-white mt-1">
+                Masuk ke akun Anda untuk melanjutkan manajemen talenta
+              </p>
+            </CardHeader>
+            <CardContent>
+              <LoginForm />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

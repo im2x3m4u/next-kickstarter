@@ -1,10 +1,10 @@
 import AdminLayout from "@/app/components/layout/layout";
-import RoleManagementPage from "./page";
+import ActivityManagementPage from "./page";
 
 export default function RolesLayout() {
   return (
     <AdminLayout>
-      <RoleManagementPage />
+      <ActivityManagementPage />
     </AdminLayout>
   );
 }

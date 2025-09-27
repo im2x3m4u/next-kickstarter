@@ -21,7 +21,7 @@ export default function PasswordInput({ value, onChange }: PasswordInputProps) {
         placeholder="••••••••"
         value={value}
         onChange={onChange}
-        className="h-10 sm:h-11 pr-10 text-gray-800"
+        className="h-10 sm:h-11 pr-10 text-white"
         required
       />
       <button

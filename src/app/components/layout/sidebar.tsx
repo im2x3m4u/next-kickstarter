@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Home, Users, Shield } from "lucide-react"
+import { Home, Users, Shield, CalendarCheck } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -9,6 +9,7 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "User Management", url: "/users", icon: Users },
   { title: "Role Management", url: "/roles", icon: Shield },
+  { title: "Activity Management", url: "/activities", icon: CalendarCheck },
 ]
 
 export function AppSidebar() {

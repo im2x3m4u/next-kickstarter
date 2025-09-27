@@ -29,7 +29,6 @@ export default function DashboardPage() {
   const stats = useAtomValue(dashboardStatsAtom)
   const activities = useAtomValue(dashboardActivitiesAtom)
   const loading = useAtomValue(dashboardLoadingAtom)
-  const error = useAtomValue(dashboardErrorAtom)
   const statsCards = useAtomValue(statsCardsAtom)
   const fetchDashboardData = useSetAtom(fetchDashboardDataAtom)
 

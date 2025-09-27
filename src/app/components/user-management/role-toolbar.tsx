@@ -156,14 +156,14 @@ export function Toolbar({
 
             {/* Actions */}
             <div className="flex gap-2 ">
-              <Button onClick={onAddUser} className="flex items-center gap-2 text-gray-900">
-                <Plus className="h-4 w-4 text-gray-900" />
+              <Button onClick={onAddUser} variant="outline" className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                <Plus className="h-4 w-4" />
                 Add User
               </Button>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
+                  <Button variant="outline" className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors">
                     <MoreHorizontal className="h-4 w-4" />
                     More
                   </Button>

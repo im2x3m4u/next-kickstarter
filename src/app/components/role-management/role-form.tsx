@@ -20,14 +20,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { 
   Shield, 
   Settings, 
-  Users,
   Calendar,
-  Check,
-  X
 } from "lucide-react"
 import { Role } from "@/app/state/roleState"
 

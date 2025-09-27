@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -40,12 +40,20 @@ export default function Navbar() {
 
         {/* Auth Button (desktop) */}
         <div className="hidden md:flex items-center gap-2">
-          <Button asChild variant="outline" size="sm">
+          <Button
+            asChild
+            size="sm"
+            className="bg-white hover:bg-gray-900 text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
+          >
             <Link href="/login">Login</Link>
           </Button>
-          {/* <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+          <Button
+            asChild
+            size="sm"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          >
             <Link href="/register">Register</Link>
-          </Button> */}
+          </Button>
         </div>
 
         {/* Mobile toggle */}
@@ -63,29 +71,60 @@ export default function Navbar() {
         <div className="md:hidden border-t bg-white">
           <div className="container mx-auto px-4 py-4 space-y-4">
             <nav className="flex flex-col gap-3">
-              <a href="#home" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+              <a
+                href="#home"
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
                 Home
               </a>
-              <a href="#service" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+              <a
+                href="#service"
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
                 Service
               </a>
-              <a href="#why-us" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+              <a
+                href="#why-us"
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
                 Why us?
               </a>
-              <a href="#testimonials" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+              <a
+                href="#testimonials"
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
                 Testimonials
               </a>
-              <a href="#faq" className="text-gray-700 hover:text-blue-600" onClick={() => setIsOpen(false)}>
+              <a
+                href="#faq"
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
+              >
                 FAQ
               </a>
             </nav>
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm" onClick={() => setIsOpen(false)}>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                onClick={() => setIsOpen(false)}
+                className="bg-white hover:bg-gray-900 text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
+              >
                 <Link href="/login">Login</Link>
               </Button>
-              {/* <Button asChild size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300" onClick={() => setIsOpen(false)}>
+              <Button
+                asChild
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() => setIsOpen(false)}
+              >
                 <Link href="/register">Register</Link>
-              </Button> */}
+              </Button>
             </div>
           </div>
         </div>

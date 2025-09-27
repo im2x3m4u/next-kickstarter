@@ -59,54 +59,56 @@ export default function LoginForm() {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleLogin}>
-      <div>
-        <Label htmlFor="username" className="text-gray-900">
-          Username
-        </Label>
-        <Input
-          id="username"
-          type="text"
-          placeholder="Masukkan username Anda"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="mt-1 h-10 sm:h-11 text-gray-800"
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="password" className="text-gray-900">
-          Password
-        </Label>
-        <PasswordInput
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <div className="text-right mt-1">
-          <a
-            href="/forgot-password"
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Lupa Password?
-          </a>
+    <div>
+      <form className="space-y-4" onSubmit={handleLogin}>
+        <div>
+          <Label htmlFor="username" className="text-white">
+            Username
+          </Label>
+          <Input
+            id="username"
+            type="text"
+            placeholder="Masukkan username Anda"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="mt-1 h-10 sm:h-11 text-white"
+            required
+          />
         </div>
-      </div>
 
-      <Button
-        type="submit"
-        disabled={isLoading}
-        className="w-full h-10 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white"
-      >
-        {isLoading ? "Memproses..." : "Masuk"}
-      </Button>
+        <div>
+          <Label htmlFor="password" className="text-white">
+            Password
+          </Label>
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div className="text-right mt-1">
+            <a
+              href="/forgot-password"
+              className="text-sm text-blue-400 hover:underline"
+            >
+              Lupa Password?
+            </a>
+          </div>
+        </div>
 
-      <p className="text-center text-xs sm:text-sm text-gray-500">
-        Belum punya akun?{" "}
-        <a href="/register" className="text-blue-600 hover:underline">
-          Daftar
-        </a>
-      </p>
-    </form>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-10 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isLoading ? "Memproses..." : "Masuk"}
+        </Button>
+
+        <p className="text-center text-xs sm:text-sm text-white">
+          Belum punya akun?{" "}
+          <a href="/register" className="text-blue-400 hover:underline">
+            Daftar
+          </a>
+        </p>
+      </form>
+    </div>
   );
 }

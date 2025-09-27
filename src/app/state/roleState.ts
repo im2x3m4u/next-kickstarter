@@ -38,16 +38,21 @@ export const statsAtom = atom((get) => {
 })
 
 // Helper functions for API calls
-export const fetchRoles = async () => {
-  try {
-    const response = await fetch('/api/role')
-    const data = await response.json()
-    return data
-  } catch (err) {
-    console.error('Error fetching roles:', err)
-    throw err
+export const fetchRolesAtom = atom(
+  null,
+  async (get, set) => {
+    set(loadingAtom, true)
+    try {
+      const response = await fetch('/api/role')
+      const data = await response.json()
+      set(rolesAtom, data.ok ? data.data : [])
+    } catch (err) {
+      console.error('Error fetching roles:', err)
+    } finally {
+      set(loadingAtom, false)
+    }
   }
-}
+)
 
 export const createRole = async (roleData: Partial<Role>) => {
   try {
