@@ -92,7 +92,8 @@ export function AppHeader() {
                 variant="destructive"
                 onClick={async () => {
                   // const res = await logout();
-                  toast.success(res.message);
+                  // toast.success(res.message);
+                  toast.success("Logout berhasil");
                   window.location.href = "/";
                 }}
               >

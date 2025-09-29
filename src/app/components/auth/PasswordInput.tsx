@@ -6,17 +6,18 @@ import { useAtom } from "jotai";
 import { showPasswordAtom } from "@/app/state/uiState";
 
 type PasswordInputProps = {
+  id?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-export default function PasswordInput({ value, onChange }: PasswordInputProps) {
+export default function PasswordInput({ id, value, onChange }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useAtom(showPasswordAtom);
 
   return (
     <div className="relative mt-1">
       <Input
-        id="password"
+        id={id}
         type={showPassword ? "text" : "password"}
         placeholder="••••••••"
         value={value}
