@@ -1,11 +1,11 @@
 meta {
   name: Register
   type: http
-  seq: 18
+  seq: 22
 }
 
 post {
-  url: http://localhost:3000/api/user/
+  url: http://localhost:3000/api/user/register
   body: json
   auth: bearer
 }
@@ -21,12 +21,12 @@ auth:bearer {
 
 body:json {
   {
-    "nama": "shela",
-    "username": "shela",
-    "password": "shela",
-    "email": "shela@gmail.com",
-    "no_telepon": "098765432123",
-    "is_aktif": "1"
+    "nama": "Kalya Anastasya",
+    "username": "kalya",
+    "password": "kalya123",
+    "email": "kalya@email.com",
+    "no_telepon": "081234567234",
+    "id_role": "5c9d73a8-91d4-11f0-bcb7-586c25927655"
   }
   
 }

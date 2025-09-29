@@ -1,0 +1,43 @@
+meta {
+  name: Auth Login
+  type: http
+  seq: 19
+}
+
+post {
+  url: http://localhost:3000/api/auth/callback/credentials
+  body: json
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer <token>
+  Content-Type: application/json
+  Cookie: next-auth.csrf-token=1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+}
+
+body:json {
+  {
+    "csrfToken": "1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381",
+    "username": "shela",
+    "password": "shela1234"
+  }
+}
+
+body:xml {
+  username=setyakc
+  password=cicik1234
+  csrfToken=1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+}
+
+body:form-urlencoded {
+  " csrfToken": 1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+  username: setyakc
+  password: cicik1234
+  callbackUrl: http://localhost:3000/
+  json: true
+}
+
+settings {
+  encodeUrl: true
+}

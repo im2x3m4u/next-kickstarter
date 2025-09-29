@@ -1,0 +1,37 @@
+meta {
+  name: Activity
+  type: http
+  seq: 23
+}
+
+get {
+  url: http://localhost:3000/api/activity?userId=5e513b0c-165b-4367-b51f-1ac869b2f42d
+  body: formUrlEncoded
+  auth: bearer
+}
+
+params:query {
+  userId: 5e513b0c-165b-4367-b51f-1ac869b2f42d
+}
+
+headers {
+  Authorization: Bearer <token>
+  Content-Type: application/x-www-form-urlencoded
+}
+
+body:json {
+  username=setyakc
+  password=cicik1234
+  csrfToken=1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+  
+}
+
+body:xml {
+  username=setyakc
+  password=cicik1234
+  csrfToken=1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+}
+
+settings {
+  encodeUrl: true
+}
