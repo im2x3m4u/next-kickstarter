@@ -12,19 +12,20 @@ import {
   regUsernameAtom,
   regNamaAtom,
   regEmailAtom,
-  regTelpAtom,
+  regNoTeleponAtom,
   regPasswordAtom,
   regConfirmPasswordAtom,
   regRoleAtom,
   regSubmittingAtom,
 } from "@/app/state/authState";
 import { validateRegister } from "@/app/lib/validation/authValidation";
+import { registerService } from "@/app/lib/services/authService";
 
 export default function RegisterForm() {
   const [username, setUsername] = useAtom(regUsernameAtom);
   const [nama, setNama] = useAtom(regNamaAtom);
   const [email, setEmail] = useAtom(regEmailAtom);
-  const [telp, setTelp] = useAtom(regTelpAtom);
+  const [noTelepon, setNoTelepon] = useAtom(regNoTeleponAtom);
   const [password, setPassword] = useAtom(regPasswordAtom);
   const [confirmPassword, setConfirmPassword] = useAtom(regConfirmPasswordAtom);
   const [role, setRole] = useAtom(regRoleAtom);
@@ -39,7 +40,7 @@ export default function RegisterForm() {
     const error = validateRegister(
       username,
       email,
-      telp,
+      noTelepon,
       password,
       confirmPassword
     );
@@ -50,6 +51,15 @@ export default function RegisterForm() {
 
     setSubmitting(true);
     try {
+      const res = await registerService(
+        username,
+        password,
+        nama,
+        email,
+        noTelepon,
+        role
+      );
+
       toast.success("Register berhasil! Silakan login.");
     } catch (err) {
       console.error("Register gagal:", err);
@@ -73,7 +83,7 @@ export default function RegisterForm() {
     // hanya angka
     if (!/^\d*$/.test(value)) return;
 
-    setTelp(value);
+    setNoTelepon(value);
 
     if (value.length > 12) {
       setTelpError("No Telepon maksimal 12 digit!");
@@ -142,10 +152,10 @@ export default function RegisterForm() {
             No Telp
           </Label>
           <Input
-            id="telp"
+            id="no_telepon"
             type="text"
             placeholder="Masukkan No Telepon Anda"
-            value={telp}
+            value={noTelepon}
             onChange={(e) => {
               // Hanya izinkan angka
               const onlyNums = e.target.value.replace(/[^0-9]/g, "");
