@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logout } from "@/lib/auth";
+// import { logout } from "@/lib/auth";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -91,7 +91,7 @@ export function AppHeader() {
               <Button
                 variant="destructive"
                 onClick={async () => {
-                  const res = await logout();
+                  // const res = await logout();
                   toast.success(res.message);
                   window.location.href = "/";
                 }}
