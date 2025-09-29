@@ -8,10 +8,10 @@ import { createEntity, getEntityById } from "@/function/entityHelp";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { nama, username, password, email, no_telepon, roleId } = body;
+    const { nama, username, password, email, no_telepon, id_role} = body;
 
     // Validasi input
-    if (!nama || !username || !password || !email || !no_telepon || !roleId) {
+    if (!nama || !username || !password || !email || !no_telepon || !id_role) {
       return NextResponse.json({ error: "Data tidak lengkap" }, { status: 400 });
     }
 
@@ -45,15 +45,15 @@ export async function POST(req: Request) {
     }
 
     // Ambil role penuh
-    const role = await getEntityById(Role, "id_role", roleId);
+    const role = await getEntityById(Role, "id_role", id_role);
     if (!role.ok || !role.data) {
       return NextResponse.json({ error: "Role tidak ditemukan" }, { status: 400 });
     }
 
     // Buat user_role
     await createEntity(UserRole, {
-      user: fullUser.data,  // Kirim object User lengkap
-      role: role.data,      // Kirim object Role lengkap
+      user: fullUser.data,  
+      role: role.data,    
     });
 
     return NextResponse.json({ message: "User berhasil didaftarkan" });
