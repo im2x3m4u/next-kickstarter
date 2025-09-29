@@ -1,8 +1,18 @@
+// Token CSRF
+const getCsrfToken = async () => {
+  const res = await fetch("/api/auth/csrf");
+  const data = await res.json();
+  return data.csrfToken;
+};
+
+
 //LOGIN
 export async function loginService(username: string, password: string) {
+const csrfToken = await getCsrfToken();
   const response = await fetch("/api/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+    credentials: "include",
     body: JSON.stringify({ username, password }),
   });
 
@@ -28,8 +38,6 @@ export async function registerService(
     admin: "5c9d73a8-91d4-11f0-bcb7-586c25927655",
     user: "6389951b-d5eb-4554-8caa-3580f5656dec",
   };
-
-  console.log("Mencoba registrasi user:", username, email); // LOG sebelum request
 
   const response = await fetch("/api/user/register", {
     method: "POST",
@@ -64,11 +72,11 @@ export async function registerService(
       message.includes("sudah ada");
 
     if (isConflict || looksDuplicate) {
-      console.log("Registrasi gagal: Username atau email sudah terdaftar"); // LOG gagal
+      console.log("Registrasi gagal: Username atau email sudah terdaftar");
       throw new Error("Username atau email sudah terdaftar!");
     }
 
-    console.log("Registrasi gagal:", data.error || data.message); // LOG gagal lain
+    console.log("Registrasi gagal:", data.error || data.message);
     throw new Error(data.error || data.message || "Registrasi gagal!");
   }
 
@@ -118,4 +126,30 @@ export async function verifyResetToken(token: string) {
   });
 
   return res.json();
+}
+
+// LOGOUT
+export async function logoutService() {
+  try {
+    const csrfToken = await getCsrfToken(); // ambil CSRF sebelum logout
+    const res = await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+      },
+      credentials: "include", // untuk cookie session ikut terkirim
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Logout gagal!");
+    }
+
+    console.log("Logout berhasil");
+    return true;
+  } catch (err) {
+    console.error("Logout gagal:", err);
+    throw err;
+  }
 }
