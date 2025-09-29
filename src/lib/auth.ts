@@ -110,13 +110,6 @@ export const logout = async (): Promise<{ ok: boolean; status: number; message: 
 };
 
 
-// server side
-// import getServerSession from "next-auth"; 
-// import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
-
-// export async function getAuthSession() {
-//   return await getServerSession(authOptions);
-// }
 
 
 
