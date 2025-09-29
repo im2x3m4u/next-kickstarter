@@ -4,6 +4,7 @@ import { DataSource } from "typeorm";
 import { User } from "../entities/user";
 import { Role } from "../entities/role";
 import { UserRole } from "../entities/userRole";
+import { Activity } from "@/entities/activity";
 
 
 export const AppDataSource = new DataSource({
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME!,
   synchronize: false,
   logging: false,
-  entities: [User, Role, UserRole],
+  entities: [User, Role, UserRole,Activity],
 });
 
 let connectionPromise: Promise<DataSource> | null = null;
