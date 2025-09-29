@@ -19,7 +19,7 @@ import {
 
 // Lazy load heavy components
 const RecentActivity = dynamic(() => import("@/app/components/dashboard/recent-activity").then(mod => ({ default: mod.RecentActivity })), {
-  loading: () => <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+  loading: () => <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
 })
 
 
@@ -60,7 +60,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Loading dashboard data...</p>
+              <p className="mt-1 text-gray-600">Loading dashboard data...</p>
             </div>
           </div>
           <DashboardSkeleton />
@@ -76,12 +76,12 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your system.</p>
+            <p className="mt-1 text-gray-600">Welcome back! Here's what's happening with your system.</p>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {statsCards.map((stat, index) => {
             const icons = [Users, Shield, Activity]
             return (
@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
         {/* Charts and Activity - Lazy loaded */}
         <Suspense fallback={<DashboardSkeleton />}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <RecentActivity activities={activities} />
           </div>
         </Suspense>
