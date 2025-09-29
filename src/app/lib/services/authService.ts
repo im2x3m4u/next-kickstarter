@@ -16,98 +16,65 @@ export async function loginService(username: string, password: string) {
 }
 
 //REGISTER
-// export async function registerService(
-//   nama: string,
-//   username: string,
-//   password: string,
-//   email: string,
-//   no_telepon: string,
-//   is_aktif: number,
-//   role: "user" | "admin"
-// ) {
-//   // Mapping role ke id_role
-//   const roleId = role === "admin" ? 1 : 2;
-
-//   const response = await fetch("/api/auth/register", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       username,
-//       password,
-//       nama,
-//       email,
-//       no_telepon,
-//       is_aktif,
-//       roleId,
-//     }),
-    
-//   });
-//   // const data = await response.json();
-// const text = await response.text(); // ambil raw response
-// let data: any = null;
-// try {
-//   data = JSON.parse(text); // coba parse jadi JSON
-// } catch {
-//   data = { message: text }; // kalau gagal parse, pakai plain text
-// }
-//   if (!response.ok) {
-//     throw new Error(data.message || "Registrasi gagal!");
-//   }
-//   return data;
-// }
-
 export async function registerService(
   nama: string,
   username: string,
   password: string,
   email: string,
   no_telepon: string,
-  // is_aktif: number,
   role: "user" | "admin"
 ) {
-  // Mapping role ke id_role
-  const roleId = role === "admin" ? 1 : 2;
-
-  const bodyData = {
-    username,
-    password,
-    nama,
-    email,
-    no_telepon,
-    is_aktif: 1,
-    roleId,
+  const roleMap: Record<string, string> = {
+    admin: "5c9d73a8-91d4-11f0-bcb7-586c25927655",
+    user: "6389951b-d5eb-4554-8caa-3580f5656dec",
   };
 
-  // ✅ log sebelum dikirim
-  console.log("📤 Data yang dikirim ke backend:", bodyData);
+  console.log("Mencoba registrasi user:", username, email); // LOG sebelum request
 
   const response = await fetch("/api/user/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bodyData),
+    body: JSON.stringify({
+      username,
+      password,
+      nama,
+      email,
+      no_telepon,
+      is_aktif: 1,
+      id_role: roleMap[role],
+    }),
   });
 
-  const text = await response.text();
-
-  // ✅ log isi mentah response
-  console.log("📥 Raw response dari backend:", text);
-
-  let data: any = null;
+  let data: any;
   try {
-    data = JSON.parse(text);
+    data = await response.json();
   } catch {
+    const text = await response.text();
     data = { message: text };
   }
 
-  // ✅ log hasil parse JSON
-  console.log("📥 Parsed response:", data);
-
   if (!response.ok) {
-    throw new Error(data.message || "Registrasi gagal!");
+    const message = (data.error || data.message || "").toString().toLowerCase();
+    const isConflict = response.status === 409;
+    const looksDuplicate =
+      message.includes("already exists") ||
+      message.includes("duplicate") ||
+      message.includes("unique") ||
+      message.includes("sudah terdaftar") ||
+      message.includes("sudah ada");
+
+    if (isConflict || looksDuplicate) {
+      console.log("Registrasi gagal: Username atau email sudah terdaftar"); // LOG gagal
+      throw new Error("Username atau email sudah terdaftar!");
+    }
+
+    console.log("Registrasi gagal:", data.error || data.message); // LOG gagal lain
+    throw new Error(data.error || data.message || "Registrasi gagal!");
   }
+
+  console.log("Registrasi berhasil:", data); // LOG berhasil
   return data;
 }
-
 
 // FORGOT PASSWORD
 export async function requestPasswordReset(email: string) {

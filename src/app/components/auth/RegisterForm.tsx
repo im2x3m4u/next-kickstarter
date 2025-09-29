@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ export default function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useAtom(regConfirmPasswordAtom);
   const [role, setRole] = useAtom(regRoleAtom);
   const [submitting, setSubmitting] = useAtom(regSubmittingAtom);
+  const router = useRouter();
 
   const [emailError, setEmailError] = useState("");
   const [telpError, setTelpError] = useState("");
@@ -52,16 +54,23 @@ export default function RegisterForm() {
     setSubmitting(true);
     try {
       const res = await registerService(
+        nama,
         username,
         password,
-        nama,
         email,
         noTelepon,
         role
       );
 
       toast.success("Register berhasil! Silakan login.");
+      router.push("/login");
     } catch (err) {
+      const message = err instanceof Error ? err.message : "Registrasi gagal";
+      if (message.toLowerCase().includes("sudah terdaftar")) {
+        toast.error("Akun dengan username atau email tersebut sudah terdaftar.");
+      } else {
+        toast.error(message);
+      }
       console.error("Register gagal:", err);
     } finally {
       setSubmitting(false);
@@ -175,6 +184,7 @@ export default function RegisterForm() {
             Password
           </Label>
           <PasswordInput
+          id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -186,6 +196,7 @@ export default function RegisterForm() {
             Konfirmasi Password
           </Label>
           <PasswordInput
+            id="confirm-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
