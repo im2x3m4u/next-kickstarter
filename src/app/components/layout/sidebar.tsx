@@ -9,7 +9,7 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "User Management", url: "/users", icon: Users },
   { title: "Role Management", url: "/roles", icon: Shield },
-  { title: "Activity Management", url: "/activities", icon: CalendarCheck },
+  { title: "Activity Management", url: "/activity", icon: CalendarCheck },
 ]
 
 export function AppSidebar() {

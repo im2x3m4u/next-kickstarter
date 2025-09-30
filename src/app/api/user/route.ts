@@ -3,7 +3,6 @@ import { User } from "../../../entities/user";
 import { encryptPassword } from "@/lib/crypto";
 // import { authPermission } from "../../../function/authPermission";
 
-
 export async function GET(req: Request) {
   const { search, page, pageSize } = Object.fromEntries(
     new URL(req.url).searchParams

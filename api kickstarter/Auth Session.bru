@@ -1,0 +1,33 @@
+meta {
+  name: Auth Session
+  type: http
+  seq: 20
+}
+
+get {
+  url: http://localhost:3000/api/auth/session
+  body: formUrlEncoded
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer <token>
+  Content-Type: application/x-www-form-urlencoded
+}
+
+body:json {
+  username=setyakc
+  password=cicik1234
+  csrfToken=1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+  
+}
+
+body:xml {
+  username=setyakc
+  password=cicik1234
+  csrfToken=1097677a44a62e457b3807c754dae568b26471bedca01ae79e8e6a6f2824d381
+}
+
+settings {
+  encodeUrl: true
+}

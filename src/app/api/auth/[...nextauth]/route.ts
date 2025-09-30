@@ -186,7 +186,7 @@ export const authOptions = {
     if (user?.id) {
       try {
         // req bisa undefined, lokasi default "Unknown"
-        await logActivity(user.id.toString(), "LOGIN", req as any);
+        await logActivity(user.id.toString(), "Pengguna Login", req as any);
       } catch (err) {
         console.error("Failed to log login activity:", err);
       }
@@ -203,7 +203,7 @@ export const authOptions = {
         await userRepo.save(user);
       }
 
-      await logActivity(token.id.toString(), "LOGOUT", req as any);
+      await logActivity(token.id.toString(), "Pengguna Logout", req as any);
     } catch (err) {
       console.error("Failed to log logout activity:", err);
     }
