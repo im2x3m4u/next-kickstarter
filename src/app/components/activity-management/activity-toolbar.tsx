@@ -4,31 +4,42 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, Download, Upload } from "lucide-react";
+import { Search, Download } from "lucide-react";
+import DownloadPdf from "@/app/components/DownloadPdf";
 
 interface ActivityToolbarProps {
   onSearch: (query: string) => void;
-  onExport: () => void;
-  onImport: () => void;
+  pdfData?: any[];
+  pdfColumns?: { header: string; key: string }[];
+  pdfTitle?: string;
+  pdfFileName?: string;
 }
 
 export function ActivityToolbar({
   onSearch,
-  onExport,
-  onImport,
+  pdfData = [],
+  pdfColumns = [],
+  pdfTitle = "Report",
+  pdfFileName = "report.pdf",
 }: ActivityToolbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     onSearch(value);
+  };
+
+  const handleExport = () => {
+    if (pdfData.length > 0) {
+      DownloadPdf({
+        data: pdfData,
+        columns: pdfColumns,
+        title: pdfTitle,
+        fileName: pdfFileName,
+      });
+    } else {
+      console.warn("No data available to export.");
+    }
   };
 
   return (
@@ -46,40 +57,15 @@ export function ActivityToolbar({
             />
           </div>
 
-          {/* Actions */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                More
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-white border border-gray-200 shadow-lg"
-            >
-              <DropdownMenuLabel className="text-gray-900 bg-white">
-                Actions
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={onExport}
-                className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-              >
-                <Download className="mr-2 h-4 w-4 text-gray-900" />
-                Export Activities
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={onImport}
-                className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-              >
-                <Upload className="mr-2 h-4 w-4 text-gray-900" />
-                Import Activities
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Export Button */}
+          <Button
+            onClick={handleExport}
+            variant="outline"
+            className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          >
+            <Download className="mr-2 h-4 w-4 " />
+            Export PDF
+          </Button>
         </div>
       </CardContent>
     </Card>

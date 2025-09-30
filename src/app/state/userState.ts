@@ -1,4 +1,11 @@
 import { atom } from "jotai";
+import type { User } from "./userState";
+import {
+  fetchUsersService,
+  createUserService,
+  updateUserService,
+  deleteUserService,
+} from "../lib/services/userService";
 
 // User interface
 export interface User {
@@ -56,73 +63,65 @@ export const statsAtom = atom((get) => {
   return { total, active, inactive };
 });
 
-// Action atoms for API calls
-export const fetchUsersAtom = atom(null, async (get, set) => {
+// Action Atoms (pakai service)
+export const fetchUsersAtom = atom(null, async (_get, set) => {
   try {
     set(loadingAtom, true);
-
-    const response = await fetch("/api/user");
-    const data: ApiResponse = await response.json();
-
+    const data = await fetchUsersService();
     if (data.ok) {
       set(usersAtom, data.data);
       set(filteredUsersAtom, data.data);
     }
   } catch (err) {
     console.error("Error fetching users:", err);
+    set(errorAtom, "Failed to fetch users");
   } finally {
     set(loadingAtom, false);
   }
 });
 
-// Helper functions for API calls
-export const fetchUsers = async () => {
+export const createUserAtom = atom(
+  null,
+  async (get, set, userData: Partial<User>) => {
+    try {
+      const result = await createUserService(userData);
+      set(usersAtom, [...get(usersAtom), result.data]);
+    } catch (err) {
+      console.error("Error creating user:", err);
+      set(errorAtom, "Failed to create user");
+    }
+  }
+);
+
+export const updateUserAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    { userId, userData }: { userId: string; userData: Partial<User> }
+  ) => {
+    try {
+      const result = await updateUserService(userId, userData);
+      set(
+        usersAtom,
+        get(usersAtom).map((u) => (u.id_user === userId ? result.data : u))
+      );
+    } catch (err) {
+      console.error("Error updating user:", err);
+      set(errorAtom, "Failed to update user");
+    }
+  }
+);
+
+export const deleteUserAtom = atom(null, async (get, set, userId: string) => {
   try {
-    const response = await fetch("/api/user");
-    const data: ApiResponse = await response.json();
-    return data;
+    await deleteUserService(userId);
+    set(
+      usersAtom,
+      get(usersAtom).filter((u) => u.id_user !== userId)
+    );
   } catch (err) {
-    console.error("Error fetching users:", err);
-    throw err;
+    console.error("Error deleting user:", err);
+    set(errorAtom, "Failed to delete user");
   }
-};
-
-export const createUser = async (userData: Partial<User>) => {
-  try {
-    const response = await fetch("/api/user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
-    return await response.json();
-  } catch (error) {
-    console.error("Error creating user:", error);
-    throw error;
-  }
-};
-
-export const updateUser = async (userId: string, userData: Partial<User>) => {
-  try {
-    const response = await fetch(`/api/user/${userId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
-    return await response.json();
-  } catch (error) {
-    console.error("Error updating user:", error);
-    throw error;
-  }
-};
-
-export const deleteUser = async (userId: string) => {
-  try {
-    const response = await fetch(`/api/user/${userId}`, {
-      method: "DELETE",
-    });
-    return await response.json();
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    throw error;
-  }
-};
+});

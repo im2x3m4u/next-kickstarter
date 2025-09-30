@@ -35,12 +35,13 @@ import {
 } from "@/app/state/userState";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { LazyUserForm, LazyUserTable } from "@/app/utils/lazyComponents";
+import { fetchUsersService } from "@/app/lib/services/userService";
 
 export default function UserManagementPage() {
   useAuthGuard();
-  const [users] = useAtom(usersAtom);
+  const [users, setUsers] = useAtom(usersAtom);
   const [filteredUsers, setFilteredUsers] = useAtom(filteredUsersAtom);
-  const [loading] = useAtom(loadingAtom);
+  const [loading, setLoading] = useAtom(loadingAtom); 
   const [error] = useAtom(errorAtom);
   const [isFormOpen, setIsFormOpen] = useAtom(isFormOpenAtom);
   const [formMode, setFormMode] = useAtom(formModeAtom);
@@ -54,14 +55,23 @@ export default function UserManagementPage() {
   // stats otomatis dihitung dari usersAtom
   const [stats] = useAtom(statsAtom);
 
-  // fetchUsersAtom untuk load data
-  const [, fetchUsers] = useAtom(fetchUsersAtom);
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchUsersService(); // ambil data dari service
+      setUsers(data.data); // set ke usersAtom
+      setFilteredUsers(data.data); // agar filtered juga ter-update
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Load users on component mount
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
+    loadUsers();
+  }, []);
   // Filter and search logic
   const handleSearch = (query: string) => {
     setSearchQuery(query);

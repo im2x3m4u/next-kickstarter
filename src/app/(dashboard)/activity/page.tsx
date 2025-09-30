@@ -3,11 +3,16 @@
 import { useEffect } from "react";
 import { useAtom } from "jotai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
-import { activityAtom, loadingActivityAtom, searchActivityQueryAtom } from "@/app/state/activityState";
+import { CalendarCheck } from "lucide-react";
+import {
+  activityAtom,
+  loadingActivityAtom,
+  searchActivityQueryAtom,
+} from "@/app/state/activityState";
 import { fetchActivities } from "@/app/lib/services/activityService";
 import { ActivityTable } from "@/app/components/activity-management/activity-table";
 import { ActivityToolbar } from "@/app/components/activity-management/activity-toolbar";
+import DownloadPdf from "@/app/components/DownloadPdf";
 
 export default function ActivityManagementPage() {
   const userId = "5e513b0c-165b-4367-b51f-1ac869b2f42d";
@@ -27,7 +32,7 @@ export default function ActivityManagementPage() {
     };
 
     loadActivities();
-  }, [ setActivities, setLoading]);
+  }, [setActivities, setLoading]);
 
   // Filter activities
   const filteredActivities = activities.filter(
@@ -57,7 +62,7 @@ export default function ActivityManagementPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <Calendar className="h-8 w-8" />
+          <CalendarCheck className="h-8 w-8" />
           Activity Management
         </h1>
       </div>
@@ -65,15 +70,22 @@ export default function ActivityManagementPage() {
       {/* Toolbar */}
       <ActivityToolbar
         onSearch={handleSearch}
-        onExport={handleExport}
-        onImport={handleImport}
+        pdfData={filteredActivities}
+        pdfColumns={[
+          { header: "Activity", key: "activity" },
+          { header: "Location", key: "location" },
+          { header: "User", key: "user.nama" },
+          { header: "Created At", key: "created_at" },
+        ]}
+        pdfTitle="Activity Report"
+        pdfFileName="activity_report.pdf"
       />
 
       {/* Activity Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-gray-900">
+            <CalendarCheck className="h-5 w-5 " />
             Activity ({filteredActivities.length})
           </CardTitle>
         </CardHeader>
@@ -87,7 +99,10 @@ export default function ActivityManagementPage() {
             <ActivityTable activities={filteredActivities} />
           ) : (
             <div className="text-center py-8 text-gray-500">
-              No activities found.
+              <CalendarCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No roles found
+              </h3>
             </div>
           )}
         </CardContent>

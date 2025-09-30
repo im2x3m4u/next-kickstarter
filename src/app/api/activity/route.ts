@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
     const activities = await repo.find({
       order: { created_at: "DESC" },
-      take: 5,
+      take: 10,
       relations: ["user"], 
     });
 

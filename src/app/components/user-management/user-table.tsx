@@ -23,26 +23,24 @@ import {
 import { User } from "@/app/state/userState";
 
 interface RoleUserProps {
-  users: User[]
-  onEdit: (user: User) => void
-  onDelete: (userId: string) => void
-  onView: (user: User) => void
+  users: User[];
+  onEdit: (user: User) => void;
+  onDelete: (userId: string) => void;
+  onView: (user: User) => void;
 }
 
-
-export function UserTable({users, onEdit, onDelete, onView}: RoleUserProps) {
-const [sortField, setSortField] = useState<keyof User>("created_at")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
+export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
+  const [sortField, setSortField] = useState<keyof User>("created_at");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const handleSort = (field: keyof User) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSortField(field);
+      setSortDirection("asc");
     }
-  }
-
+  };
 
   const getStatusBadge = (isAktif: number) => {
     const variants = {
@@ -62,7 +60,9 @@ const [sortField, setSortField] = useState<keyof User>("created_at")
     );
   };
 
-  const getRoleBadge = (userRoles?: Array<{ role?: { nama_role: string } }>) => {
+  const getRoleBadge = (
+    userRoles?: Array<{ role?: { nama_role: string } }>
+  ) => {
     // Check if user has roles and if the first role exists
     if (
       !userRoles ||

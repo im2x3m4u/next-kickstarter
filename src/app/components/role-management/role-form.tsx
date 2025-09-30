@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   Shield, 
   Settings, 
-  Calendar,
+  CalendarCheck,
 } from "lucide-react"
 import { Role } from "@/app/state/roleState"
 
@@ -155,14 +155,14 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
                   <div className="space-y-2">
                     <Label>Created At</Label>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-4 w-4" />
+                      <CalendarCheck className="h-4 w-4" />
                       {new Date(role.created_at).toLocaleDateString("id-ID")}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Updated At</Label>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-4 w-4" />
+                      <CalendarCheck className="h-4 w-4" />
                       {new Date(role.updated_at).toLocaleDateString("id-ID")}
                     </div>
                   </div>

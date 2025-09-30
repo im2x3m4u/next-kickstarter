@@ -30,12 +30,17 @@ import {
   searchQueryAtom,
   statusFilterAtom,
   statsAtom,
-  fetchRolesAtom,
-  createRole,
-  updateRole,
-  deleteRole,
   Role,
-} from "@/app/state/roleState";
+} from "@/app/state/roleState"; // tetap dari roleState.ts
+
+import {
+  fetchRolesService,
+  createRoleService,
+  updateRoleService,
+  deleteRoleService,
+} from "@/app/lib/services/roleService"; 
+
+
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { LazyRoleTable, LazyRoleForm } from "@/app/utils/lazyComponents";
 
@@ -52,31 +57,19 @@ export default function RoleManagementPage() {
   const [roleToDelete, setRoleToDelete] = useAtom(roleToDeleteAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom);
-
-  // stats otomatis dihitung dari usersAtom
   const [stats] = useAtom(statsAtom);
-
-  // fetch roles untuk load data
-  const [, fetchRoles] = useAtom(fetchRolesAtom);
 
   // Load roles
   const loadRoles = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchRoles();
-
-      let rolesData: Role[] = [];
-      if (Array.isArray(data)) rolesData = data;
-      else if (data?.data) rolesData = data.data;
-      else if (data?.value) rolesData = data.value;
-      else setError("Failed to fetch roles");
-
+      const data = await fetchRolesService();
+      const rolesData = data.data || [];
       setRoles(rolesData);
       setFilteredRoles(rolesData);
-    } catch (err) {
-      setError("Error loading roles");
-      console.error("Error fetching roles:", err);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch roles");
     } finally {
       setLoading(false);
     }
@@ -89,19 +82,16 @@ export default function RoleManagementPage() {
   // Filter + Search
   const filterRoles = (q: string, status: string) => {
     let filtered = roles;
-
     if (q.trim()) {
       filtered = filtered.filter((role) =>
         role.nama_role.toLowerCase().includes(q.toLowerCase())
       );
     }
-
     if (status !== "all") {
       filtered = filtered.filter((role) =>
         status === "active" ? role.is_aktif === 1 : role.is_aktif === 0
       );
     }
-
     setFilteredRoles(filtered);
   };
 
@@ -140,22 +130,32 @@ export default function RoleManagementPage() {
   };
 
   const confirmDelete = async () => {
-    if (roleToDelete) {
-      await deleteRole(roleToDelete);
-      loadRoles();
+    if (!roleToDelete) return;
+    try {
+      await deleteRoleService(roleToDelete);
+      await loadRoles();
+    } catch (err: any) {
+      console.error("Error deleting role:", err);
+      setError(err.message || "Failed to delete role");
+    } finally {
       setRoleToDelete(null);
       setDeleteDialogOpen(false);
     }
   };
 
   const handleFormSubmit = async (roleData: Partial<Role>) => {
-    if (formMode === "create") {
-      await createRole(roleData);
-    } else if (formMode === "edit" && selectedRole) {
-      await updateRole(selectedRole.id_role, roleData);
+    try {
+      if (formMode === "create") {
+        await createRoleService(roleData);
+      } else if (formMode === "edit" && selectedRole) {
+        await updateRoleService(selectedRole.id_role, roleData);
+      }
+      await loadRoles();
+      setIsFormOpen(false);
+    } catch (err: any) {
+      console.error("Error saving role:", err);
+      setError(err.message || "Failed to save role");
     }
-    loadRoles();
-    setIsFormOpen(false);
   };
 
   return (

@@ -27,7 +27,7 @@ import {
   Mail, 
   Phone, 
   Shield, 
-  Calendar,
+  CalendarCheck,
   MapPin,
   Building
 } from "lucide-react"
@@ -250,14 +250,14 @@ export function UserForm({ user, isOpen, onClose, onSubmit, mode }: UserFormProp
                   <div className="space-y-2">
                     <Label>Created At</Label>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-4 w-4" />
+                      <CalendarCheck className="h-4 w-4" />
                       {new Date(user.created_at).toLocaleDateString("id-ID")}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Updated At</Label>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-4 w-4" />
+                      <CalendarCheck className="h-4 w-4" />
                       {new Date(user.updated_at).toLocaleDateString("id-ID")}
                     </div>
                   </div>
