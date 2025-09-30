@@ -1,15 +1,19 @@
 import { getAllEntities, createEntity } from "../../../function/entityHelp";
 import { User } from "../../../entities/user";
 import { encryptPassword } from "@/lib/crypto";
-<<<<<<< HEAD
-=======
-// import { authPermission } from "../../../function/authPermission";
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthSession } from "@/function/authPermission";
 
->>>>>>> 9c2cd05cbfaeaece0f61c5437c2280f47c09c1db
+export async function GET(req: NextRequest) {
+  // Cek login dulu
+  const session = await getAuthSession();
 
-export async function GET(req: Request) {
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { search, page, pageSize } = Object.fromEntries(
-    new URL(req.url).searchParams
+    req.nextUrl.searchParams
   );
 
   const result = await getAllEntities<User>(
@@ -25,6 +29,13 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    // Cek login dulu
+  const session = await getAuthSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
   const body = await req.json();
   const { password } = body;
 
