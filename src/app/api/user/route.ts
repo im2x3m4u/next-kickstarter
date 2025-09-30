@@ -2,8 +2,6 @@ import { getAllEntities, createEntity } from "../../../function/entityHelp";
 import { User } from "../../../entities/user";
 import { encryptPassword } from "@/lib/crypto";
 // import { authPermission } from "../../../function/authPermission";
-
-export async function GET(req: Request) {
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthSession } from "@/function/authPermission";
 
