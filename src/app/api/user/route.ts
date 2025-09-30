@@ -1,6 +1,11 @@
 import { getAllEntities, createEntity } from "../../../function/entityHelp";
 import { User } from "../../../entities/user";
 import { encryptPassword } from "@/lib/crypto";
+<<<<<<< HEAD
+=======
+// import { authPermission } from "../../../function/authPermission";
+
+>>>>>>> 9c2cd05cbfaeaece0f61c5437c2280f47c09c1db
 
 export async function GET(req: Request) {
   const { search, page, pageSize } = Object.fromEntries(

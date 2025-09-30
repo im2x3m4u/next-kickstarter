@@ -1,4 +1,4 @@
-import type { User, ApiResponse } from "@/state/userState"
+import type { User, ApiResponse } from "@/app/state/userState"
 
 const BASE_URL = "/api/user"
 
