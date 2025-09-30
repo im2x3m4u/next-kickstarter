@@ -4,8 +4,19 @@ import { encryptPassword } from "@/lib/crypto";
 // import { authPermission } from "../../../function/authPermission";
 
 export async function GET(req: Request) {
+import { NextRequest, NextResponse } from "next/server";
+import { getAuthSession } from "@/function/authPermission";
+
+export async function GET(req: NextRequest) {
+  // Cek login dulu
+  const session = await getAuthSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { search, page, pageSize } = Object.fromEntries(
-    new URL(req.url).searchParams
+    req.nextUrl.searchParams
   );
 
   const result = await getAllEntities<User>(
@@ -21,6 +32,13 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    // Cek login dulu
+  const session = await getAuthSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
   const body = await req.json();
   const { password } = body;
 

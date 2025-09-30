@@ -1,10 +1,15 @@
 import { getAllEntities, createEntity } from "../../../function/entityHelp";
 import { UserRole } from "../../../entities/userRole";
-import { authPermission } from "../../../function/authPermission";
+import { getAuthSession } from "@/function/authPermission";
+import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  const auth = await authPermission(req as any);
-  if (!auth.ok) return new Response(JSON.stringify(auth), { status: 401 });
+      // Cek login dulu
+      const session = await getAuthSession();
+    
+      if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
   const { page, pageSize } = Object.fromEntries(new URL(req.url).searchParams);
 
   const result = await getAllEntities<UserRole>(
@@ -18,8 +23,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const auth = await authPermission(req as any);
-  if (!auth.ok) return new Response(JSON.stringify(auth), { status: 401 });
+      // Cek login dulu
+      const session = await getAuthSession();
+    
+      if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
   const body = await req.json();
   const newUserRole = await createEntity(UserRole, body);
   return Response.json(newUserRole, { status: 201 });
