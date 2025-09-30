@@ -46,7 +46,6 @@ export async function logActivity(
   let location = "Unknown";
 
   if (req) {
-    // Ambil IP: pakai x-forwarded-for atau connection.remoteAddress fallback
     const ipHeader = req.headers.get("x-forwarded-for");
     const ip = ipHeader?.split(",")[0].trim() || "127.0.0.1";
     location = await getLocationFromIP(ip);
@@ -60,5 +59,6 @@ export async function logActivity(
 
   await activityRepo.save(record);
 }
+
 
 

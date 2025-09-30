@@ -23,3 +23,4 @@ export function verifyPassword(plain: string, cipher: string): boolean {
     return false;
   }
 }
+
