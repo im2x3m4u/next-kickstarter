@@ -33,14 +33,8 @@ export async function registerService(
   username: string,
   password: string,
   email: string,
-  no_telepon: string,
-  role: "user" | "admin"
+  no_telepon: string
 ) {
-  const roleMap: Record<string, string> = {
-    admin: "5c9d73a8-91d4-11f0-bcb7-586c25927655",
-    user: "6389951b-d5eb-4554-8caa-3580f5656dec",
-  };
-
   const response = await fetch("/api/user/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -50,8 +44,6 @@ export async function registerService(
       nama,
       email,
       no_telepon,
-      is_aktif: 1,
-      id_role: roleMap[role],
     }),
   });
 

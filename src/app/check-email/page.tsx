@@ -1,11 +1,13 @@
 export default function CheckEmailPage() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-center">
-      <h1 className="text-2xl font-bold mb-4">Cek Email Anda 📩</h1>
-      <p className="max-w-md text-gray-600">
-        Registrasi berhasil! Kami telah mengirimkan link aktivasi ke email Anda.
-        Silakan klik link tersebut untuk mengaktifkan akun.
-      </p>
+    <div className="flex items-center justify-center h-screen text-white">
+      <div className="text-center space-y-4">
+        <h1 className="text-2xl font-bold">Registrasi Berhasil 🎉</h1>
+        <p>Silakan cek email Anda untuk verifikasi akun.</p>
+        <p className="text-sm text-gray-400">
+          Jika tidak menemukan email, coba cek folder Spam/Promotions.
+        </p>
+      </div>
     </div>
   );
 }

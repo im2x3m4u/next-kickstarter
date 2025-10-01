@@ -65,10 +65,13 @@ export default function RegisterForm() {
       toast.success(
         "Registrasi berhasil! Silakan cek email untuk aktivasi akun."
       );
-      router.push("/login");
+      // router.push("/login");
       // arahkan ke halaman info cek email
       router.push("/check-email");
     } catch (err) {
+      if (err.response) {
+        console.error("API Error:", err.response.data)
+      }
       const message = err instanceof Error ? err.message : "Registrasi gagal";
       if (message.toLowerCase().includes("sudah terdaftar")) {
         toast.error(

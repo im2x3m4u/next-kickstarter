@@ -60,8 +60,14 @@ export default function LoginForm() {
         setUser(session.user);
         localStorage.setItem("user", JSON.stringify(session.user));
 
-        // Redirect manual
-        router.push("/dashboard");
+
+
+        // untuk cek role user
+        if (session?.user?.role === "admin") {
+          router.push("/dashboard")
+        } else {
+          router.push("/home")
+        }
       }
     } catch (err) {
       toast.error("Terjadi kesalahan saat login");
