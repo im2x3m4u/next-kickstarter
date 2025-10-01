@@ -8,13 +8,13 @@ const getCsrfToken = async () => {
 //LOGIN
 export async function loginService(username: string, password: string) {
   const csrfToken = await getCsrfToken();
-  const response = await fetch("/api/auth/login", {
+  const response = await fetch("/api/auth/callback/credentials", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-CSRF-Token": csrfToken,
     },
-    credentials: "include", // penting! supaya cookie session disimpan
+    credentials: "include",
     body: JSON.stringify({ username, password }),
   });
 

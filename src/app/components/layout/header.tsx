@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { logout } from "@/lib/auth";
+import { logoutService } from "@/app/lib/services/authService";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -24,9 +24,37 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { signOut } from "next-auth/react";
+import { useAtom } from "jotai";
+import { userAtom, tokenAtom } from "@/app/state/authState";
 
 export function AppHeader() {
   const [open, setOpen] = useState(false);
+    const router = useRouter();
+  const [, setUser] = useAtom(userAtom);
+  const [, setToken] = useAtom(tokenAtom);
+
+  const handleLogout = async () => {
+    try {
+      // Panggil API logout
+      // await logoutService();
+      await signOut({ redirect: false });
+
+      // Bersihkan state & localStorage
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+
+      toast.success("Logout berhasil 🎉");
+
+      // Redirect ke halaman login
+      router.push("/auth/login");
+    } catch (err) {
+      console.error("Logout gagal:", err);
+      toast.error("Logout gagal!");
+    }
+  };
 
   return (
     <header className="flex items-center justify-between border-b bg-white px-6 py-4 shadow-sm">
@@ -71,7 +99,7 @@ export function AppHeader() {
               className="text-red-600 hover:bg-red-50 focus:bg-red-50 cursor-pointer"
               onClick={() => setOpen(true)} // buka alert dialog
             >
-              <LogOut className="mr-2 h-4 w-4 text-red-600" />
+              <LogOut onClick={handleLogout} className="mr-2 h-4 w-4 text-red-600" />
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -60,7 +60,7 @@ export const isAuthenticated = (): boolean => {
 // Login function
 export const login = async (username: string, password: string): Promise<LoginResponse> => {
   try {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch("/api/auth/callback/credentials", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

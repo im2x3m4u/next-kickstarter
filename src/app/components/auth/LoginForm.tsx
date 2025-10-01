@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,7 @@ import { toast } from "sonner";
 import { globalLoadingAtom } from "@/app/state/uiState";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [username, setUsername] = useAtom(usernameAtom);
   const [password, setPassword] = useAtom(passwordAtom);
   const [, setUser] = useAtom(userAtom);
@@ -34,30 +37,39 @@ export default function LoginForm() {
     }
 
     setIsLoading(true);
+
     try {
-      const data = await loginService(username, password);
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      setUser(data.user);
-      setToken(data.token);
-
-      toast.success("Login berhasil! 🎉", {
-        description: `Selamat datang ${data.user.nama}!`,
+      const res = await signIn("credentials", {
+        redirect: false,
+        username,
+        password,
       });
 
-      setTimeout(() => {
-        window.location.href = `/dashboard?token=${data.token}`;
-      }, 1500);
+      if (res?.error) {
+        toast.error("Login gagal!", {
+          description: res.error,
+        });
+      } else if (res?.ok) {
+        toast.success("Login berhasil! 🎉", {
+          description: `Selamat datang ${username}!`,
+        });
+
+        // Ambil session
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+        setUser(session.user);
+        localStorage.setItem("user", JSON.stringify(session.user));
+
+        // Redirect manual
+        router.push("/dashboard");
+      }
     } catch (err) {
-      toast.error("Login gagal!", {
-        description: "Silakan cek username & password",
-      });
+      toast.error("Terjadi kesalahan saat login");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div>
       <form className="space-y-4" onSubmit={handleLogin}>
