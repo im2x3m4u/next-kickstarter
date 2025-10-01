@@ -23,7 +23,7 @@ const RecentActivity = dynamic(() => import("@/app/components/dashboard/recent-a
   loading: () => <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
 })
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
   // Jotai state management
   const stats = useAtomValue(dashboardStatsAtom)
   const activities = useAtomValue(dashboardActivitiesAtom)

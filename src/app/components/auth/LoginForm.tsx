@@ -39,45 +39,33 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        username,
-        password,
-      });
+      const res = await loginService(username, password);
 
-      if (res?.error) {
-        toast.error("Login gagal!", {
-          description: res.error,
-        });
-      } else if (res?.ok) {
+      if (res?.ok) {
         toast.success("Login berhasil! 🎉", {
           description: `Selamat datang ${username}!`,
         });
 
-        // Ambil session
+        // Ambil session setelah login
         const sessionRes = await fetch("/api/auth/session");
         const session = await sessionRes.json();
         setUser(session.user);
         localStorage.setItem("user", JSON.stringify(session.user));
 
-        // untuk cek role user
-        // if (session?.user?.role === "admin") {
-        //   router.push("/dashboard")
-        // } else {
-        //   router.push("/home")
-        // }
         // Redirect berdasarkan role
-const roles = session.user.roles as string[];
-if (roles.includes("admin")) {
-  router.push("/dashboard");
-} else if (roles.includes("user")) {
-  router.push("/home");
-} else {
-  router.push("/login"); // fallback
-}
+        const roles = session.user.roles as string[];
+        if (roles.includes("admin")) {
+          router.push("/dashboard");
+        } else if (roles.includes("user")) {
+          router.push("/home");
+        } else {
+          router.push("/login"); // fallback
+        }
       }
-    } catch (err) {
-      toast.error("Terjadi kesalahan saat login");
+    } catch (err: any) {
+      toast.error("Login gagal!", {
+        description: err.message,
+      });
       console.error(err);
     } finally {
       setIsLoading(false);
