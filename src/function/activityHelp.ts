@@ -2,39 +2,11 @@ import { getConnection } from "@/lib/typeorm";
 import { Activity } from "@/entities/activity";
 import { User } from "@/entities/user";
 import { NextRequest } from "next/server";
-import fetch from "node-fetch";
-
-// fungsi untuk dapatkan lokasi dari IP
-interface IPApiResponse {
-  status: "success" | "fail";
-  city?: string;
-  regionName?: string;
-  country?: string;
-}
-
-async function getLocationFromIP(ip: string): Promise<string> {
-  try {
-    // fallback jika localhost
-    if (ip === "127.0.0.1" || ip === "::1") return "Localhost";
-
-    const res = await fetch(`http://ip-api.com/json/${ip}`);
-    const data = (await res.json()) as Partial<IPApiResponse>;
-
-    if (data?.status === "success") {
-      return `${data.city || ""}, ${data.regionName || ""}, ${data.country || ""}`
-        .replace(/^, |, ,|,$/g, "")
-        .trim();
-    }
-  } catch (err) {
-    console.error("Failed to get location from IP:", err);
-  }
-  return "Unknown";
-}
 
 export async function logActivity(
   userId: string,
   activity: string,
-  req?: NextRequest
+  req?: NextRequest | { url?: string }
 ) {
   const ds = await getConnection();
   const userRepo = ds.getRepository(User);
@@ -46,9 +18,17 @@ export async function logActivity(
   let location = "Unknown";
 
   if (req) {
-    const ipHeader = req.headers.get("x-forwarded-for");
-    const ip = ipHeader?.split(",")[0].trim() || "127.0.0.1";
-    location = await getLocationFromIP(ip);
+    try {
+      if ("nextUrl" in req && req.nextUrl) {
+        // dari NextRequest
+        location = req.nextUrl.href; // full URL
+      } else if ("url" in req && req.url) {
+        // fallback dari req.url
+        location = req.url;
+      }
+    } catch {
+      location = "Unknown";
+    }
   }
 
   const record = activityRepo.create({
@@ -59,6 +39,7 @@ export async function logActivity(
 
   await activityRepo.save(record);
 }
+
 
 
 

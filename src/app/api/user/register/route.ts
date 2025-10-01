@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { encryptPassword } from "@/lib/crypto";
-import { promisify } from "util";
+import { randomBytes } from "crypto";
 import { User } from "@/entities/user";
 import { UserRole } from "@/entities/userRole";
 import { Role } from "@/entities/role";
 import { createEntity, getEntityById } from "@/function/entityHelp";
-
-const scrypt = promisify(encryptPassword);
+import { sendEmail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +13,7 @@ export async function POST(req: Request) {
     const { nama, username, password, email, no_telepon, id_role } = body;
 
     // Validasi input
-    if (!nama || !username || !password || !email || !no_telepon || !id_role) {
+    if (!nama || !username || !password || !email || !no_telepon) {
       return NextResponse.json(
         { error: "Data tidak lengkap" },
         { status: 400 }
@@ -34,45 +33,68 @@ export async function POST(req: Request) {
     // Encrypt password
     const encryptedPassword = encryptPassword(password);
 
-    // Buat user baru
+    // Generate login token untuk verifikasi email
+    const loginToken = randomBytes(32).toString("hex");
+
+    // Buat user baru dengan is_aktif = 0 (menunggu verifikasi)
     const newUser = await createEntity(User, {
       nama,
       username,
       password: encryptedPassword,
       email,
       no_telepon,
-      is_aktif: 1,
+      is_aktif: 0,
+      login_token: loginToken,
     });
-    
+
     const createdUser = Array.isArray(newUser.data)
       ? newUser.data[0]
       : newUser.data;
 
-    // Ambil user 
-    const fullUser = await getEntityById(User, "id_user", createdUser.id_user);
-    if (!fullUser.ok || !fullUser.data) {
-      return NextResponse.json(
-        { error: "User tidak ditemukan setelah dibuat" },
-        { status: 500 }
-      );
+    // Ambil role default user
+    let roleData;
+    if (id_role) {
+      const role = await getEntityById(Role, "id_role", id_role);
+      if (!role.ok || !role.data) {
+        return NextResponse.json(
+          { error: "Role tidak ditemukan" },
+          { status: 400 }
+        );
+      }
+      roleData = role.data;
+    } else {
+      const role = await getEntityById(Role, "nama_role", "user");
+      if (!role.ok || !role.data) {
+        return NextResponse.json(
+          { error: "Role default 'user' tidak ditemukan" },
+          { status: 500 }
+        );
+      }
+      roleData = role.data;
     }
 
-    // Ambil role 
-    const role = await getEntityById(Role, "id_role", id_role);
-    if (!role.ok || !role.data) {
-      return NextResponse.json(
-        { error: "Role tidak ditemukan" },
-        { status: 400 }
-      );
-    }
-
-    // Buat user_role
+    // Buat relasi user-role
     await createEntity(UserRole, {
-      user: fullUser.data,
-      role: role.data,
+      user: createdUser,
+      role: roleData,
     });
 
-    return NextResponse.json({ message: "User berhasil didaftarkan" });
+    // Kirim email verifikasi
+    const verifyUrl = `${process.env.FRONTEND_URL}/api/user/verifikasi?token=${loginToken}`;
+    await sendEmail(
+      email,
+      "Verifikasi Akun Anda",
+      `
+  <p>Halo ${nama},</p>
+  <p>Terima kasih telah mendaftar. Silakan klik link di bawah untuk memverifikasi akun Anda:</p>
+  <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+  <p>Jika tidak mendaftar, abaikan email ini.</p>
+  `
+    );
+
+    return NextResponse.json({
+      message: "User berhasil didaftarkan. Silakan cek email untuk verifikasi.",
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

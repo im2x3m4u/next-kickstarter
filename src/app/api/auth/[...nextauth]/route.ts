@@ -80,7 +80,8 @@ export const authOptions = {
     async signIn({ user }) {
       if (user?.id) {
         try {
-          await logActivity(user.id.toString(), "Pengguna Login", null);
+          // await logActivity(user.id.toString(), "Pengguna Login", { url: "/login" });
+            await logActivity(user.id.toString(), "Pengguna Login");
         } catch (err) {
           console.error("Failed to log login activity:", err);
         }
@@ -96,8 +97,8 @@ export const authOptions = {
           user.login_token = null;
           await userRepo.save(user);
         }
-
-        await logActivity(token.id.toString(), "Pengguna Logout", null);
+        await logActivity(token.id.toString(), "Pengguna Logout");
+        // await logActivity(token.id.toString(), "Pengguna Logout", { url: "/logout" });
       } catch (err) {
         console.error("Failed to log logout activity:", err);
       }

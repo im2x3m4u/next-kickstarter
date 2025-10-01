@@ -1,5 +1,6 @@
 import { getConnection } from "../lib/typeorm";
 import { EntityTarget } from "typeorm";
+import { encryptPassword } from "@/lib/crypto";
 
 // Get All (pagination + search)
 export async function getAllEntities<T>(
@@ -85,6 +86,17 @@ export async function updateEntityById<T>(
   const entity = await repo.findOne({ where: { [idField]: id } as any });
   if (!entity) return { ok: false, data: null };
 
+  // Jika password dikirim dan tidak kosong, hash dulu
+  if ("password" in data && data.password) {
+    (data as any).password = encryptPassword((data as any).password);
+  }
+
+  // Jika password dikirim tapi kosong, jangan overwrite password lama
+  if ("password" in data && !(data as any).password) {
+    delete (data as any).password;
+  }
+
+  // Merge hanya field yang dikirim
   repo.merge(entity, data as any);
   const updated = await repo.save(entity);
 
