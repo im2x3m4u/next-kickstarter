@@ -1,13 +1,13 @@
 import Image from "next/image";
-import Navbar from "./components/navbar";
-import About from "./components/about";
-import CTA from "./components/cta";
-import Testimoni from "./components/testimonials";
+import Navbar from "./components/landing-page/navbar";
+import About from "./components/landing-page/about";
+import CTA from "./components/landing-page/cta";
+import Testimoni from "./components/landing-page/testimonials";
 import Footer from "./components/footer";
-import Hero from "./components/hero";
-import Service from "./components/service";
-import FAQ from "./components/faq";
-import WhyUs from "./components/why-us";
+import Hero from "./components/landing-page/hero";
+import Service from "./components/landing-page/service";
+import FAQ from "./components/landing-page/faq";
+import WhyUs from "./components/landing-page/why-us";
 
 export default function Home() {
   return (

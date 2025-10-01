@@ -1,33 +1,55 @@
-import { Suspense } from "react"
-import dynamic from "next/dynamic"
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 
 // Lazy load sidebar untuk mengurangi initial bundle
-const AppSidebar = dynamic(() => import("./sidebar").then(mod => ({ default: mod.AppSidebar })), {
-  loading: () => <div className="w-64 bg-indigo-600 animate-pulse" />
-})
+const AppSidebar = dynamic(
+  () => import("./sidebar").then((mod) => ({ default: mod.AppSidebar })),
+  {
+    loading: () => <div className="w-64 bg-indigo-600 animate-pulse" />,
+  }
+);
 
-const AppHeader = dynamic(() => import("./header").then(mod => ({ default: mod.AppHeader })), {
-  loading: () => <div className="h-16 bg-white border-b animate-pulse" />
-})
+const AppHeader = dynamic(
+  () => import("./header").then((mod) => ({ default: mod.default })),
+  {
+    // 🔑 ambil default
+    loading: () => <div className="h-16 bg-white border-b animate-pulse" />,
+  }
+);
 
 interface AdminLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex h-screen bg-gray-100">
-      <Suspense fallback={<div className="w-64 bg-indigo-600 animate-pulse" />}>
-        <AppSidebar />
-      </Suspense>
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Suspense fallback={<div className="h-16 bg-white border-b animate-pulse" />}>
-          <AppHeader />
+      {/* Sidebar */}
+      <div className="w-64 mt-16">
+        <Suspense
+          fallback={<div className="w-64 bg-indigo-600 animate-pulse" />}
+        >
+          <AppSidebar />
         </Suspense>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="fixed top-0 left-64 right-0 z-50">
+          {/* left-64 biar gak ketimpa sidebar */}
+          <Suspense
+            fallback={<div className="h-16 bg-white border-b animate-pulse" />}
+          >
+            <AppHeader />
+          </Suspense>
+        </div>
+
+        {/* Content */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 pt-24">
           {children}
         </main>
       </div>
     </div>
-  )
+  );
 }

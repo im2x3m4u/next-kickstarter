@@ -62,12 +62,18 @@ export default function RegisterForm() {
         role
       );
 
-      toast.success("Register berhasil! Silakan login.");
+      toast.success(
+        "Registrasi berhasil! Silakan cek email untuk aktivasi akun."
+      );
       router.push("/login");
+      // arahkan ke halaman info cek email
+      router.push("/check-email");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Registrasi gagal";
       if (message.toLowerCase().includes("sudah terdaftar")) {
-        toast.error("Akun dengan username atau email tersebut sudah terdaftar.");
+        toast.error(
+          "Akun dengan username atau email tersebut sudah terdaftar."
+        );
       } else {
         toast.error(message);
       }
@@ -184,7 +190,7 @@ export default function RegisterForm() {
             Password
           </Label>
           <PasswordInput
-          id="password"
+            id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -200,29 +206,6 @@ export default function RegisterForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-        </div>
-
-        {/* Role */}
-        <div>
-          <Label className="text-white mb-1 block">Daftar Sebagai</Label>
-          <RadioGroup
-            value={role}
-            onValueChange={(value: "user" | "admin") => setRole(value)}
-            className="flex gap-4 mt-3"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="user" id="role-user" />
-              <Label htmlFor="role-user" className="text-white">
-                User
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="admin" id="role-admin" />
-              <Label htmlFor="role-admin" className="text-white">
-                Admin
-              </Label>
-            </div>
-          </RadioGroup>
         </div>
 
         {/* Submit */}
