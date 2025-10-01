@@ -60,14 +60,21 @@ export default function LoginForm() {
         setUser(session.user);
         localStorage.setItem("user", JSON.stringify(session.user));
 
-
-
         // untuk cek role user
-        if (session?.user?.role === "admin") {
-          router.push("/dashboard")
-        } else {
-          router.push("/home")
-        }
+        // if (session?.user?.role === "admin") {
+        //   router.push("/dashboard")
+        // } else {
+        //   router.push("/home")
+        // }
+        // Redirect berdasarkan role
+const roles = session.user.roles as string[];
+if (roles.includes("admin")) {
+  router.push("/dashboard");
+} else if (roles.includes("user")) {
+  router.push("/home");
+} else {
+  router.push("/login"); // fallback
+}
       }
     } catch (err) {
       toast.error("Terjadi kesalahan saat login");
@@ -89,7 +96,7 @@ export default function LoginForm() {
             placeholder="Masukkan username Anda"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 h-10 sm:h-11 text-white"
+            className="h-10 mt-1 text-white sm:h-11"
             required
           />
         </div>
@@ -102,7 +109,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <div className="text-right mt-1">
+          <div className="mt-1 text-right">
             <a
               href="/forgot-password"
               className="text-sm text-blue-400 hover:underline"
@@ -115,12 +122,12 @@ export default function LoginForm() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full h-10 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full h-10 text-white bg-blue-600 sm:h-11 hover:bg-blue-700"
         >
           {isLoading ? "Memproses..." : "Masuk"}
         </Button>
 
-        <p className="text-center text-xs sm:text-sm text-white">
+        <p className="text-xs text-center text-white sm:text-sm">
           Belum punya akun?{" "}
           <a href="/register" className="text-blue-400 hover:underline">
             Daftar

@@ -17,21 +17,19 @@ import {
   fetchDashboardDataAtom 
 } from "@/app/state/dashboardState"
 
+
 // Lazy load heavy components
 const RecentActivity = dynamic(() => import("@/app/components/dashboard/recent-activity").then(mod => ({ default: mod.RecentActivity })), {
   loading: () => <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
 })
 
-
-
-export default function DashboardPage() {
+export default async function DashboardPage() {
   // Jotai state management
   const stats = useAtomValue(dashboardStatsAtom)
   const activities = useAtomValue(dashboardActivitiesAtom)
   const loading = useAtomValue(dashboardLoadingAtom)
   const statsCards = useAtomValue(statsCardsAtom)
   const fetchDashboardData = useSetAtom(fetchDashboardDataAtom)
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const tokenFromUrl = searchParams.get("token");
