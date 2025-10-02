@@ -1,40 +1,34 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Home, Users, Shield } from "lucide-react"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
+import { Home, Users, Shield, CalendarCheck } from "lucide-react"
+
+interface AppSidebarProps {
+  username?: string
+}
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "User Management", url: "/users", icon: Users },
   { title: "Role Management", url: "/roles", icon: Shield },
+  { title: "Activity Management", url: "/activity", icon: CalendarCheck },
 ]
 
-export default async function AppSidebar() {
+export default function AppSidebar({ username }: AppSidebarProps) {
   const pathname = usePathname()
-  const [displayName, setDisplayName] = useState<string | null>(null)
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      const raw = localStorage.getItem("user")
-      if (!raw) return
-      const user = JSON.parse(raw) as { nama?: string; username?: string }
-      setDisplayName(user?.username || user?.username || null)
-    } catch {
-      // ignore parse errors
-    }
-  }, [])
 
   return (
     <div className="w-64 min-h-screen text-white bg-gray-900">
       <div className="p-6">
-        <h2 className="text-xl font-bold text-white" suppressHydrationWarning>{displayName ? `Halo, ${displayName}!` : "Halo, Pengguna!"}</h2>
-      <p className="italic text-gray-300">Admin</p>
+        <h2 className="text-xl font-bold text-white" suppressHydrationWarning>
+          {username ? `Halo, ${username}!` : "Halo, Pengguna!"}
+        </h2>
+        <p className="italic text-gray-300">Admin</p>
       </div>
       <nav className="px-4">
         <ul className="space-y-2">
-          {items.map((item) => (
+          {items.map(item => (
             <li key={item.title}>
               <Link
                 href={item.url}

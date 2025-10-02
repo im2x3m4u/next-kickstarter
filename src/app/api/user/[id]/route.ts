@@ -1,3 +1,5 @@
+// src/app/api/users/[id]/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import {
   getEntityById,
   updateEntityById,
@@ -7,52 +9,53 @@ import { User } from "../../../../entities/user";
 import { logActivity } from "@/function/activityHelp";
 import { getAuthSession } from "@/function/authPermission";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
-    // Cek login dulu
+//GET user berdasarkan id
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
-
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await getEntityById(User, "id_user", params.id, ["userRoles"]);
-  if (!user) return new Response("User not found", { status: 404 });
-  return Response.json(user);
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+  return NextResponse.json({ ok: true, data: user });
 }
 
-import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-    // Cek login dulu
+//PUT (Update data user)
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  console.log("PUT params.id:", params.id);
+
   const body = await req.json();
   const updated = await updateEntityById(User, "id_user", params.id, body);
   if (!updated.ok) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  await logActivity(params.id, "Pengguna Update Data", req);
+  try {
+    await logActivity(params.id, "Mengubah Data User", req);
+  } catch (err) {
+    console.error("logActivity PUT error:", err);
+  }
 
-  return NextResponse.json(updated.data);
+  return NextResponse.json({ ok: true, data: updated.data });
 }
 
-
-export async function DELETE(
-  _: Request,
-  { params }: { params: { id: string } }
-) {
-  // Cek login dulu
+// DELETE user
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  console.log("DELETE params.id:", params.id);
+
   const deleted = await deleteEntityById(User, "id_user", params.id);
-  if (!deleted) return new Response("User not found", { status: 404 });
-  return new Response("Deleted successfully");
+  if (!deleted) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+  try {
+    await logActivity(session.user.id_user, "Menghapus Data User", req);
+  } catch (err) {
+    console.error("logActivity DELETE error:", err);
+  }
+
+  return NextResponse.json({ ok: true, message: "Deleted successfully" });
 }

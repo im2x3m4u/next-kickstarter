@@ -198,6 +198,7 @@ export const authOptions = {
           username: user.username,
           nama: user.nama,
           email: user.email,
+          no_telepon:user.no_telepon,
           roles: user.userRoles.map((ur) => ur.role.nama_role),
           loginToken,
         };
@@ -214,6 +215,7 @@ export const authOptions = {
         token.username = user.username;
         token.nama = user.nama;
         token.email = user.email;
+        token.no_telepon=user.no_telepon;
         token.roles = user.roles;
         token.loginToken = user.loginToken;
       }

@@ -1,5 +1,5 @@
 import { getConnection } from "../lib/typeorm";
-import { EntityTarget } from "typeorm";
+import { DeepPartial, EntityTarget } from "typeorm";
 import { encryptPassword } from "@/lib/crypto";
 
 // Get All (pagination + search)
@@ -18,13 +18,16 @@ export async function getAllEntities<T>(
   const safePage = Number.isNaN(page) || page < 1 ? 1 : page;
   const safePageSize = Number.isNaN(pageSize) || pageSize < 1 ? 10 : pageSize;
 
-  const qb = repo.createQueryBuilder("t")
+  const qb = repo
+    .createQueryBuilder("t")
     .orderBy(`t.${String(orderField)}`, "ASC")
     .skip((safePage - 1) * safePageSize)
     .take(safePageSize);
 
   if (search && searchField) {
-    qb.where(`t.${String(searchField)} LIKE :search`, { search: `%${search}%` });
+    qb.where(`t.${String(searchField)} LIKE :search`, {
+      search: `%${search}%`,
+    });
   }
 
   const [data, total] = await qb.getManyAndCount();
@@ -63,14 +66,14 @@ export async function getEntityById<T>(
 export async function createEntity<T>(
   entityClass: EntityTarget<T>,
   data: Partial<T>
-) {
+): Promise<{ ok: true; data: T }> {
   const ds = await getConnection();
-  const repo = ds.getRepository(entityClass);
+  const repo = ds.getRepository<T>(entityClass);
 
-  const entity = repo.create(data as any);
+  const entity = repo.create(data as DeepPartial<T>);
   const saved = await repo.save(entity);
 
-  return { ok: true, data: saved };
+  return { ok: true, data: saved as T };
 }
 
 // Update By Id
@@ -86,17 +89,14 @@ export async function updateEntityById<T>(
   const entity = await repo.findOne({ where: { [idField]: id } as any });
   if (!entity) return { ok: false, data: null };
 
-  // Jika password dikirim dan tidak kosong, hash dulu
   if ("password" in data && data.password) {
     (data as any).password = encryptPassword((data as any).password);
   }
 
-  // Jika password dikirim tapi kosong, jangan overwrite password lama
   if ("password" in data && !(data as any).password) {
     delete (data as any).password;
   }
 
-  // Merge hanya field yang dikirim
   repo.merge(entity, data as any);
   const updated = await repo.save(entity);
 
