@@ -1,3 +1,5 @@
+import { signIn } from "next-auth/react";
+
 // Token CSRF
 const getCsrfToken = async () => {
   const res = await fetch("/api/auth/csrf");
@@ -6,25 +8,40 @@ const getCsrfToken = async () => {
 };
 
 //LOGIN
+// export async function loginService(username: string, password: string) {
+//   const csrfToken = await getCsrfToken();
+//   const response = await fetch("/api/auth/callback/credentials", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "X-CSRF-Token": csrfToken,
+//     },
+//     credentials: "include",
+//     body: JSON.stringify({ username, password }),
+//   });
+
+//   const data = await response.json();
+
+//   if (!response.ok) {
+//     throw new Error(data.message || "Login gagal!");
+//   }
+
+//   return data;
+// }
+
+// LOGIN
 export async function loginService(username: string, password: string) {
-  const csrfToken = await getCsrfToken();
-  const response = await fetch("/api/auth/callback/credentials", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-Token": csrfToken,
-    },
-    credentials: "include",
-    body: JSON.stringify({ username, password }),
+  const res = await signIn("credentials", {
+    redirect: false, // biar kita bisa handle redirect sendiri di login-form
+    username,
+    password,
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Login gagal!");
+  if (res?.error) {
+    throw new Error(res.error);
   }
 
-  return data;
+  return res;
 }
 
 //REGISTER
