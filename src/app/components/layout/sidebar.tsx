@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Home, Users, Shield, CalendarCheck } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { protectPage } from "@/function/protectPage"
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -13,17 +12,16 @@ const items = [
   { title: "Activity Management", url: "/activity", icon: CalendarCheck },
 ]
 
-export default async function AppSidebar() {
+export default function AppSidebar() {
   const pathname = usePathname()
   const [displayName, setDisplayName] = useState<string | null>(null)
-   const session = await protectPage(["admin"])
   useEffect(() => {
     if (typeof window === "undefined") return
     try {
       const raw = localStorage.getItem("user")
       if (!raw) return
       const user = JSON.parse(raw) as { nama?: string; username?: string }
-      setDisplayName(session.user?.username || session.user?.username || null)
+      setDisplayName(user?.username || user?.username || null)
     } catch {
       // ignore parse errors
     }
