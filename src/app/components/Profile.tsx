@@ -1,4 +1,5 @@
 "use client";
+import { useAuth } from "@/app/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logoutService } from "@/app/lib/services/authService";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -31,6 +31,7 @@ import { userAtom, tokenAtom } from "@/app/state/authState";
 export default function Profile() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const { logout, loading } = useAuth();
   const [, setUser] = useAtom(userAtom);
   const [, setToken] = useAtom(tokenAtom);
 
@@ -94,7 +95,7 @@ export default function Profile() {
             onClick={() => setOpen(true)} // buka alert dialog
           >
             <LogOut
-              onClick={handleLogout}
+              // onClick={handleLogout}
               className="mr-2 h-4 w-4 text-red-600"
             />
             Logout
@@ -116,11 +117,16 @@ export default function Profile() {
             <Button
               variant="destructive"
               onClick={async () => {
-                // const res = await logout();
-                // toast.success(res.message);
-                toast.success("Logout berhasil");
-                window.location.href = "/";
+                const res = await logout(); // panggil hook logout
+                console.log("Hasil logout:", res);
+                if (res.success) {
+                  toast.success(res.message);
+                  router.push("/");
+                } else {
+                  toast.error(res.message);
+                }
               }}
+              disabled={loading} // disable saat proses logout
             >
               Ya, Logout
             </Button>

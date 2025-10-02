@@ -1,4 +1,4 @@
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 
 // Token CSRF
 const getCsrfToken = async () => {
@@ -7,42 +7,28 @@ const getCsrfToken = async () => {
   return data.csrfToken;
 };
 
-//LOGIN
+// LOGIN
 export async function loginService(username: string, password: string) {
-  const csrfToken = await getCsrfToken();
-  const response = await fetch("/api/auth/callback/credentials", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-Token": csrfToken,
-    },
-    credentials: "include",
-    body: JSON.stringify({ username, password }),
+  const res = await signIn("credentials", {
+    redirect: false,
+    username,
+    password,
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Login gagal!");
+  if (res?.error) {
+    throw new Error(res.error);
   }
 
-  return data;
+  return res;
 }
 
-// LOGIN
-// export async function loginService(username: string, password: string) {
-//   const res = await signIn("credentials", {
-//     redirect: false, // biar kita bisa handle redirect sendiri di login-form
-//     username,
-//     password,
-//   });
-
-//   if (res?.error) {
-//     throw new Error(res.error);
-//   }
-
-//   return res;
-// }
+// LOGOUT
+export async function logoutService(redirectUrl: string = "/login") {
+  await signOut({
+    redirect: true,
+    callbackUrl: redirectUrl,
+  });
+}
 
 //REGISTER
 export async function registerService(
@@ -137,30 +123,4 @@ export async function verifyResetToken(token: string) {
   });
 
   return res.json();
-}
-
-// LOGOUT
-export async function logoutService() {
-  try {
-    const csrfToken = await getCsrfToken(); // ambil CSRF sebelum logout
-    const res = await fetch("/api/auth/logout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken,
-      },
-      credentials: "include", // untuk cookie session ikut terkirim
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || "Logout gagal!");
-    }
-
-    console.log("Logout berhasil");
-    return true;
-  } catch (err) {
-    console.error("Logout gagal:", err);
-    throw err;
-  }
 }

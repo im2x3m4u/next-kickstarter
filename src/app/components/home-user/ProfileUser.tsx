@@ -6,12 +6,23 @@ import { Button } from "@/components/ui/button";
 
 export default function ProfileUser() {
   const {
-    user, draft, isEdit, setDraft,
-    startEdit, cancelEdit, saveEdit,
-    showPasswordForm, startPasswordEdit, cancelPasswordEdit, savePassword,
-    passwordData, setPasswordData,
-    showNewPassword, setShowNewPassword,
-    showConfirmPassword, setShowConfirmPassword,
+    user,
+    draft,
+    isEdit,
+    setDraft,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    showPasswordForm,
+    startPasswordEdit,
+    cancelPasswordEdit,
+    savePassword,
+    passwordData,
+    setPasswordData,
+    showNewPassword,
+    setShowNewPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
   } = useProfile();
 
   if (!user) {
@@ -25,12 +36,28 @@ export default function ProfileUser() {
       {/* Info profil */}
       {!isEdit ? (
         <div className="space-y-2">
-          <p><strong>Nama:</strong> {user.nama}</p>
-          <p><strong>Username:</strong> {user.username}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>No Telepon:</strong> {user.no_telepon}</p>
-          <Button onClick={startEdit} className="mt-4">Edit Profil</Button>
-          <Button variant="outline" onClick={startPasswordEdit} className="mt-2">Ubah Password</Button>
+          <p>
+            <strong>Nama:</strong> {user.nama}
+          </p>
+          <p>
+            <strong>Username:</strong> {user.username}
+          </p>
+          <p>
+            <strong>Email:</strong> {user.email}
+          </p>
+          <p>
+            <strong>No Telepon:</strong> {user.no_telepon}
+          </p>
+          <Button onClick={startEdit} className="mt-4">
+            Edit Profil
+          </Button>
+          <Button
+            variant="outline"
+            onClick={startPasswordEdit}
+            className="mt-2"
+          >
+            Ubah Password
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -47,11 +74,15 @@ export default function ProfileUser() {
           <Input
             placeholder="No Telepon"
             value={draft.no_telepon}
-            onChange={(e) => setDraft((d) => ({ ...d, no_telepon: e.target.value }))}
+            onChange={(e) =>
+              setDraft((d) => ({ ...d, no_telepon: e.target.value }))
+            }
           />
           <div className="flex gap-2">
             <Button onClick={saveEdit}>Simpan</Button>
-            <Button variant="outline" onClick={cancelEdit}>Batal</Button>
+            <Button variant="outline" onClick={cancelEdit}>
+              Batal
+            </Button>
           </div>
         </div>
       )}
@@ -64,17 +95,26 @@ export default function ProfileUser() {
             type={showNewPassword ? "text" : "password"}
             placeholder="Password Baru"
             value={passwordData.newPassword}
-            onChange={(e) => setPasswordData((d) => ({ ...d, newPassword: e.target.value }))}
+            onChange={(e) =>
+              setPasswordData((d) => ({ ...d, newPassword: e.target.value }))
+            }
           />
           <Input
             type={showConfirmPassword ? "text" : "password"}
             placeholder="Konfirmasi Password"
             value={passwordData.confirmPassword}
-            onChange={(e) => setPasswordData((d) => ({ ...d, confirmPassword: e.target.value }))}
+            onChange={(e) =>
+              setPasswordData((d) => ({
+                ...d,
+                confirmPassword: e.target.value,
+              }))
+            }
           />
           <div className="flex gap-2">
             <Button onClick={savePassword}>Simpan Password</Button>
-            <Button variant="outline" onClick={cancelPasswordEdit}>Batal</Button>
+            <Button variant="outline" onClick={cancelPasswordEdit}>
+              Batal
+            </Button>
           </div>
         </div>
       )}

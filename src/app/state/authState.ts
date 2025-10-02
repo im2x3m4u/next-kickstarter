@@ -18,12 +18,12 @@ export const forgotPasswordAtom = atom("");
 
 // data user yang sudah login
 export type AuthUser = {
-  id_user: number;
+  id_user: string;
   username: string;
   nama?: string;
   email?: string;
   no_telepon?: string;
-  roles?: Array<{ id_userRole: number; id_role?: string; role_name: string }>;
+  roles?: Array<{ id_userRole: string; id_role?: string; role_name: string }>;
 } | null;
 
 export const userAtom = atom<AuthUser>(null);

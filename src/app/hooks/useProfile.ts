@@ -1,62 +1,79 @@
-import { useAtom } from "jotai"
-import { useState, useEffect } from "react"
-import { userAtom, profileDraftAtom, profileEditModeAtom } from "@/app/state/authState"
-import { toast } from "sonner"
+import { useAtom } from "jotai";
+import { useState, useEffect } from "react";
+import {
+  userAtom,
+  profileDraftAtom,
+  profileEditModeAtom,
+} from "@/app/state/authState";
+import { toast } from "sonner";
 
 export function useProfile() {
-  const [user, setUser] = useAtom(userAtom)
-  const [draft, setDraft] = useAtom(profileDraftAtom)
-  const [isEdit, setIsEdit] = useAtom(profileEditModeAtom)
+  const [user, setUser] = useAtom(userAtom);
+  const [draft, setDraft] = useAtom(profileDraftAtom);
+  const [isEdit, setIsEdit] = useAtom(profileEditModeAtom);
 
-  const [showPasswordForm, setShowPasswordForm] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
-  })
+    confirmPassword: "",
+  });
 
-//   Handlers
+  // Sync user from localStorage if not in atom
   useEffect(() => {
-    if (user) return
-    if (typeof window === "undefined") return
-    try {
-      const raw = localStorage.getItem("user")
-      if (!raw) return
-      const parsed = JSON.parse(raw)
-      setUser(parsed)
-      setDraft({
-        nama: parsed?.nama || "",
-        username: parsed?.username || "",
-        email: parsed?.email || "",
-        no_telepon: parsed?.no_telepon || "",
-      })
-    } catch {}
-  }, [user, setUser])
+    if (typeof window === "undefined") return;
+    if (!user) {
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          setUser(parsed);
+        } catch {}
+      }
+    }
+  }, [user, setUser]);
 
+  // Sync draft whenever user changes
+  useEffect(() => {
+    if (user) {
+      setDraft({
+        nama: user.nama || "",
+        username: user.username || "",
+        email: user.email || "",
+        no_telepon: user.no_telepon || "",
+      });
+    }
+  }, [user, setDraft]);
+
+  // Handlers
   const startEdit = () => {
-    if (!user) return
+    if (!user) return;
     setDraft({
       nama: user.nama || "",
-      username: user.username || "",
       email: user.email || "",
       no_telepon: user.no_telepon || "",
-    })
-    setIsEdit(true)
-  }
+      username: user.username || "",
+    });
+    setIsEdit(true);
+  };
 
-  const cancelEdit = () => setIsEdit(false)
+  const cancelEdit = () => setIsEdit(false);
+  const startPasswordEdit = () => setShowPasswordForm(true);
   const cancelPasswordEdit = () => {
-    setShowPasswordForm(false)
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-  }
-  const startPasswordEdit = () => setShowPasswordForm(true)
+    setShowPasswordForm(false);
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
 
   const saveEdit = async () => {
-    if (!user) return
+    if (!user) return;
     try {
-      const res = await fetch(`/api/user/${user.id_user}`, {
+      const res = await fetch(`/api/user/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -64,31 +81,34 @@ export function useProfile() {
           email: draft.email,
           no_telepon: draft.no_telepon,
         }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.ok) return toast.error(data.message || "Gagal menyimpan profil")
-      setUser(data.user)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      toast.success("Profil berhasil diperbarui")
-      setIsEdit(false)
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok)
+        return toast.error(data.message || "Gagal menyimpan profil");
+
+      setUser(data.data);
+      localStorage.setItem("user", JSON.stringify(data.data));
+
+      toast.success("Profil berhasil diperbarui");
+      setIsEdit(false);
     } catch {
-      toast.error("Terjadi kesalahan. Coba lagi.")
+      toast.error("Terjadi kesalahan. Coba lagi.");
     }
-  }
+  };
 
   const savePassword = async () => {
-    if (!user) return
+    if (!user) return;
     if (!passwordData.newPassword || !passwordData.confirmPassword) {
-      toast.error("Password baru dan konfirmasi harus diisi")
-      return
+      toast.error("Password baru dan konfirmasi harus diisi");
+      return;
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("Password baru dan konfirmasi tidak sama")
-      return
+      toast.error("Password baru dan konfirmasi tidak sama");
+      return;
     }
     if (passwordData.newPassword.length < 6) {
-      toast.error("Password baru minimal 6 karakter")
-      return
+      toast.error("Password baru minimal 6 karakter");
+      return;
     }
 
     try {
@@ -96,23 +116,35 @@ export function useProfile() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: passwordData.newPassword }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.ok) return toast.error(data.message || "Gagal mengubah password")
-      toast.success("Password berhasil diubah")
-      cancelPasswordEdit()
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok)
+        return toast.error(data.message || "Gagal mengubah password");
+      toast.success("Password berhasil diubah");
+      cancelPasswordEdit();
     } catch {
-      toast.error("Terjadi kesalahan. Coba lagi.")
+      toast.error("Terjadi kesalahan. Coba lagi.");
     }
-  }
+  };
 
   return {
-    user, draft, isEdit, setDraft,
-    showPasswordForm, setShowPasswordForm,
-    showNewPassword, setShowNewPassword,
-    showConfirmPassword, setShowConfirmPassword,
-    passwordData, setPasswordData,
-    startEdit, cancelEdit, saveEdit,
-    startPasswordEdit, cancelPasswordEdit, savePassword
-  }
+    user,
+    draft,
+    isEdit,
+    setDraft,
+    showPasswordForm,
+    setShowPasswordForm,
+    showNewPassword,
+    setShowNewPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
+    passwordData,
+    setPasswordData,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    startPasswordEdit,
+    cancelPasswordEdit,
+    savePassword,
+  };
 }

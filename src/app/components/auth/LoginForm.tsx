@@ -15,7 +15,6 @@ import {
   tokenAtom,
 } from "@/app/state/authState";
 import { validateLogin } from "@/app/lib/validation/authValidation";
-import { loginService } from "@/app/lib/services/authService";
 import { toast } from "sonner";
 import { globalLoadingAtom } from "@/app/state/uiState";
 

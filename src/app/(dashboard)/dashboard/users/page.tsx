@@ -39,7 +39,7 @@ import { fetchUsersService } from "@/app/lib/services/userService";
 export default function UserManagementPage() {
   const [users, setUsers] = useAtom(usersAtom);
   const [filteredUsers, setFilteredUsers] = useAtom(filteredUsersAtom);
-  const [loading, setLoading] = useAtom(loadingAtom); 
+  const [loading, setLoading] = useAtom(loadingAtom);
   const [error] = useAtom(errorAtom);
   const [isFormOpen, setIsFormOpen] = useAtom(isFormOpenAtom);
   const [formMode, setFormMode] = useAtom(formModeAtom);
@@ -170,7 +170,7 @@ export default function UserManagementPage() {
         });
         const result = await response.json();
         if (result.ok) {
-          fetchUsers(); // refresh data dari Jotai
+          loadUsers();
         }
       } catch (error) {
         console.error("Error deleting user:", error);
@@ -190,7 +190,7 @@ export default function UserManagementPage() {
         });
         const result = await response.json();
         if (result.ok) {
-          fetchUsers();
+          loadUsers();
         }
       } else if (formMode === "edit" && selectedUser) {
         const response = await fetch(`/api/user/${selectedUser.id_user}`, {
@@ -200,7 +200,7 @@ export default function UserManagementPage() {
         });
         const result = await response.json();
         if (result.ok) {
-          fetchUsers();
+          loadUsers();
         }
       }
       setIsFormOpen(false);

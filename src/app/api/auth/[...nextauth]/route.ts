@@ -74,7 +74,7 @@
 //         };
 //       }
 //       return session;
-//     }, 
+//     },
 //      async redirect({ url, baseUrl, user }) {
 //       if (user && "roles" in user) {
 //         const roles = user.roles as string[];
@@ -187,7 +187,6 @@ export const authOptions = {
           throw new Error("Akun tidak aktif");
         }
 
-
         // Generate login_token
         const loginToken = randomBytes(32).toString("hex");
         user.login_token = loginToken;
@@ -198,6 +197,7 @@ export const authOptions = {
           username: user.username,
           nama: user.nama,
           email: user.email,
+          no_telepon: user.no_telepon,
           roles: user.userRoles.map((ur) => ur.role.nama_role),
           loginToken,
         };
@@ -214,6 +214,7 @@ export const authOptions = {
         token.username = user.username;
         token.nama = user.nama;
         token.email = user.email;
+        token.no_telepon = user.no_telepon;
         token.roles = user.roles;
         token.loginToken = user.loginToken;
       }
@@ -226,6 +227,7 @@ export const authOptions = {
           username: token.username,
           nama: token.nama,
           email: token.email,
+          no_telepon: token.no_telepon,
           roles: token.roles,
           loginToken: token.loginToken,
         };
@@ -245,8 +247,12 @@ export const authOptions = {
     async signIn({ user }) {
       if (user?.id) {
         try {
-          const redirectUrl = user.roles.includes("admin") ? "/dashboard" : "/home";
-          await logActivity(user.id.toString(), "Pengguna Login", { url: redirectUrl });
+          const redirectUrl = user.roles.includes("admin")
+            ? "/dashboard"
+            : "/home";
+          await logActivity(user.id.toString(), "Pengguna Login", {
+            url: redirectUrl,
+          });
         } catch (err) {
           console.error("Failed to log login activity:", err);
         }
@@ -262,7 +268,9 @@ export const authOptions = {
           user.login_token = null;
           await userRepo.save(user);
         }
-        await logActivity(token.id.toString(), "Pengguna Logout", { url: "/logout" });
+        await logActivity(token.id.toString(), "Pengguna Logout", {
+          url: "/logout",
+        });
       } catch (err) {
         console.error("Failed to log logout activity:", err);
       }

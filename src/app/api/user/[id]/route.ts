@@ -22,23 +22,24 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-    // Cek login dulu
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // console.log("PUT params.id:", params.id);
+  const { params } = context;
+  const id = params.id;
   const body = await req.json();
-  const updated = await updateEntityById(User, "id_user", params.id, body);
+  const updated = await updateEntityById(User, "id_user", id, body);
   if (!updated.ok) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  await logActivity(params.id, "Pengguna Update Data", req);
+  try {
+    await logActivity(id, "Mengubah Data User", req);
+  } catch (err) {
+    console.error("logActivity PUT error:", err);
+  }
 
-  return NextResponse.json(updated.data);
+  return NextResponse.json({ ok: true, data: updated.data });
 }
 
 
