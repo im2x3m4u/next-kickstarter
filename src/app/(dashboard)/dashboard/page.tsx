@@ -1,110 +1,22 @@
-"use client"
+import AdminLayout from "@/app/components/layout/layout";
+import { redirect } from "next/navigation";
+// import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import DashboardContent from "./dashboardContent/page";
+import { protectPage } from "@/function/protectPage"
 
-import { Suspense, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAtomValue, useSetAtom } from "jotai"
-import dynamic from "next/dynamic"
-import AdminLayout from "@/app/components/layout/layout"
-import { StatsCard } from "@/app/components/dashboard/stats-card"
-import { DashboardSkeleton } from "@/app/components/loading-skeleton"
-import { Users, Shield, Activity } from "lucide-react"
-import { 
-  dashboardStatsAtom, 
-  dashboardActivitiesAtom, 
-  dashboardLoadingAtom, 
-  dashboardErrorAtom,
-  statsCardsAtom,
-  fetchDashboardDataAtom 
-} from "@/app/state/dashboardState"
+export default async function DashboardPage() {
+  // const session = await getServerSession(authOptions);
+   const session = await protectPage(["admin"])
 
-
-// Lazy load heavy components
-const RecentActivity = dynamic(() => import("@/app/components/dashboard/recent-activity").then(mod => ({ default: mod.RecentActivity })), {
-  loading: () => <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-})
-
-export default function DashboardPage() {
-  // Jotai state management
-  const stats = useAtomValue(dashboardStatsAtom)
-  const activities = useAtomValue(dashboardActivitiesAtom)
-  const loading = useAtomValue(dashboardLoadingAtom)
-  const statsCards = useAtomValue(statsCardsAtom)
-  const fetchDashboardData = useSetAtom(fetchDashboardDataAtom)
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tokenFromUrl = searchParams.get("token");
-
-
-  // Fetch dashboard data on component mount
-  // useEffect(() => {
-  //   fetchDashboardData()
-  // }, [fetchDashboardData])
-
-  useEffect(() => {
-    const token = tokenFromUrl || localStorage.getItem("token");
-    if (!token) {
-      router.replace("/login"); // redirect ke login
-    } else if (tokenFromUrl && !localStorage.getItem("token")) {
-      localStorage.setItem("token", tokenFromUrl); // simpan token dari URL
-    } else {
-      fetchDashboardData(); // baru fetch data kalau sudah login
-    }
-  }, [router, tokenFromUrl, fetchDashboardData]);
-
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="mt-1 text-gray-600">Loading dashboard data...</p>
-            </div>
-          </div>
-          <DashboardSkeleton />
-        </div>
-      </AdminLayout>
-    )
-  }
+  // Proteksi halaman di server
+  // if (!session || !session.user.roles.includes("admin")) {
+  //   redirect("/login");
+  // }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-1 text-gray-600">Welcome back! Here's what's happening with your system.</p>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {statsCards.map((stat, index) => {
-            const icons = [Users, Shield, Activity]
-            return (
-              <StatsCard
-                key={index}
-                title={stat.title}
-                value={stat.value}
-                icon={icons[index]}
-                change={stat.change}
-                changeType={stat.changeType}
-                description={stat.description}
-              />
-            )
-          })}
-        </div>
-
-        {/* Charts and Activity - Lazy loaded */}
-        <Suspense fallback={<DashboardSkeleton />}>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <RecentActivity activities={activities} />
-          </div>
-        </Suspense>
-
-
-      </div>
+    <AdminLayout username={session.user.username}>
+      <DashboardContent />
     </AdminLayout>
-  )
+  );
 }
