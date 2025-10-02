@@ -6,6 +6,7 @@ import { UserRole } from "@/entities/userRole";
 import { Role } from "@/entities/role";
 import { createEntity, getEntityById } from "@/function/entityHelp";
 import { sendEmail } from "@/lib/mailer";
+import { validateUserData } from "@/function/validasiHelp";
 
 export async function POST(req: Request) {
   try {
@@ -19,6 +20,10 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const check = validateUserData({ email, no_telepon });
+    if (check.length > 0)
+      return NextResponse.json({ check }, { status: 400 });
 
     // Cek username/email sudah ada
     const existingUser = await getEntityById(User, "username", username);

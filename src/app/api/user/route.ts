@@ -8,6 +8,7 @@ import { getAuthSession } from "@/function/authPermission";
 // import { authPermission } from "../../../function/authPermission";
 import { logActivity } from "@/function/activityHelp";
 import { getConnection } from "@/lib/typeorm";
+import { validateUserData } from "@/function/validasiHelp";
 
 export async function GET(req: NextRequest) {
   // Cek login dulu
@@ -40,7 +41,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { password, id_role } = body;
+  const { password, id_role, email, no_telepon } = body;
+
+   const check = validateUserData({ email, no_telepon });
+    if (check.length > 0)
+      return NextResponse.json({ check }, { status: 400 });
 
   if (!password)
     return NextResponse.json(

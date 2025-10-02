@@ -18,13 +18,13 @@ export function validateUserData(data: {
   email?: string;
   no_telepon?: string;
 }): string[] {
-  const errors: string[] = [];
+  const check: string[] = [];
 
   const emailErr = validateEmail(data.email);
-  if (emailErr) errors.push(emailErr);
+  if (emailErr) check.push(emailErr);
 
   const phoneErr = validatePhone(data.no_telepon);
-  if (phoneErr) errors.push(phoneErr);
+  if (phoneErr) check.push(phoneErr);
 
-  return errors; 
+  return check; 
 }
