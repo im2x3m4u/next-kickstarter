@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Home, Users, Shield, CalendarCheck } from "lucide-react"
+import { Home, Users, Shield } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -9,10 +9,9 @@ const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "User Management", url: "/users", icon: Users },
   { title: "Role Management", url: "/roles", icon: Shield },
-  { title: "Activity Management", url: "/activity", icon: CalendarCheck },
 ]
 
-export default function AppSidebar() {
+export default async function AppSidebar() {
   const pathname = usePathname()
   const [displayName, setDisplayName] = useState<string | null>(null)
   useEffect(() => {

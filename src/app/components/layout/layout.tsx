@@ -3,11 +3,12 @@ import dynamic from "next/dynamic";
 
 // Lazy load sidebar untuk mengurangi initial bundle
 const AppSidebar = dynamic(
-  () => import("./sidebar").then((mod) => ({ default: mod.AppSidebar })),
+  () => import("./sidebar"),
   {
     loading: () => <div className="w-64 bg-indigo-600 animate-pulse" />,
   }
 );
+
 
 const AppHeader = dynamic(
   () => import("./header").then((mod) => ({ default: mod.default })),
