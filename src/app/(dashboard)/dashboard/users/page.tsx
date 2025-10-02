@@ -33,12 +33,10 @@ import {
   statsAtom,
   fetchUsersAtom,
 } from "@/app/state/userState";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { LazyUserForm, LazyUserTable } from "@/app/utils/lazyComponents";
 import { fetchUsersService } from "@/app/lib/services/userService";
 
 export default function UserManagementPage() {
-  useAuthGuard();
   const [users, setUsers] = useAtom(usersAtom);
   const [filteredUsers, setFilteredUsers] = useAtom(filteredUsersAtom);
   const [loading, setLoading] = useAtom(loadingAtom); 

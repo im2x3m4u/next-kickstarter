@@ -41,11 +41,9 @@ import {
 } from "@/app/lib/services/roleService"; 
 
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { LazyRoleTable, LazyRoleForm } from "@/app/utils/lazyComponents";
 
 export default function RoleManagementPage() {
-  useAuthGuard();
   const [roles, setRoles] = useAtom(rolesAtom);
   const [filteredRoles, setFilteredRoles] = useAtom(filteredRolesAtom);
   const [loading, setLoading] = useAtom(loadingAtom);

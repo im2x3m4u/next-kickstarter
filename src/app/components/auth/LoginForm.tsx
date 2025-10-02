@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import { globalLoadingAtom } from "@/app/state/uiState";
 
 export default function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
   const [username, setUsername] = useAtom(usernameAtom);
   const [password, setPassword] = useAtom(passwordAtom);
   const [, setUser] = useAtom(userAtom);
@@ -61,7 +62,9 @@ export default function LoginForm() {
       localStorage.setItem("user", JSON.stringify(session.user));
 
       // Ketika user berhasil login
-      toast.success(`Login berhasil! Selamat datang, ${session.user.username}!`);
+      toast.success(
+        `Login berhasil! Selamat datang, ${session.user.username}!`
+      );
 
       // Redirect sesuai role
       const roles = session.user.roles as string[];

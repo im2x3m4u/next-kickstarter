@@ -1,23 +1,26 @@
-// layout/sidebar.tsx
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { Home, Users, Shield, CalendarCheck } from "lucide-react"
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { Home, Users, Shield, CalendarCheck } from "lucide-react";
 
 interface AppSidebarProps {
-  username?: string
+  username?: string;
 }
 
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "User Management", url: "/users", icon: Users },
-  { title: "Role Management", url: "/roles", icon: Shield },
-  { title: "Activity Management", url: "/activity", icon: CalendarCheck },
-]
+  { title: "User Management", url: "/dashboard/users", icon: Users },
+  { title: "Role Management", url: "/dashboard/roles", icon: Shield },
+  {
+    title: "Activity Management",
+    url: "/dashboard/activity",
+    icon: CalendarCheck,
+  },
+];
 
 export default function AppSidebar({ username }: AppSidebarProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <div className="w-64 min-h-screen text-white bg-gray-900">
@@ -29,7 +32,7 @@ export default function AppSidebar({ username }: AppSidebarProps) {
       </div>
       <nav className="px-4">
         <ul className="space-y-2">
-          {items.map(item => (
+          {items.map((item) => (
             <li key={item.title}>
               <Link
                 href={item.url}
@@ -47,5 +50,5 @@ export default function AppSidebar({ username }: AppSidebarProps) {
         </ul>
       </nav>
     </div>
-  )
+  );
 }
