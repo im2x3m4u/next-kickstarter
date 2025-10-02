@@ -1,8 +1,5 @@
-<<<<<<< HEAD
+
 "use client"
-=======
-"use client";
->>>>>>> 6ed6c6e9017387b2b519c57016e1dd733b2baae3
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
