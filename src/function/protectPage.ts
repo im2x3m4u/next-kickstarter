@@ -12,7 +12,9 @@ export async function protectPage(requiredRoles: string[] = []) {
 
   // cek role
   const userRoles = session.user.roles as string[];
-  const hasRole = requiredRoles.some((role) => userRoles.includes(role));
+  const hasRole =
+    requiredRoles.length === 0 ||
+    requiredRoles.some((role) => userRoles.includes(role));
 
   if (!hasRole) {
     // user tidak sesuai role -> redirect default
