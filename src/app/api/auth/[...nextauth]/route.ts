@@ -187,6 +187,7 @@ export const authOptions = {
           throw new Error("Akun tidak aktif");
         }
 
+
         // Generate login_token
         const loginToken = randomBytes(32).toString("hex");
         user.login_token = loginToken;

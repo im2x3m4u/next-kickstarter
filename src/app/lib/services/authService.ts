@@ -8,41 +8,41 @@ const getCsrfToken = async () => {
 };
 
 //LOGIN
-// export async function loginService(username: string, password: string) {
-//   const csrfToken = await getCsrfToken();
-//   const response = await fetch("/api/auth/callback/credentials", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "X-CSRF-Token": csrfToken,
-//     },
-//     credentials: "include",
-//     body: JSON.stringify({ username, password }),
-//   });
-
-//   const data = await response.json();
-
-//   if (!response.ok) {
-//     throw new Error(data.message || "Login gagal!");
-//   }
-
-//   return data;
-// }
-
-// LOGIN
 export async function loginService(username: string, password: string) {
-  const res = await signIn("credentials", {
-    redirect: false, // biar kita bisa handle redirect sendiri di login-form
-    username,
-    password,
+  const csrfToken = await getCsrfToken();
+  const response = await fetch("/api/auth/callback/credentials", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
+    },
+    credentials: "include",
+    body: JSON.stringify({ username, password }),
   });
 
-  if (res?.error) {
-    throw new Error(res.error);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Login gagal!");
   }
 
-  return res;
+  return data;
 }
+
+// LOGIN
+// export async function loginService(username: string, password: string) {
+//   const res = await signIn("credentials", {
+//     redirect: false, // biar kita bisa handle redirect sendiri di login-form
+//     username,
+//     password,
+//   });
+
+//   if (res?.error) {
+//     throw new Error(res.error);
+//   }
+
+//   return res;
+// }
 
 //REGISTER
 export async function registerService(

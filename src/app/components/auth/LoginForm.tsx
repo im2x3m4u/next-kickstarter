@@ -27,50 +27,59 @@ export default function LoginForm() {
   const [, setToken] = useAtom(tokenAtom);
   const [isLoading, setIsLoading] = useAtom(globalLoadingAtom);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const error = validateLogin(username, password);
-    if (error) {
-      toast.error(error);
+  const error = validateLogin(username, password);
+  if (error) {
+    toast.error(error);
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    // 🔹 Pakai NextAuth signIn
+    const result = await signIn("credentials", {
+      redirect: false, // biar kita kontrol manual redirect
+      username,
+      password,
+    });
+
+    console.log("SignIn Result:", result);
+
+    if (result?.error) {
+      toast.error("Login gagal!", { description: result.error });
       return;
     }
 
-    setIsLoading(true);
+    // 🔹 Ambil session setelah login sukses
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+    console.log("Session setelah login:", session);
 
-    try {
-      const res = await loginService(username, password);
+    setUser(session.user);
+    localStorage.setItem("user", JSON.stringify(session.user));
 
-      if (res?.ok) {
-        toast.success("Login berhasil! 🎉", {
-          description: `Selamat datang ${username}!`,
-        });
-
-        // Ambil session setelah login
-        const sessionRes = await fetch("/api/auth/session");
-        const session = await sessionRes.json();
-        setUser(session.user);
-        localStorage.setItem("user", JSON.stringify(session.user));
-
-        // Redirect berdasarkan role
-        const roles = session.user.roles as string[];
-        if (roles.includes("admin")) {
-          router.push("/dashboard");
-        } else if (roles.includes("user")) {
-          router.push("/home");
-        } else {
-          router.push("/login"); // fallback
-        }
-      }
-    } catch (err: any) {
-      toast.error("Login gagal!", {
-        description: err.message,
-      });
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+    // 🔹 Redirect sesuai role
+    const roles = session.user.roles as string[];
+    if (roles.includes("admin")) {
+      router.push("/dashboard");
+    } else if (roles.includes("user")) {
+      router.push("/home");
+    } else {
+      router.push("/login");
     }
-  };
+
+  } catch (err: any) {
+    toast.error("Login gagal!", { description: err.message });
+    console.error(err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
   return (
     <div>
       <form className="space-y-4" onSubmit={handleLogin}>
