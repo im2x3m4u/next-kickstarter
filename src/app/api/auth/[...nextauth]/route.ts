@@ -215,6 +215,7 @@ export const authOptions = {
         token.nama = user.nama;
         token.email = user.email;
         token.no_telepon = user.no_telepon;
+
         token.roles = user.roles;
         token.loginToken = user.loginToken;
       }

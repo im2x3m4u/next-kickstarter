@@ -2,6 +2,7 @@ import { getAllEntities, createEntity } from "../../../function/entityHelp";
 import { Role } from "../../../entities/role";
 import { getAuthSession } from "@/function/authPermission";
 import { NextResponse } from "next/server";
+import { logActivity } from "@/function/activityHelp";
 
 export async function GET(req: Request) {
   // Cek login dulu
@@ -29,11 +30,16 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   // Cek login dulu
   const session = await getAuthSession();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   const body = await req.json();
   const newRole = await createEntity(Role, body);
-  return Response.json(newRole, { status: 201 });
+
+  try {
+    await logActivity(session.user.id_user, "Menambah Data Role", req);
+  } catch (err) {
+    console.error("logActivity POST error:", err);
+  }
+
+  return NextResponse.json(newRole, { status: 201 });
 }

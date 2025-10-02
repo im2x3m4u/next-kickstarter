@@ -1,3 +1,4 @@
+// src/function/activityHelp.ts
 import { getConnection } from "@/lib/typeorm";
 import { Activity } from "@/entities/activity";
 import { User } from "@/entities/user";
@@ -8,36 +9,36 @@ export async function logActivity(
   activity: string,
   req?: NextRequest | { url?: string }
 ) {
-  const ds = await getConnection();
-  const userRepo = ds.getRepository(User);
-  const activityRepo = ds.getRepository(Activity);
+  try {
+    const ds = await getConnection();
+    const userRepo = ds.getRepository(User);
+    const activityRepo = ds.getRepository(Activity);
 
-  const user = await userRepo.findOne({ where: { id_user: userId } });
-  if (!user) return;
-
-  let location = "Unknown";
-
-  if (req) {
-    try {
-      if ("nextUrl" in req && req.nextUrl) {
-        // dari NextRequest
-        location = req.nextUrl.href; // full URL
-      } else if ("url" in req && req.url) {
-        // fallback dari req.url
-        location = req.url;
-      }
-    } catch {
-      location = "Unknown";
+    const user = await userRepo.findOne({ where: { id_user: userId } });
+    if (!user) {
+      console.warn("logActivity: User not found", userId);
+      return;
     }
+
+    let location = "Unknown";
+    if (req) {
+      try {
+        if ("nextUrl" in req && req.nextUrl) location = req.nextUrl.href;
+        else if ("url" in req && req.url) location = req.url;
+      } catch {
+        location = "Unknown";
+      }
+    }
+
+    const record = activityRepo.create({
+      user,
+      activity,
+      location,
+    });
+
+    await activityRepo.save(record);
+  } catch (err) {
+    console.error("logActivity error:", err);
   }
-
-  const record = activityRepo.create({
-    user,
-    activity,
-    location,
-  });
-
-  await activityRepo.save(record);
 }
-
 
