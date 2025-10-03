@@ -138,7 +138,7 @@ export const fetchRolesAtom = atom(null, async (get, set) => {
   set(loadingAtom, true);
   set(errorAtom, null);
   try {
-    const { fetchRolesService } = await import("../services/roleService");
+    const { fetchRolesService} = await import("../lib/services/roleService")
     const result = await fetchRolesService();
     set(rolesAtom, result.data || []);
     set(filteredRolesAtom, result.data || []);

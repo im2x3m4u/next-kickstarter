@@ -1,18 +1,32 @@
 import { Activity } from "@/app/state/activityState";
 
-export const fetchActivities = async (): Promise<Activity[]> => {
+export const fetchActivities = async (
+  page: number,
+  pageSize: number,
+  sortBy: string,
+  sortOrder: "ASC" | "DESC",
+  username?: string
+): Promise<{ data: Activity[]; total: number }> => {
   try {
-    const res = await fetch("http://localhost:3000/api/activity");
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+      sortBy,
+      sortOrder,
+    });
+
+    if (username) params.append("username", username);
+
+    const res = await fetch(`/api/activity?${params.toString()}`);
 
     if (!res.ok) {
       throw new Error("Failed to fetch activities");
     }
 
-    const data: Activity[] = await res.json();
-    return data;
+    return res.json();
   } catch (err) {
     console.error("Error fetching activities:", err);
-    return [];
+    return { data: [], total: 0 };
   }
 };
 

@@ -63,11 +63,32 @@ export const statsAtom = atom((get) => {
   return { total, active, inactive };
 });
 
+// Pagination state
+export const pageAtom = atom<number>(1);
+export const pageSizeAtom = atom<number>(10);
+
+// Sorting state
+export const sortByAtom = atom<string>("nama");
+export const sortOrderAtom = atom<"ASC" | "DESC">("ASC");
+
 // Action Atoms (pakai service)
-export const fetchUsersAtom = atom(null, async (_get, set) => {
+export const fetchUsersAtom = atom(null, async (get, set) => {
   try {
     set(loadingAtom, true);
-    const data = await fetchUsersService();
+    const search = get(searchQueryAtom);
+    const page = get(pageAtom);
+    const pageSize = get(pageSizeAtom);
+    const sortBy = get(sortByAtom);
+    const sortOrder = get(sortOrderAtom);
+
+    const data = await fetchUsersService(
+      search,
+      page,
+      pageSize,
+      sortBy,
+      sortOrder
+    );
+
     if (data.ok) {
       set(usersAtom, data.data);
       set(filteredUsersAtom, data.data);

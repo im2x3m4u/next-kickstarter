@@ -3,23 +3,44 @@ import type { User, ApiResponse } from "@/app/state/userState";
 const BASE_URL = "/api/user";
 
 // Get all users
-export async function fetchUsersService(): Promise<ApiResponse> {
+export async function fetchUsersService(
+  search: string = "",
+  page: number = 1,
+  pageSize: number = 10,
+  sortBy: string = "nama",
+  sortOrder: "ASC" | "DESC" = "ASC"
+): Promise<ApiResponse> {
   try {
-    const res = await fetch(BASE_URL, {
+    const q = new URLSearchParams({
+      search,
+      page: String(page),
+      pageSize: String(pageSize),
+      sortBy,
+      sortOrder,
+    });
+
+    const res = await fetch(`${BASE_URL}?${q.toString()}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Fetch failed:", res.status, errorText);
-      throw new Error(`Failed to fetch users: ${res.status} ${errorText}`);
+    const text = await res.text(); // baca text dulu supaya kita bisa log apa pun yang dikembalikan
+    let data: any;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = text;
     }
 
-    return res.json();
+    if (!res.ok) {
+      console.error("fetchUsersService error response:", res.status, data);
+      throw new Error(`Failed to fetch users: ${res.status} ${typeof data === "string" ? data : JSON.stringify(data)}`);
+    }
+
+    return data as ApiResponse;
   } catch (err) {
-    console.error("fetchUsersService error:", err);
+    console.error("fetchUsersService thrown error:", err);
     throw err;
   }
 }

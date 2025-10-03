@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useCallback } from "react";
 import { useAtom } from "jotai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Toolbar } from "@/app/components/user-management/role-toolbar";
+import { UserToolbar } from "@/app/components/user-management/user-toolbar";
 import { Users, Plus, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
@@ -31,7 +31,10 @@ import {
   roleFilterAtom,
   statusFilterAtom,
   statsAtom,
-  fetchUsersAtom,
+  pageAtom,
+  pageSizeAtom,
+  sortByAtom,
+  sortOrderAtom,
 } from "@/app/state/userState";
 import { LazyUserForm, LazyUserTable } from "@/app/utils/lazyComponents";
 import { fetchUsersService } from "@/app/lib/services/userService";
@@ -40,7 +43,7 @@ export default function UserManagementPage() {
   const [users, setUsers] = useAtom(usersAtom);
   const [filteredUsers, setFilteredUsers] = useAtom(filteredUsersAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
-  const [error] = useAtom(errorAtom);
+  const [error, setError] = useAtom(errorAtom);
   const [isFormOpen, setIsFormOpen] = useAtom(isFormOpenAtom);
   const [formMode, setFormMode] = useAtom(formModeAtom);
   const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
@@ -49,49 +52,58 @@ export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const [roleFilter, setRoleFilter] = useAtom(roleFilterAtom);
   const [statusFilter, setStatusFilter] = useAtom(statusFilterAtom);
+  const [page, setPage] = useAtom(pageAtom);
+  const [pageSize, setPageSize] = useAtom(pageSizeAtom);
+  const [sortBy, setSortBy] = useAtom(sortByAtom);
+  const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
 
   // stats otomatis dihitung dari usersAtom
   const [stats] = useAtom(statsAtom);
 
-  const loadUsers = async () => {
+  // load data dari server dengan pagination & sorting
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchUsersService(); // ambil data dari service
-      setUsers(data.data); // set ke usersAtom
-      setFilteredUsers(data.data); // agar filtered juga ter-update
+      const data = await fetchUsersService(
+        searchQuery,
+        page,
+        pageSize,
+        sortBy,
+        sortOrder
+      );
+      setUsers(data.data);
+      setFilteredUsers(data.data);
     } catch (err: any) {
       setError(err.message || "Failed to fetch users");
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    searchQuery,
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+    setUsers,
+    setFilteredUsers,
+    setError,
+    setLoading,
+  ]);
 
-  // Load users on component mount
+  // load tiap kali dependency berubah
   useEffect(() => {
     loadUsers();
-  }, []);
-  // Filter and search logic
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    filterUsers(query, roleFilter, statusFilter);
-  };
+  }, [
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+    searchQuery,
+    roleFilter,
+    statusFilter,
+  ]);
 
-  const handleFilterRole = (role: string) => {
-    setRoleFilter(role);
-    filterUsers(searchQuery, role, statusFilter);
-  };
-
-  const handleFilterStatus = (status: string) => {
-    setStatusFilter(status);
-    filterUsers(searchQuery, roleFilter, status);
-  };
-
-  const handleAddRole = () => {
-    setSelectedRole(undefined);
-    setFormMode("create");
-    setIsFormOpen(true);
-  };
-
+  // Filter tambahan (di sisi client)
   const filterUsers = (
     searchQuery: string,
     roleFilter: string,
@@ -99,7 +111,6 @@ export default function UserManagementPage() {
   ) => {
     let filtered = users;
 
-    // Apply search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(
         (user) =>
@@ -110,7 +121,6 @@ export default function UserManagementPage() {
       );
     }
 
-    // Apply role filter
     if (roleFilter !== "all") {
       filtered = filtered.filter((user) => {
         if (roleFilter === "admin") {
@@ -126,7 +136,6 @@ export default function UserManagementPage() {
       });
     }
 
-    // Apply status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((user) => {
         if (statusFilter === "active") return user.is_aktif === 1;
@@ -138,7 +147,22 @@ export default function UserManagementPage() {
     setFilteredUsers(filtered);
   };
 
-  // CRUD operations
+  // Trigger filter tiap kali state berubah
+  useEffect(() => {
+    filterUsers(searchQuery, roleFilter, statusFilter);
+  }, [users, searchQuery, roleFilter, statusFilter]);
+
+  // Sorting handler
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(field);
+      setSortOrder("ASC");
+    }
+  };
+
+  // CRUD
   const handleAddUser = () => {
     setSelectedUser(null);
     setFormMode("create");
@@ -183,43 +207,28 @@ export default function UserManagementPage() {
   const handleFormSubmit = async (userData: Partial<User>) => {
     try {
       if (formMode === "create") {
-        const response = await fetch("/api/user", {
+        await fetch("/api/user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(userData),
         });
-        const result = await response.json();
-        if (result.ok) {
-          loadUsers();
-        }
       } else if (formMode === "edit" && selectedUser) {
-        const response = await fetch(`/api/user/${selectedUser.id_user}`, {
+        await fetch(`/api/user/${selectedUser.id_user}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(userData),
         });
-        const result = await response.json();
-        if (result.ok) {
-          loadUsers();
-        }
       }
+      loadUsers();
       setIsFormOpen(false);
     } catch (error) {
       console.error("Error saving user:", error);
     }
   };
 
-  const handleExport = () => {
-    console.log("Exporting users...");
-  };
-
-  const handleImport = () => {
-    console.log("Importing users...");
-  };
-
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
@@ -232,20 +241,18 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Toolbar and Stats */}
-      <Toolbar
+      {/* Toolbar */}
+      <UserToolbar
         onAddUser={handleAddUser}
-        onSearch={handleSearch}
-        onFilterRole={handleFilterRole}
-        onFilterStatus={handleFilterStatus}
-        onExport={handleExport}
-        onImport={handleImport}
+        onSearch={(q) => setSearchQuery(q)}
+        onFilterRole={(role) => setRoleFilter(role)}
+        onFilterStatus={(status) => setStatusFilter(status)}
         totalUsers={stats.total}
         activeUsers={stats.active}
         inactiveUsers={stats.inactive}
       />
 
-      {/* Data Table */}
+      {/* Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
@@ -255,41 +262,53 @@ export default function UserManagementPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-              <p className="text-gray-500">Loading users...</p>
-            </div>
+            <div className="text-center py-8">Loading...</div>
           ) : (filteredUsers?.length ?? 0) > 0 ? (
-            <Suspense
-              fallback={
-                <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
-              }
-            >
-              <LazyUserTable
-                users={filteredUsers}
-                onEdit={handleEditUser}
-                onDelete={handleDeleteUser}
-                onView={handleViewUser}
-              />
-            </Suspense>
+            <>
+              <Suspense fallback={<div>Loading Table...</div>}>
+                <LazyUserTable
+                  users={filteredUsers}
+                  onEdit={handleEditUser}
+                  onDelete={handleDeleteUser}
+                  onView={handleViewUser}
+                  onSort={handleSort}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                />
+              </Suspense>
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </Button>
+                <span>Page {page}</span>
+                <Button onClick={() => setPage((p) => p + 1)}>Next</Button>
+
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="ml-4 border rounded p-1"
+                >
+                  <option value={5}>5 / page</option>
+                  <option value={10}>10 / page</option>
+                  <option value={20}>20 / page</option>
+                </select>
+              </div>
+            </>
           ) : (
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No users found
-              </h3>
-              <Button onClick={handleAddRole}>
-                <Plus className="h-4 w-4" /> Add First Role
-              </Button>
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500 text-center">No users found</div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* User Form Modal */}
-      <Suspense
-        fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg" />}
-      >
+      {/* Form */}
+      <Suspense fallback={<div>Loading Form...</div>}>
         <LazyUserForm
           user={selectedUser}
           isOpen={isFormOpen}
@@ -299,7 +318,7 @@ export default function UserManagementPage() {
         />
       </Suspense>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -309,7 +328,7 @@ export default function UserManagementPage() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this user? This action cannot be
-              undone. The user will be permanently removed from the system.
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

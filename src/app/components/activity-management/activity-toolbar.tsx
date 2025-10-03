@@ -53,7 +53,7 @@ export function ActivityToolbar({
               placeholder="Search activity..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-gray-400"
             />
           </div>
 

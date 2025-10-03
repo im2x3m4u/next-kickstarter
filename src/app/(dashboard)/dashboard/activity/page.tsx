@@ -1,60 +1,67 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useAtom } from "jotai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { CalendarCheck } from "lucide-react";
 import {
   activityAtom,
   loadingActivityAtom,
   searchActivityQueryAtom,
+  pageAtom,
+  pageSizeAtom,
+  sortByAtom,
+  sortOrderAtom,
 } from "@/app/state/activityState";
 import { fetchActivities } from "@/app/lib/services/activityService";
 import { ActivityTable } from "@/app/components/activity-management/activity-table";
 import { ActivityToolbar } from "@/app/components/activity-management/activity-toolbar";
-import DownloadPdf from "@/app/components/DownloadPdf";
 
 export default function ActivityManagementPage() {
-  const userId = "5e513b0c-165b-4367-b51f-1ac869b2f42d";
   const [activities, setActivities] = useAtom(activityAtom);
   const [loading, setLoading] = useAtom(loadingActivityAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchActivityQueryAtom);
+  const [page, setPage] = useAtom(pageAtom);
+  const [pageSize, setPageSize] = useAtom(pageSizeAtom);
+  const [sortBy, setSortBy] = useAtom(sortByAtom);
+  const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
+
+  const loadActivities = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await fetchActivities(page, pageSize, sortBy, sortOrder);
+      setActivities(result.data);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, sortBy, sortOrder, setActivities, setLoading]);
 
   useEffect(() => {
-    const loadActivities = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchActivities();
-        setActivities(data);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadActivities();
-  }, [setActivities, setLoading]);
+  }, [loadActivities]);
 
-  // Filter activities
-  const filteredActivities = activities.filter(
-    (act) =>
-      act.activity.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      act.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      act.user.nama.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // search filter
+  const filteredActivities = activities.filter((act) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      act.activity.toLowerCase().includes(query) ||
+      act.location.toLowerCase().includes(query) ||
+      act.user?.username?.toLowerCase().includes(query)
+    );
+  });
 
   // Toolbar handlers
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
+  const handleSearch = (query: string) => setSearchQuery(query);
 
-  const handleExport = () => {
-    console.log("Exporting activities...");
-    // bisa bikin generate CSV di sini
-  };
-
-  const handleImport = () => {
-    console.log("Importing activities...");
-    // bisa buka modal upload file di sini
+  // Sorting handler
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(field);
+      setSortOrder("ASC");
+    }
   };
 
   return (
@@ -74,7 +81,7 @@ export default function ActivityManagementPage() {
         pdfColumns={[
           { header: "Activity", key: "activity" },
           { header: "Location", key: "location" },
-          { header: "User", key: "user.nama" },
+          { header: "User", key: "user.username" },
           { header: "Created At", key: "created_at" },
         ]}
         pdfTitle="Activity Report"
@@ -91,18 +98,43 @@ export default function ActivityManagementPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-              <p className="text-gray-500">Loading activities...</p>
-            </div>
+            <div className="text-center py-8">Loading activities...</div>
           ) : filteredActivities.length > 0 ? (
-            <ActivityTable activities={filteredActivities} />
+            <>
+              <ActivityTable
+                activities={filteredActivities}
+                onSort={handleSort}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+              />
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </Button>
+                <span>Page {page}</span>
+                <Button onClick={() => setPage((p) => p + 1)}>Next</Button>
+
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="ml-4 border rounded p-1"
+                >
+                  <option value={5}>5 / page</option>
+                  <option value={10}>10 / page</option>
+                  <option value={20}>20 / page</option>
+                </select>
+              </div>
+            </>
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              <CalendarCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No roles found
-              </h3>
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500 text-center">
+                No activities found
+              </div>
             </div>
           )}
         </CardContent>

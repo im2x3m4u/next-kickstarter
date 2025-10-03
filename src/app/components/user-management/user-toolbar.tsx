@@ -41,7 +41,7 @@ interface ToolbarProps {
   inactiveUsers: number
 }
 
-export function Toolbar({
+export function UserToolbar({
   onAddUser,
   onSearch,
   onFilterRole,
@@ -124,7 +124,7 @@ export function Toolbar({
                   placeholder="Search users..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-gray-500"
                 />
               </div>
               
