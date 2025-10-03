@@ -1,21 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getConnection } from "@/lib/typeorm";
+import { getAllEntities } from "@/function/entityHelp";
 import { Activity } from "@/entities/activity";
 
 export async function GET(req: NextRequest) {
   try {
-    const ds = await getConnection();
-    const repo = ds.getRepository(Activity);
+    const url = new URL(req.url);
 
-    const activities = await repo.find({
-      order: { created_at: "DESC" },
-      take: 10,
-      relations: ["user"], 
-    });
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
+    const sortBy = (url.searchParams.get("sortBy") ||
+      "created_at") as keyof Activity;
+    const sortOrder = (
+      url.searchParams.get("sortOrder") || "ASC"
+    ).toUpperCase() as "ASC" | "DESC";
+    const usernameFilter = url.searchParams.get("username") || "";
 
-    return NextResponse.json(activities);
+    const result = await getAllEntities<Activity>(
+      Activity,
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+      undefined, // searchField di entity
+      undefined, // search value di entity
+      ["user"], // relations
+      usernameFilter
+        ? { relation: "user", column: "username", value: usernameFilter }
+        : undefined // search di relasi jika ada filter
+    );
+
+    return NextResponse.json(result);
   } catch (err) {
     console.error("Activity GET error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -7,9 +7,12 @@ export async function getAllEntities<T>(
   entityClass: EntityTarget<T>,
   page: number = 1,
   pageSize: number = 10,
-  orderField: keyof T,
+  orderField: keyof T = "created_at" as keyof T,
+  sortOrder: "ASC" | "DESC" = "ASC",
   searchField?: keyof T,
-  search?: string
+  search?: string,
+  relations: string[] = [],
+  searchInRelation?: { relation: string; column: string; value: string }
 ) {
   const ds = await getConnection();
   const repo = ds.getRepository(entityClass);
@@ -24,11 +27,27 @@ export async function getAllEntities<T>(
     .skip((safePage - 1) * safePageSize)
     .take(safePageSize);
 
-  if (search && searchField) {
-    qb.where(`t.${String(searchField)} LIKE :search`, {
-      search: `%${search}%`,
-    });
+  // Tambahkan relations jika ada
+  relations.forEach((rel) => {
+    qb.leftJoinAndSelect(`t.${rel}`, rel);
+  });
+
+  // Search di relasi
+  if (searchInRelation?.value) {
+    qb.andWhere(
+      `${searchInRelation.relation}.${searchInRelation.column} LIKE :search`,
+      { search: `%${searchInRelation.value}%` }
+    );
   }
+    // Search di entity
+  if (search && searchField) {
+    qb.andWhere(`t.${String(searchField)} LIKE :search`, { search: `%${search}%` });
+  }
+  // Sorting
+  qb.orderBy(`t.${String(orderField)}`, sortOrder);
+
+  // Pagination
+  qb.skip((safePage - 1) * safePageSize).take(safePageSize);
 
   const [data, total] = await qb.getManyAndCount();
 

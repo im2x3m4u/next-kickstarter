@@ -6,7 +6,6 @@ export async function protectPage(requiredRoles: string[] = []) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    // belum login -> ke halaman login
     redirect("/login");
   }
 
@@ -17,7 +16,7 @@ export async function protectPage(requiredRoles: string[] = []) {
     requiredRoles.some((role) => userRoles.includes(role));
 
   if (!hasRole) {
-    // user tidak sesuai role -> redirect default
+    // user tidak sesuai role redirect default
     if (userRoles.includes("admin")) redirect("/dashboard");
     if (userRoles.includes("user")) redirect("/home");
     redirect("/login"); // fallback

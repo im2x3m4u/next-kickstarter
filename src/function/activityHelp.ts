@@ -16,7 +16,7 @@ export async function logActivity(
 
     const user = await userRepo.findOne({ where: { id_user: userId } });
     if (!user) {
-      console.warn("logActivity: User not found", userId);
+      console.warn("logActivity not found", userId);
       return;
     }
 

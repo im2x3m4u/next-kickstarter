@@ -18,21 +18,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { search, page, pageSize } = Object.fromEntries(
-    req.nextUrl.searchParams
-  );
+  const url = new URL(req.url);
+  const search = url.searchParams.get("search") || "";
+  const page = parseInt(url.searchParams.get("page") || "1");
+  const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
+  const sortBy = (url.searchParams.get("sortBy") || "nama") as keyof User;
+  const sortOrder = (url.searchParams.get("sortOrder") || "ASC").toUpperCase() as "ASC" | "DESC";
 
   const result = await getAllEntities<User>(
-    User,
-    Number(page),
-    Number(pageSize),
-    "nama",
-    "username",
-    search || ""
-  );
+      User,
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,      // ✅ posisi benar
+      "username",     // ✅ searchField
+      search          // ✅ search value
+    );
+
 
   return NextResponse.json(result);
 }
+
 
 export async function POST(req: NextRequest) {
   // Cek login
