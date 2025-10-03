@@ -1,0 +1,28 @@
+meta {
+  name: Verifikasi
+  type: http
+  seq: 24
+}
+
+get {
+  url: http://localhost:3000/api/user/verifikasi?token=cc614157d719e91c8300ffa81839e5de4f5c81c1ec6de04d6ded8100bdbb5519
+  body: json
+  auth: bearer
+}
+
+params:query {
+  token: cc614157d719e91c8300ffa81839e5de4f5c81c1ec6de04d6ded8100bdbb5519
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer <token>
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoiZThmNmMxZjUtOTFkNC0xMWYwLWJjYjctNTg2YzI1OTI3NjU1IiwidXNlcm5hbWUiOiJzZXR5YWtjIiwibmFtYSI6InNldHlhIGtyaXN0ZW5keSBjaWFuanVyIiwiaWF0IjoxNzU4Nzc5NzI5LCJleHAiOjE3NTg3ODMzMjl9.ufCPqFsYzZZEspwvxc0gFDF3QXT2Ux1cxXV_qc3PMvc
+}
+
+settings {
+  encodeUrl: true
+}
