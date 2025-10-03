@@ -32,9 +32,12 @@ export const dashboardLoadingAtom = atom<boolean>(true);
 
 export const dashboardErrorAtom = atom<string | null>(null);
 
+export const rawUsersAtom = atom<any[]>([]);
+
 // Derived atoms for stats cards
 export const statsCardsAtom = atom((get) => {
   const stats = get(dashboardStatsAtom);
+  const dailyActivity = get(dailyUserActivityAtom);
 
   return [
     {
@@ -51,6 +54,13 @@ export const statsCardsAtom = atom((get) => {
       changeType: "neutral" as const,
       description: "Available role types",
     },
+    {
+      title: "User Activity Today",
+      value: dailyActivity[0]?.count.toString() || "0",
+      change: `${dailyActivity[0]?.date || "-"}`,
+      changeType: "neutral" as const,
+      description: "Total user activities today",
+    },
   ];
 });
 
@@ -60,10 +70,11 @@ export const fetchDashboardDataAtom = atom(null, async (get, set) => {
     set(dashboardLoadingAtom, true);
     set(dashboardErrorAtom, null);
 
-    const { stats, activities } = await getDashboardData();
+    const { stats, activities, rawUsers  } = await getDashboardData();
 
     set(dashboardStatsAtom, stats);
     set(dashboardActivitiesAtom, activities);
+    set(rawUsersAtom, rawUsers);
   } catch (error: any) {
     console.error("Error fetching dashboard data:", error);
     set(dashboardErrorAtom, "Failed to load dashboard data");
@@ -71,3 +82,24 @@ export const fetchDashboardDataAtom = atom(null, async (get, set) => {
     set(dashboardLoadingAtom, false);
   }
 });
+
+// Derived atom untuk menghitung total aktivitas per hari
+export const dailyUserActivityAtom = atom((get) => {
+  const rawUsers = get(rawUsersAtom);
+  if (!rawUsers || rawUsers.length === 0) return [];
+
+  const activityMap: Record<string, number> = {};
+  rawUsers.forEach((user) => {
+    const date = user.updated_at
+      ? new Date(user.updated_at).toLocaleDateString("id-ID")
+      : new Date().toLocaleDateString("id-ID");
+    activityMap[date] = (activityMap[date] || 0) + 1;
+  });
+
+  const result = Object.entries(activityMap)
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  return result;
+});
+

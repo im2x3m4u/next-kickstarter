@@ -96,6 +96,7 @@
 
 // src/app/state/roleState.ts
 import { atom } from "jotai";
+import { fetchRolesService } from "../lib/services/roleService";
 
 export interface Role {
   id_role: string;
@@ -120,11 +121,14 @@ export const selectedRoleAtom = atom<Role | undefined>(undefined);
 export const deleteDialogOpenAtom = atom<boolean>(false);
 export const roleToDeleteAtom = atom<string | null>(null);
 
-// Search and filter atoms
+// Search, filter & pagination
 export const searchQueryAtom = atom<string>("");
-export const statusFilterAtom = atom<string>("all");
+export const statusFilterAtom = atom<"all" | "active" | "inactive">("all");
+export const pageAtom = atom<number>(1);
+export const pageSizeAtom = atom<number>(10);
+export const totalAtom = atom<number>(0);
 
-// Derived atoms
+// Derived atom untuk stats
 export const statsAtom = atom((get) => {
   const roles = get(rolesAtom);
   const total = roles.length;
@@ -133,15 +137,50 @@ export const statsAtom = atom((get) => {
   return { total, active, inactive };
 });
 
-// Fetch roles atom (optional, bisa dipakai jika ingin Jotai async atom)
+// Derived atom untuk membangun query params
+export const rolesQueryAtom = atom((get) => ({
+  page: get(pageAtom),
+  pageSize: get(pageSizeAtom),
+  search: get(searchQueryAtom),
+  status: get(statusFilterAtom),
+  sortBy: "nama_role",
+  sortOrder: "ASC",
+}));
+
+// Fetch roles dari backend
 export const fetchRolesAtom = atom(null, async (get, set) => {
   set(loadingAtom, true);
   set(errorAtom, null);
+
+  const search = get(searchQueryAtom);
+  const page = get(pageAtom);
+  const pageSize = get(pageSizeAtom);
+  const status = get(statusFilterAtom);
+  const sortBy = "nama_role";
+  const sortOrder = "ASC";
+
   try {
-    const { fetchRolesService} = await import("../lib/services/roleService")
-    const result = await fetchRolesService();
-    set(rolesAtom, result.data || []);
-    set(filteredRolesAtom, result.data || []);
+    const data = await fetchRolesService({
+      search,
+      page,
+      pageSize,
+      status,
+      sortBy,
+      sortOrder,
+    });
+
+    let rolesData: Role[] = data.data || [];
+
+    // Filter status jika service belum handle
+    if (status !== "all") {
+      rolesData = rolesData.filter((role) =>
+        status === "active" ? role.is_aktif === 1 : role.is_aktif === 0
+      );
+    }
+
+    set(rolesAtom, rolesData);
+    set(filteredRolesAtom, rolesData);
+    set(totalAtom, data.total || rolesData.length);
   } catch (err: any) {
     set(errorAtom, err.message || "Failed to fetch roles");
     console.error(err);

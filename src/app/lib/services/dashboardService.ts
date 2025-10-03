@@ -89,12 +89,8 @@ export async function getDashboardData(): Promise<{
         ? "Created new account"
         : "Viewed dashboard",
     time: u.updated_at
-      ? new Date(u.updated_at).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      : new Date().toLocaleDateString("id-ID"),
+      ? new Date(u.updated_at).toISOString()
+      : new Date().toISOString(),
   }));
 
   return { stats, activities, rawUsers: users, rawRoles: roles };
