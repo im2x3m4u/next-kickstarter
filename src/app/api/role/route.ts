@@ -11,26 +11,34 @@ export async function GET(req: Request) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { search, page, pageSize } = Object.fromEntries(
-    new URL(req.url).searchParams
-  );
+
+  const url = new URL(req.url);
+  const search = url.searchParams.get("search") || "";
+  const page = parseInt(url.searchParams.get("page") || "1");
+  const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
+  const sortBy = (url.searchParams.get("sortBy") || "nama_role") as keyof Role;
+  const sortOrder = (
+    url.searchParams.get("sortOrder") || "ASC"
+  ).toUpperCase() as "ASC" | "DESC";
 
   const result = await getAllEntities<Role>(
     Role,
-    Number(page),
-    Number(pageSize),
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
     "nama_role",
-    "nama_role",
-    search || ""
+    search
   );
 
-  return Response.json(result);
+  return NextResponse.json(result);
 }
 
 export async function POST(req: Request) {
   // Cek login dulu
   const session = await getAuthSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const newRole = await createEntity(Role, body);

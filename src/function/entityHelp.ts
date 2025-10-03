@@ -39,9 +39,11 @@ export async function getAllEntities<T>(
       { search: `%${searchInRelation.value}%` }
     );
   }
-    // Search di entity
+  // Search di entity
   if (search && searchField) {
-    qb.andWhere(`t.${String(searchField)} LIKE :search`, { search: `%${search}%` });
+    qb.andWhere(`t.${String(searchField)} LIKE :search`, {
+      search: `%${search}%`,
+    });
   }
   // Sorting
   qb.orderBy(`t.${String(orderField)}`, sortOrder);

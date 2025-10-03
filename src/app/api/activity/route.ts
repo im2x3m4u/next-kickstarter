@@ -21,12 +21,12 @@ export async function GET(req: NextRequest) {
       pageSize,
       sortBy,
       sortOrder,
-      undefined, // searchField di entity
-      undefined, // search value di entity
-      ["user"], // relations
+      undefined, 
+      undefined, 
+      ["user"], 
       usernameFilter
         ? { relation: "user", column: "username", value: usernameFilter }
-        : undefined // search di relasi jika ada filter
+        : undefined 
     );
 
     return NextResponse.json(result);

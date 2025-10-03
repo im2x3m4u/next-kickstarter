@@ -23,22 +23,22 @@ export async function GET(req: NextRequest) {
   const page = parseInt(url.searchParams.get("page") || "1");
   const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
   const sortBy = (url.searchParams.get("sortBy") || "nama") as keyof User;
-  const sortOrder = (url.searchParams.get("sortOrder") || "ASC").toUpperCase() as "ASC" | "DESC";
+  const sortOrder = (
+    url.searchParams.get("sortOrder") || "ASC"
+  ).toUpperCase() as "ASC" | "DESC";
 
   const result = await getAllEntities<User>(
-      User,
-      page,
-      pageSize,
-      sortBy,
-      sortOrder,      // ✅ posisi benar
-      "username",     // ✅ searchField
-      search          // ✅ search value
-    );
-
+    User,
+    page,
+    pageSize,
+    sortBy,
+    sortOrder, 
+    "username", 
+    search 
+  );
 
   return NextResponse.json(result);
 }
-
 
 export async function POST(req: NextRequest) {
   // Cek login
@@ -49,9 +49,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { password, id_role, email, no_telepon } = body;
 
-   const check = validateUserData({ email, no_telepon });
-    if (check.length > 0)
-      return NextResponse.json({ check }, { status: 400 });
+  const check = validateUserData({ email, no_telepon });
+  if (check.length > 0) return NextResponse.json({ check }, { status: 400 });
 
   if (!password)
     return NextResponse.json(

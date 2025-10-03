@@ -8,12 +8,12 @@ import { getAuthSession } from "@/function/authPermission";
 import { NextResponse } from "next/server";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-    // Cek login dulu
-    const session = await getAuthSession();
-  
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // Cek login dulu
+  const session = await getAuthSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const userRole = await getEntityById(UserRole, "id_userRole", params.id, [
     "user",
     "role",
@@ -26,12 +26,12 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-    // Cek login dulu
-    const session = await getAuthSession();
-  
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // Cek login dulu
+  const session = await getAuthSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const body = await req.json();
   const updated = await updateEntityById(
     UserRole,

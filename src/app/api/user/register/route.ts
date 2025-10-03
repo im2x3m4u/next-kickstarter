@@ -22,8 +22,7 @@ export async function POST(req: Request) {
     }
 
     const check = validateUserData({ email, no_telepon });
-    if (check.length > 0)
-      return NextResponse.json({ check }, { status: 400 });
+    if (check.length > 0) return NextResponse.json({ check }, { status: 400 });
 
     // Cek username/email sudah ada
     const existingUser = await getEntityById(User, "username", username);
@@ -90,11 +89,11 @@ export async function POST(req: Request) {
       email,
       "Verifikasi Akun Anda",
       `
-  <p>Halo ${nama},</p>
-  <p>Terima kasih telah mendaftar. Silakan klik link di bawah untuk memverifikasi akun Anda:</p>
-  <p><a href="${verifyUrl}">${verifyUrl}</a></p>
-  <p>Jika tidak mendaftar, abaikan email ini.</p>
-  `
+      <p>Halo ${nama},</p>
+      <p>Terima kasih telah mendaftar. Silakan klik link di bawah untuk memverifikasi akun Anda:</p>
+      <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+      <p>Jika tidak mendaftar, abaikan email ini.</p>
+      `
     );
 
     return NextResponse.json({

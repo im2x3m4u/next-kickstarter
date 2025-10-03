@@ -45,11 +45,12 @@ export async function PUT(
 
 //DELETE
 export async function DELETE(
-  req: Request, 
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   const session = await getAuthSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const deleted = await deleteEntityById(Role, "id_role", params.id);
   if (!deleted) return new Response("Role not found", { status: 404 });
@@ -62,4 +63,3 @@ export async function DELETE(
 
   return new Response("Deleted successfully");
 }
-
