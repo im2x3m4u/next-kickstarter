@@ -37,8 +37,6 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
-      // Panggil API logout
-      // await logoutService();
       await signOut({ redirect: false });
 
       // Bersihkan state & localStorage
@@ -89,13 +87,12 @@ export default function Profile() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {/* Logout dengan trigger manual */}
           <DropdownMenuItem
             className="text-red-600 hover:bg-red-50 focus:bg-red-50 cursor-pointer"
-            onClick={() => setOpen(true)} // buka alert dialog
+            onClick={() => setOpen(true)}
           >
             <LogOut
-              // onClick={handleLogout}
+              onClick={handleLogout}
               className="mr-2 h-4 w-4 text-red-600"
             />
             Logout
