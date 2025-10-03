@@ -6,7 +6,7 @@ export interface RawUser {
   updated_at?: string;
   [k: string]: any;
 }
-    
+
 export interface RawRole {
   id_role: string;
   nama_role: string;
@@ -41,7 +41,6 @@ export async function getDashboardData(): Promise<{
   rawUsers: RawUser[];
   rawRoles: RawRole[];
 }> {
-  // parallel fetch
   const [usersResp, rolesResp] = await Promise.allSettled([
     fetchJson("/api/user"),
     fetchJson("/api/role"),
@@ -58,6 +57,7 @@ export async function getDashboardData(): Promise<{
     ? rolesData
     : rolesData?.data || rolesData?.value || [];
 
+  // proses stats dan activities...
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.is_aktif === 1).length;
   const adminUsers = users.filter((u) =>
@@ -77,8 +77,7 @@ export async function getDashboardData(): Promise<{
     userUsers,
   };
 
-  // Build recent activities (defensive)
-  const activities = users.slice(0, 6).map((u, idx) => ({
+  const activities: DashboardActivity[] = users.slice(0, 6).map((u, idx) => ({
     id: u.id_user ?? String(idx),
     user: u.nama ?? "Unknown",
     action:
@@ -90,12 +89,8 @@ export async function getDashboardData(): Promise<{
         ? "Created new account"
         : "Viewed dashboard",
     time: u.updated_at
-      ? new Date(u.updated_at).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      : new Date().toLocaleDateString("id-ID"),
+      ? new Date(u.updated_at).toISOString()
+      : new Date().toISOString(),
   }));
 
   return { stats, activities, rawUsers: users, rawRoles: roles };
