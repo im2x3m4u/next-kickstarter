@@ -1,4 +1,3 @@
-// Loading skeleton components untuk better UX
 export function DashboardSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">

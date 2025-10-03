@@ -98,6 +98,7 @@ export default function ProfileUser() {
             onChange={(e) =>
               setPasswordData((d) => ({ ...d, newPassword: e.target.value }))
             }
+            className="text-black placeholder-gray-400"
           />
           <Input
             type={showConfirmPassword ? "text" : "password"}

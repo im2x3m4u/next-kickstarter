@@ -26,8 +26,8 @@ export function PasswordForm({
                 value={passwordData[key]}
                 onChange={(e) => setPasswordData({ ...passwordData, [key]: e.target.value })}
                 placeholder={key === "newPassword" ? "Masukkan password baru" : "Konfirmasi password baru"}
-                className="pr-10"
-              />
+                className="pr-10 text-black"
+              />  
               <button
                 type="button"
                 onClick={() => key === "newPassword" ? setShowNewPassword(!showNewPassword) : setShowConfirmPassword(!showConfirmPassword)}

@@ -93,7 +93,11 @@ export default function ProfileClient({ session }: { session: any }) {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink
-                  href={sessionUser.roles?.includes("admin") ? "/dashboard" : "/home"}
+                  href={
+                    sessionUser.roles?.includes("admin")
+                      ? "/dashboard"
+                      : "/home"
+                  }
                 >
                   {sessionUser.roles?.includes("admin") ? "Dashboard" : "Home"}
                 </BreadcrumbLink>
@@ -129,7 +133,9 @@ export default function ProfileClient({ session }: { session: any }) {
                   </div>
                   <Input
                     value={draft.nama}
-                    onChange={(e) => setDraft({ ...draft, nama: e.target.value })}
+                    onChange={(e) =>
+                      setDraft({ ...draft, nama: e.target.value })
+                    }
                     className="text-center text-lg text-gray-900"
                     placeholder="Nama"
                   />
@@ -184,18 +190,24 @@ export default function ProfileClient({ session }: { session: any }) {
                         <p className="text-[11px] uppercase tracking-wider text-gray-500">
                           Email
                         </p>
-                        {isEdit && <Edit3 className="h-3 w-3 text-indigo-500" />}
+                        {isEdit && (
+                          <Edit3 className="h-3 w-3 text-indigo-500" />
+                        )}
                       </div>
                       {isEdit ? (
                         <Input
                           type="email"
                           value={draft.email}
-                          onChange={(e) => setDraft({ ...draft, email: e.target.value })}
+                          onChange={(e) =>
+                            setDraft({ ...draft, email: e.target.value })
+                          }
                           placeholder="email@example.com"
                           className="text-gray-900"
                         />
                       ) : (
-                        <p className="text-gray-900 font-medium">{user?.email ?? "-"}</p>
+                        <p className="text-gray-900 font-medium">
+                          {user?.email ?? "-"}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -212,17 +224,23 @@ export default function ProfileClient({ session }: { session: any }) {
                         <p className="text-[11px] uppercase tracking-wider text-gray-500">
                           No. Telepon
                         </p>
-                        {isEdit && <Edit3 className="h-3 w-3 text-indigo-500" />}
+                        {isEdit && (
+                          <Edit3 className="h-3 w-3 text-indigo-500" />
+                        )}
                       </div>
                       {isEdit ? (
                         <Input
                           value={draft.no_telepon}
-                          onChange={(e) => setDraft({ ...draft, no_telepon: e.target.value })}
+                          onChange={(e) =>
+                            setDraft({ ...draft, no_telepon: e.target.value })
+                          }
                           placeholder="08xxxxxxxxxx"
                           className="text-gray-900"
                         />
                       ) : (
-                        <p className="text-gray-900 font-medium">{user?.no_telepon ?? "-"}</p>
+                        <p className="text-gray-900 font-medium">
+                          {user?.no_telepon ?? "-"}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -237,7 +255,9 @@ export default function ProfileClient({ session }: { session: any }) {
               <div className="p-6 mt-3 bg-yellow-50 border border-yellow-200 rounded-lg mx-6 mb-4">
                 <div className="flex items-center gap-2 mb-4">
                   <Lock className="h-5 w-5 text-yellow-600" />
-                  <h3 className="text-lg font-semibold text-yellow-800">Ubah Password</h3>
+                  <h3 className="text-lg font-semibold text-yellow-800">
+                    Ubah Password
+                  </h3>
                 </div>
                 <div className="space-y-4">
                   <div>
@@ -248,16 +268,25 @@ export default function ProfileClient({ session }: { session: any }) {
                       <Input
                         type={showNewPassword ? "text" : "password"}
                         value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            newPassword: e.target.value,
+                          })
+                        }
                         placeholder="Masukkan password baru (min. 6 karakter)"
-                        className="pr-10"
+                        className="pr-10 text-gray-800"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                       >
-                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showNewPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -269,24 +298,42 @@ export default function ProfileClient({ session }: { session: any }) {
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
                         value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                         placeholder="Konfirmasi password baru"
-                        className="pr-10"
+                        className="pr-10 text-gray-800"
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                       >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <Button onClick={cancelPasswordEdit} variant="outline" className="rounded-lg border-gray-300 hover:border-gray-400">
+                    <Button
+                      onClick={cancelPasswordEdit}
+                      variant="outline"
+                      className="rounded-lg border-gray-300 hover:border-gray-400"
+                    >
                       Batal
                     </Button>
-                    <Button onClick={savePassword} className="rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white">
+                    <Button
+                      onClick={savePassword}
+                      className="rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white"
+                    >
                       Simpan Password
                     </Button>
                   </div>
@@ -298,19 +345,34 @@ export default function ProfileClient({ session }: { session: any }) {
             <div className="flex flex-wrap items-center justify-end gap-3 p-6">
               {!isEdit && !showPasswordForm ? (
                 <>
-                  <Button onClick={startEdit} variant="outline" className="gap-2 rounded-lg border-gray-200 hover:border-indigo-300 hover:text-indigo-700">
+                  <Button
+                    onClick={startEdit}
+                    variant="outline"
+                    className="gap-2 rounded-lg border-gray-200 hover:border-indigo-300 hover:text-indigo-700"
+                  >
                     <PencilLine className="h-4 w-4" /> Edit Profil
                   </Button>
-                  <Button onClick={startPasswordEdit} variant="outline" className="gap-2 rounded-lg border-yellow-200 hover:border-yellow-300 hover:text-yellow-700">
+                  <Button
+                    onClick={startPasswordEdit}
+                    variant="outline"
+                    className="gap-2 rounded-lg border-yellow-200 hover:border-yellow-300 hover:text-yellow-700"
+                  >
                     <Lock className="h-4 w-4" /> Ubah Password
                   </Button>
                 </>
               ) : isEdit ? (
                 <div className="flex gap-2">
-                  <Button onClick={cancelEdit} variant="outline" className="rounded-lg">
+                  <Button
+                    onClick={cancelEdit}
+                    variant="outline"
+                    className="rounded-lg"
+                  >
                     Batal
                   </Button>
-                  <Button onClick={saveEdit} className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white">
+                  <Button
+                    onClick={saveEdit}
+                    className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                  >
                     Simpan
                   </Button>
                 </div>
