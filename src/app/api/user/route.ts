@@ -5,10 +5,10 @@ import { Role } from "@/entities/role";
 import { encryptPassword } from "@/lib/crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthSession } from "@/function/authPermission";
-// import { authPermission } from "../../../function/authPermission";
 import { logActivity } from "@/function/activityHelp";
 import { getConnection } from "@/lib/typeorm";
 import { validateUserData } from "@/function/validasiHelp";
+
 
 export async function GET(req: NextRequest) {
   // Cek login dulu
