@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/option";
 import { redirect } from "next/navigation";
 
 export async function protectPage(requiredRoles: string[] = []) {
