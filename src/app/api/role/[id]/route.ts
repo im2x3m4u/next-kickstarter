@@ -22,17 +22,17 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  // Cek login dulu
-  const session = await getAuthSession();
+  const { id } = await context.params;
 
+  const session = await getAuthSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
-  const updated = await updateEntityById(Role, "id_role", params.id, body);
+  const updated = await updateEntityById(Role, "id_role", id, body);
   if (!updated) return new Response("Role not found", { status: 404 });
 
   try {
@@ -40,19 +40,21 @@ export async function PUT(
   } catch (err) {
     console.error("logActivity PUT error:", err);
   }
-  return Response.json(updated);
+
+  return NextResponse.json(updated);
 }
 
 //DELETE
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getAuthSession();
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const deleted = await deleteEntityById(Role, "id_role", params.id);
+  const deleted = await deleteEntityById(Role, "id_role", id);
   if (!deleted) return new Response("Role not found", { status: 404 });
 
   try {

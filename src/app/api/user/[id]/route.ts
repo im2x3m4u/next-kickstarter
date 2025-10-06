@@ -28,15 +28,12 @@ export async function GET(
 //PUT (Update data user)
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getAuthSession();
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  // console.log("PUT params.id:", params.id);
-  const { params } = context;
-  const id = params.id;
   const body = await req.json();
   const updated = await updateEntityById(User, "id_user", id, body);
   if (!updated.ok)
@@ -51,17 +48,16 @@ export async function PUT(
   return NextResponse.json({ ok: true, data: updated.data });
 }
 
+//DELETE
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const session = await getAuthSession();
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  console.log("DELETE params.id:", params.id);
-
-  const deleted = await deleteEntityById(User, "id_user", params.id);
+  const deleted = await deleteEntityById(User, "id_user", id);
   if (!deleted)
     return NextResponse.json({ error: "User not found" }, { status: 404 });
 
