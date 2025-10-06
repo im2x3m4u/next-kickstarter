@@ -4,6 +4,7 @@ import {
   userAtom,
   profileDraftAtom,
   profileEditModeAtom,
+  AuthUser,
 } from "@/app/state/authState";
 import { toast } from "sonner";
 
@@ -21,21 +22,23 @@ export function useProfile() {
     confirmPassword: "",
   });
 
-  // Sync user from localStorage if not in atom
+  // --- Sync user from localStorage if not in atom ---
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!user) {
       const raw = localStorage.getItem("user");
       if (raw) {
         try {
-          const parsed = JSON.parse(raw);
+          const parsed: AuthUser = JSON.parse(raw);
           setUser(parsed);
-        } catch {}
+        } catch (error) {
+          console.error("Failed to parse user from localStorage:", error);
+        }
       }
     }
   }, [user, setUser]);
 
-  // Sync draft whenever user changes
+  // --- Sync draft whenever user changes ---
   useEffect(() => {
     if (user) {
       setDraft({
@@ -47,7 +50,7 @@ export function useProfile() {
     }
   }, [user, setDraft]);
 
-  // Handlers
+  // --- Handlers ---
   const startEdit = () => {
     if (!user) return;
     setDraft({
@@ -61,6 +64,7 @@ export function useProfile() {
 
   const cancelEdit = () => setIsEdit(false);
   const startPasswordEdit = () => setShowPasswordForm(true);
+
   const cancelPasswordEdit = () => {
     setShowPasswordForm(false);
     setPasswordData({
@@ -70,10 +74,11 @@ export function useProfile() {
     });
   };
 
+  // --- Save profile changes ---
   const saveEdit = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/user/${user.id}`, {
+      const res = await fetch(`/api/user/${user.id_user}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,30 +87,58 @@ export function useProfile() {
           no_telepon: draft.no_telepon,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok)
-        return toast.error(data.message || "Gagal menyimpan profil");
 
-      setUser(data.data);
-      localStorage.setItem("user", JSON.stringify(data.data));
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        return toast.error(data.message || "Gagal menyimpan profil");
+      }
+
+      // Pastikan data sesuai dengan tipe AuthUser
+      const updatedUser: AuthUser = {
+        id_user: data.data.id_user,
+        username: data.data.username,
+        nama: data.data.nama,
+        email: data.data.email,
+        no_telepon: data.data.no_telepon,
+        roles:
+          user?.roles ??
+          [
+            {
+              id_userRole: "",
+              id_role: "",
+              role_name: "user",
+            },
+          ],
+      };
+
+      console.log("Updated user:", updatedUser);
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success("Profil berhasil diperbarui");
       setIsEdit(false);
-    } catch {
+    } catch (error) {
+      console.error(error);
       toast.error("Terjadi kesalahan. Coba lagi.");
     }
   };
 
+  // --- Save new password ---
   const savePassword = async () => {
     if (!user) return;
+
     if (!passwordData.newPassword || !passwordData.confirmPassword) {
       toast.error("Password baru dan konfirmasi harus diisi");
       return;
     }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("Password baru dan konfirmasi tidak sama");
       return;
     }
+
     if (passwordData.newPassword.length < 6) {
       toast.error("Password baru minimal 6 karakter");
       return;
@@ -117,12 +150,16 @@ export function useProfile() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: passwordData.newPassword }),
       });
+
       const data = await res.json();
-      if (!res.ok || !data.ok)
+      if (!res.ok || !data.ok) {
         return toast.error(data.message || "Gagal mengubah password");
+      }
+
       toast.success("Password berhasil diubah");
       cancelPasswordEdit();
-    } catch {
+    } catch (error) {
+      console.error(error);
       toast.error("Terjadi kesalahan. Coba lagi.");
     }
   };

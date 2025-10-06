@@ -3,7 +3,6 @@
 import { useEffect, useCallback } from "react";
 import { useAtom } from "jotai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { CalendarCheck } from "lucide-react";
 import {
   activityAtom,
@@ -17,13 +16,21 @@ import {
 import { fetchActivities } from "@/app/lib/services/activityService";
 import { ActivityTable } from "@/app/components/activity-management/activity-table";
 import { ActivityToolbar } from "@/app/components/activity-management/activity-toolbar";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 export default function ActivityManagementPage() {
   const [activities, setActivities] = useAtom(activityAtom);
   const [loading, setLoading] = useAtom(loadingActivityAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchActivityQueryAtom);
   const [page, setPage] = useAtom(pageAtom);
-  const [pageSize, setPageSize] = useAtom(pageSizeAtom);
+  const [pageSize] = useAtom(pageSizeAtom);
   const [sortBy, setSortBy] = useAtom(sortByAtom);
   const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
 
@@ -41,7 +48,7 @@ export default function ActivityManagementPage() {
     loadActivities();
   }, [loadActivities]);
 
-  // search filter
+  // Filter search
   const filteredActivities = activities.filter((act) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -51,10 +58,16 @@ export default function ActivityManagementPage() {
     );
   });
 
-  // Toolbar handlers
+  // Pagination setup
+  const totalItems = filteredActivities.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const paginatedData = filteredActivities.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   const handleSearch = (query: string) => setSearchQuery(query);
 
-  // Sorting handler
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
@@ -66,7 +79,7 @@ export default function ActivityManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
           <CalendarCheck className="h-8 w-8" />
@@ -88,46 +101,138 @@ export default function ActivityManagementPage() {
         pdfFileName="activity_report.pdf"
       />
 
-      {/* Activity Table */}
+      {/* Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
-            <CalendarCheck className="h-5 w-5 " />
+            <CalendarCheck className="h-5 w-5" />
             Activity ({filteredActivities.length})
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           {loading ? (
             <div className="text-center py-8">Loading activities...</div>
-          ) : filteredActivities.length > 0 ? (
+          ) : paginatedData.length > 0 ? (
             <>
               <ActivityTable
-                activities={filteredActivities}
+                activities={paginatedData}
                 onSort={handleSort}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
               />
 
               {/* Pagination */}
-              <div className="flex justify-between items-center mt-4">
-                <Button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Prev
-                </Button>
-                <span>Page {page}</span>
-                <Button onClick={() => setPage((p) => p + 1)}>Next</Button>
+              <div className="flex justify-center items-center mt-6">
+                <Pagination>
+                  <PaginationContent className="flex items-center space-x-1">
+                    {/* Previous */}
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        className={`cursor-pointer ${
+                          page === 1
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
+                        }`}
+                      />
+                    </PaginationItem>
 
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="ml-4 border rounded p-1"
-                >
-                  <option value={5}>5 / page</option>
-                  <option value={10}>10 / page</option>
-                  <option value={20}>20 / page</option>
-                </select>
+                    {/* Page Numbers */}
+                    {(() => {
+                      const maxVisible = 5;
+                      const startPage = Math.max(
+                        1,
+                        page - Math.floor(maxVisible / 2)
+                      );
+                      const endPage = Math.min(
+                        totalPages,
+                        startPage + maxVisible - 1
+                      );
+                      const pages = [];
+
+                      if (startPage > 1) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink
+                              onClick={() => setPage(1)}
+                              className="text-black"
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                        if (startPage > 2) {
+                          pages.push(
+                            <span
+                              key="start-ellipsis"
+                              className="px-1 text-gray-500"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                      }
+
+                      for (let i = startPage; i <= endPage; i++) {
+                        pages.push(
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              onClick={() => setPage(i)}
+                              isActive={page === i}
+                              className={`${
+                                page === i
+                                  ? "bg-black text-white hover:bg-gray-800"
+                                  : "hover:bg-gray-100 text-black"
+                              }`}
+                            >
+                              {i}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+
+                      if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                          pages.push(
+                            <span
+                              key="end-ellipsis"
+                              className="px-1 text-gray-500"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink
+                              onClick={() => setPage(totalPages)}
+                              className="text-black"
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+
+                      return pages;
+                    })()}
+
+                    {/* Next */}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        className={`cursor-pointer ${
+                          page === totalPages
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
+                        }`}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             </>
           ) : (

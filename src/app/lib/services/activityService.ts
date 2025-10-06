@@ -20,10 +20,17 @@ export const fetchActivities = async (
     const res = await fetch(`/api/activity?${params.toString()}`);
 
     if (!res.ok) {
+      const errText = await res.text();
+      console.error("fetchActivities error response:", res.status, errText);
       throw new Error("Failed to fetch activities");
     }
 
-    return res.json();
+    const json = await res.json();
+
+    return {
+      data: json.data || [],
+      total: json.pagination?.total || 0,
+    };
   } catch (err) {
     console.error("Error fetching activities:", err);
     return { data: [], total: 0 };

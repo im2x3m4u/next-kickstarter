@@ -31,7 +31,7 @@ export default function AppSidebar({ username, role = "user" }: AppSidebarProps)
   const items = sidebarItems[role];
 
   return (
-    <div className="w-64 min-h-screen text-white bg-gray-900">
+    <div className="w-64 min-h-screen text-white bg-gray-900 mt-12">
       <div className="p-6">
         <h2 className="text-xl font-bold text-white" suppressHydrationWarning>
           {username ? `Halo, ${username}!` : "Halo, Pengguna!"}
