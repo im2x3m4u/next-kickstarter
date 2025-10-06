@@ -43,7 +43,7 @@ export function ActivityToolbar({
   };
 
   return (
-    <Card>
+    <Card className="bg-white">
       <CardContent className="p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* Search */}
@@ -61,7 +61,7 @@ export function ActivityToolbar({
           <Button
             onClick={handleExport}
             variant="outline"
-            className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
           >
             <Download className="mr-2 h-4 w-4 " />
             Export PDF

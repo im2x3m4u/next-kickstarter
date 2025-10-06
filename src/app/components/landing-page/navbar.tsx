@@ -43,7 +43,7 @@ export default function Navbar() {
           <Button
             asChild
             size="sm"
-            className="bg-white hover:bg-gray-900 text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
+            className="bg-white hover:bg-[#AD49E1] text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
           >
             <Link href="/login">Login</Link>
           </Button>

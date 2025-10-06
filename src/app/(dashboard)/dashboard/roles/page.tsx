@@ -36,10 +36,7 @@ import {
   Role,
 } from "@/app/state/roleState";
 
-import {
-  LazyRoleTable,
-  LazyRoleForm,
-} from "@/app/utils/lazyComponents";
+import { LazyRoleTable, LazyRoleForm } from "@/app/utils/lazyComponents";
 
 export default function RoleManagementPage() {
   const [roles] = useAtom(rolesAtom);
@@ -101,7 +98,9 @@ export default function RoleManagementPage() {
   const confirmDelete = async () => {
     if (!roleToDelete) return;
     try {
-      const { deleteRoleService } = await import("@/app/lib/services/roleService");
+      const { deleteRoleService } = await import(
+        "@/app/lib/services/roleService"
+      );
       await deleteRoleService(roleToDelete);
       fetchRoles();
     } catch (err: any) {
@@ -142,7 +141,7 @@ export default function RoleManagementPage() {
       />
 
       {/* Table */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Shield className="h-5 w-5" /> Roles ({roles.length})
@@ -155,7 +154,11 @@ export default function RoleManagementPage() {
               <p className="text-gray-500">Loading roles...</p>
             </div>
           ) : roles.length > 0 ? (
-            <Suspense fallback={<div className="animate-pulse bg-gray-200 h-64 rounded-lg" />}>
+            <Suspense
+              fallback={
+                <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+              }
+            >
               <LazyRoleTable
                 roles={roles}
                 onEdit={handleEditRole}
@@ -197,7 +200,9 @@ export default function RoleManagementPage() {
       </Card>
 
       {/* Form */}
-      <Suspense fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg" />}>
+      <Suspense
+        fallback={<div className="animate-pulse bg-gray-200 h-96 rounded-lg" />}
+      >
         <LazyRoleForm
           role={selectedRole}
           isOpen={isFormOpen}
@@ -222,22 +227,22 @@ export default function RoleManagementPage() {
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" /> Delete Role
+              <AlertCircle className="h-5 w-5 text-red-500 hover:text-red-700 " /> <p className="text-black"> Hapus Role</p> 
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-black">
               Apakah kamu yakin ingin menghapus role?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete Role
+              Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

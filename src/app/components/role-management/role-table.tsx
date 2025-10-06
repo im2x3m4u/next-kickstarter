@@ -83,25 +83,25 @@ export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("nama_role")}
             >
               Role Name
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("is_aktif")}
             >
               Status
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("created_at")}
             >
               Created At
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("updated_at")}
             >
               Updated At
@@ -154,7 +154,7 @@ export function RoleTable({ roles, onEdit, onDelete, onView }: RoleTableProps) {
                       className="text-red-600 hover:bg-red-50 focus:bg-red-50"
                     >
                       <Trash2 className="mr-2 h-4 w-4 text-red-600" />
-                      Delete Role
+                      Hapus Role
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

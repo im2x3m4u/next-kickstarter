@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, LogOut, User } from "lucide-react";
+import {  LogOut, User, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -64,7 +64,10 @@ export default function Profile() {
             className="flex items-center gap-2 p-2"
             suppressHydrationWarning
           >
-            <div className="h-10 w-10 rounded-full border flex items-center justify-center">
+            <div
+              className="h-10 w-10 rounded-full border flex items-center justify-center 
+                  transition-colors bg-white hover:text-white"
+            >
               👤
             </div>
           </Button>
@@ -102,17 +105,19 @@ export default function Profile() {
 
       {/* AlertDialog */}
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white text-black">
           <AlertDialogHeader>
-            <AlertDialogTitle>Konfirmasi Logout</AlertDialogTitle>
+            <AlertCircle className="h-5 w-5 text-red-500 hover:text-red-700 " />{" "}
+            <p className="text-black"> Konfirmasi Logout</p>
             <AlertDialogDescription>
               Apakah Anda yakin ingin keluar dari akun ini?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel className="text-white">Batal</AlertDialogCancel>
             <Button
               variant="destructive"
+              className="hover:bg-red-700"
               onClick={async () => {
                 const res = await logout(); // panggil hook logout
                 console.log("Hasil logout:", res);

@@ -31,12 +31,12 @@ export default function AppSidebar({ username, role = "user" }: AppSidebarProps)
   const items = sidebarItems[role];
 
   return (
-    <div className="w-64 min-h-screen text-white bg-gray-900 mt-12">
+    <div className="w-64 min-h-screen text-black bg-white mt-12">
       <div className="p-6">
-        <h2 className="text-xl font-bold text-white" suppressHydrationWarning>
+        <h2 className="text-xl font-bold text-black" suppressHydrationWarning>
           {username ? `Halo, ${username}!` : "Halo, Pengguna!"}
         </h2>
-        <p className="italic text-gray-300 capitalize">{role}</p>
+        <p className="italic text-gray-700 capitalize">{role}</p>
       </div>
       <nav className="px-4">
         <ul className="space-y-2">
@@ -46,8 +46,8 @@ export default function AppSidebar({ username, role = "user" }: AppSidebarProps)
                 href={item.url}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   pathname === item.url
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    ? "bg-[#AD49E1] text-white"
+                    : "text-gray-700 hover:bg-[#C68FE6] hover:text-white"
                 }`}
               >
                 <item.icon className="w-5 h-5" />

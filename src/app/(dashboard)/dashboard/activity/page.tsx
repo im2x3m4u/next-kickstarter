@@ -102,7 +102,7 @@ export default function ActivityManagementPage() {
       />
 
       {/* Table */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <CalendarCheck className="h-5 w-5" />
@@ -182,7 +182,7 @@ export default function ActivityManagementPage() {
                               isActive={page === i}
                               className={`${
                                 page === i
-                                  ? "bg-black text-white hover:bg-gray-800"
+                                  ? "bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
                                   : "hover:bg-gray-100 text-black"
                               }`}
                             >

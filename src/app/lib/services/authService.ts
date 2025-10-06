@@ -1,12 +1,5 @@
 import { signIn, signOut } from "next-auth/react";
 
-// Token CSRF
-const getCsrfToken = async () => {
-  const res = await fetch("/api/auth/csrf");
-  const data = await res.json();
-  return data.csrfToken;
-};
-
 // LOGIN
 export async function loginService(username: string, password: string) {
   const res = await signIn("credentials", {
@@ -77,7 +70,7 @@ export async function registerService(
     throw new Error(data.error || data.message || "Registrasi gagal!");
   }
 
-  console.log("Registrasi berhasil:", data); // LOG berhasil
+  console.log("Registrasi berhasil:", data);
   return data;
 }
 

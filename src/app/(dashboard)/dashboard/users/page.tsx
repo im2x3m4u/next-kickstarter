@@ -252,7 +252,7 @@ export default function UserManagementPage() {
       />
 
       {/* Table */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Users className="h-5 w-5" />
@@ -277,7 +277,6 @@ export default function UserManagementPage() {
               </Suspense>
 
               {/* Pagination */}
-              {/* Pagination */}
               <div className="flex justify-center items-center mt-6">
                 <Pagination>
                   <PaginationContent className="flex items-center space-x-1">
@@ -286,7 +285,9 @@ export default function UserManagementPage() {
                       <PaginationPrevious
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         className={`cursor-pointer ${
-                          page === 1 ? "pointer-events-none opacity-50 text-black" : ""
+                          page === 1
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
                         }`}
                       />
                     </PaginationItem>
@@ -332,7 +333,7 @@ export default function UserManagementPage() {
                               isActive={page === i}
                               className={`${
                                 page === i
-                                  ? "bg-black text-white hover:bg-gray-800"
+                                  ? "bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
                                   : "hover:bg-gray-100 text-black"
                               }`}
                             >
@@ -403,24 +404,23 @@ export default function UserManagementPage() {
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              Delete User
+              <AlertCircle className="h-5 w-5 text-red-500 hover:text-red-7000" />{" "}
+              <p className="text-black">Hapus User</p>
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this user? This action cannot be
-              undone.
+            <AlertDialogDescription className="text-black">
+              Apakah kamu yakin ingin menghapus role?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete User
+              Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

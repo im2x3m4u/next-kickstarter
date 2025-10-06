@@ -15,7 +15,7 @@ export default function NavbarUser() {
         <div className="flex items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-xl font-bold text-blue-600">
+            <Link href="/" className="text-xl font-bold">
               Talent Start
             </Link>
           </div>
