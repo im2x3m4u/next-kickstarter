@@ -23,14 +23,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User as UserIcon, Shield, CalendarCheck } from "lucide-react";
 import type { User } from "@/app/state/userState";
 
-// Definisikan tipe untuk Role agar lebih jelas
 interface Role {
   id_role: string;
   nama_role: string;
 }
 
 interface UserFormProps {
-  user?: User;
+  user?: User | null;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (userData: Partial<User>) => void;
@@ -44,7 +43,6 @@ export function UserForm({
   onSubmit,
   mode,
 }: UserFormProps) {
-  // Fungsi untuk mendapatkan state form awal/default
   const getInitialFormData = () => ({
     nama: "",
     username: "",
@@ -52,37 +50,32 @@ export function UserForm({
     no_telepon: "",
     password: "",
     is_aktif: 1,
-    id_role: [] as string[], // Pastikan tipe data adalah array of string
+    id_role: [] as string[],
   });
 
   const [formData, setFormData] = useState(getInitialFormData());
   const [roles, setRoles] = useState<Role[]>([]);
   const isReadOnly = mode === "view";
 
-  // -- EFEK 1: Mengisi form saat dialog dibuka atau user berubah --
   useEffect(() => {
     if (isOpen) {
       if ((mode === 'edit' || mode === 'view') && user) {
-        // Mode Edit/View: Isi form dengan data user yang ada
-        // Ambil id_role dari relasi user.userRoles
         const roleId = user.userRoles?.[0]?.role?.id_role;
         setFormData({
           nama: user.nama || "",
           username: user.username || "",
           email: user.email || "",
           no_telepon: user.no_telepon || "",
-          password: "", // Password tidak pernah di-pre-fill
+          password: "",
           is_aktif: user.is_aktif ?? 1,
           id_role: roleId ? [roleId] : [],
         });
       } else {
-        // Mode Create: Reset form ke kondisi awal
         setFormData(getInitialFormData());
       }
     }
   }, [isOpen, user, mode]);
 
-  // -- EFEK 2: Mengambil daftar role dari API saat dialog dibuka --
   useEffect(() => {
     if (isOpen) {
       const fetchRoles = async () => {
@@ -102,20 +95,22 @@ export function UserForm({
     }
   }, [isOpen]);
 
-  // Handler untuk input biasa
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handler untuk dropdown role (sudah diperbaiki)
   const handleRoleChange = (value: string) => {
-    // `value` adalah string UUID dari role, tidak perlu parseInt
     setFormData((prev) => ({ ...prev, id_role: [value] }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const submissionData: Partial<User> = { ...formData };
+    // Jangan kirim password kosong saat edit
+    if (mode === 'edit' && !formData.password) {
+      delete (submissionData as any).password;
+    }
+    onSubmit(submissionData);
   };
 
   const getTitle = () => {
@@ -147,8 +142,6 @@ export function UserForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Fields: Nama, Username, Email, No Telepon */}
-                {/* ... (tidak ada perubahan di sini) ... */}
                  <div className="space-y-2">
                   <Label htmlFor="nama" className="text-gray-900">
                     Full Name *
@@ -176,7 +169,7 @@ export function UserForm({
                     placeholder="Enter username"
                     className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
                     required
-                    disabled={isReadOnly}
+                    disabled={isReadOnly || mode === 'edit'}
                   />
                 </div>
               </div>
@@ -214,24 +207,23 @@ export function UserForm({
                 </div>
               </div>
 
-              {mode === "create" && (
+              {mode !== 'view' && (
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-gray-900">
-                    Password *
+                    Password {mode === 'create' ? '*' : '(Opsional)'}
                   </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    placeholder="Enter password"
+                    placeholder={mode === 'create' ? "Enter password" : "Kosongkan jika tidak ingin diubah"}
                     className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
-                    required
+                    required={mode === 'create'}
                   />
                 </div>
               )}
 
-              {/* Role Dropdown (sudah diperbaiki) */}
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-gray-900">Role *</Label>
                 <Select
@@ -283,7 +275,7 @@ export function UserForm({
                 </Select>
               </div>
 
-              {mode === "view" && user && (
+              {mode !== "create" && user && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                   <div className="space-y-2">
                     <Label className="text-gray-900">Created At</Label>
@@ -310,7 +302,7 @@ export function UserForm({
             </Button>
             {!isReadOnly && (
               <Button type="submit">
-                {mode === "create" ? "Create User" : "Update User"}
+                {mode === "create" ? "Create User" : "Save Changes"}
               </Button>
             )}
           </DialogFooter>

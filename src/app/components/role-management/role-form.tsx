@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -18,123 +18,145 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  Shield, 
-  Settings, 
-  CalendarCheck,
-} from "lucide-react"
-import { Role } from "@/app/state/roleState"
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, Settings, CalendarCheck } from "lucide-react";
+import { Role } from "@/app/state/roleState";
 
 interface RoleFormProps {
-  role?: Role
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (roleData: Partial<Role>) => void
-  mode: "create" | "edit" | "view"
+  role?: Role;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (roleData: Partial<Role>) => void;
+  mode: "create" | "edit" | "view";
 }
 
-export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProps) {
+export function RoleForm({
+  role,
+  isOpen,
+  onClose,
+  onSubmit,
+  mode,
+}: RoleFormProps) {
   const [formData, setFormData] = useState({
     nama_role: "",
-    is_aktif: 1
-  })
+    is_aktif: 1,
+  });
 
   useEffect(() => {
     if (role && mode !== "create") {
       setFormData({
         nama_role: role.nama_role || "",
-        is_aktif: role.is_aktif || 1
-      })
+        is_aktif: role.is_aktif || 1,
+      });
     } else {
       setFormData({
         nama_role: "",
-        is_aktif: 1
-      })
+        is_aktif: 1,
+      });
     }
-  }, [role, mode])
+  }, [role, mode]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
-    }))
-  }
+      [field]: value,
+    }));
+  };
 
   const getTitle = () => {
     switch (mode) {
-      case "create": return "Add New Role"
-      case "edit": return "Edit Role"
-      case "view": return "Role Details"
-      default: return "Role"
+      case "create":
+        return "Add New Role";
+      case "edit":
+        return "Edit Role";
+      case "view":
+        return "Role Details";
+      default:
+        return "Role";
     }
-  }
+  };
 
   const getDescription = () => {
     switch (mode) {
-      case "create": return "Create a new role in the system."
-      case "edit": return "Update role information and permissions."
-      case "view": return "View detailed information about this role."
-      default: return ""
+      case "create":
+        return "Create a new role in the system.";
+      case "edit":
+        return "Update role information and permissions.";
+      case "view":
+        return "View detailed information about this role.";
+      default:
+        return "";
     }
-  }
+  };
 
-  const isReadOnly = mode === "view"
+  const isReadOnly = mode === "view";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white text-gray-900">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
             {getTitle()}
           </DialogTitle>
-          <DialogDescription>
-            {getDescription()}
-          </DialogDescription>
+          <DialogDescription>{getDescription()}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Shield className="h-4 w-4" />
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
+                <Shield className="h-4 w-4 " />
                 Basic Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 text-gray-900">
               <div className="space-y-2">
                 <Label htmlFor="nama_role">Role Name *</Label>
                 <Input
                   id="nama_role"
                   value={formData.nama_role}
-                  onChange={(e) => handleInputChange("nama_role", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("nama_role", e.target.value)
+                  }
                   placeholder="Enter role name"
                   required
                   disabled={isReadOnly}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="is_aktif">Status *</Label>
                 <Select
                   value={formData.is_aktif.toString()}
-                  onValueChange={(value) => handleInputChange("is_aktif", parseInt(value))}
+                  onValueChange={(value) =>
+                    handleInputChange("is_aktif", parseInt(value))
+                  }
                   disabled={isReadOnly}
                 >
                   <SelectTrigger className="bg-white border-gray-200 text-gray-900">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                    <SelectItem value="1" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Active</SelectItem>
-                    <SelectItem value="0" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Inactive</SelectItem>
+                    <SelectItem
+                      value="1"
+                      className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                    >
+                      Active
+                    </SelectItem>
+                    <SelectItem
+                      value="0"
+                      className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                    >
+                      Inactive
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -144,7 +166,7 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
           {/* System Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
                 <Settings className="h-4 w-4" />
                 System Information
               </CardTitle>
@@ -172,7 +194,12 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
           </Card>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              className="text-gray bg-white"
+              onClick={onClose}
+            >
               {mode === "view" ? "Close" : "Cancel"}
             </Button>
             {mode !== "view" && (
@@ -184,5 +211,5 @@ export function RoleForm({ role, isOpen, onClose, onSubmit, mode }: RoleFormProp
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
