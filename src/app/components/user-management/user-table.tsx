@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -22,24 +21,38 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/app/state/userState";
 
-interface RoleUserProps {
+interface UserTableProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (userId: string) => void;
   onView: (user: User) => void;
 }
 
-export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
-  const [sortField, setSortField] = useState<keyof User>("created_at");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+export function UserTable({ users, onEdit, onDelete, onView }: UserTableProps) {
+  // --- FUNGSI INI TELAH DIPERBAIKI ---
+  const getRoleBadge = (
+    userRoles?: Array<{ role?: { nama_role: string } }>
+  ) => {
+    // 1. Ambil nama role dari data, default ke 'user' jika tidak ada.
+    const roleName = userRoles?.[0]?.role?.nama_role?.toLowerCase() || 'user';
+    
+    // 2. Buat nama yang akan ditampilkan dengan huruf kapital di awal.
+    const displayName = roleName.charAt(0).toUpperCase() + roleName.slice(1);
 
-  const handleSort = (field: keyof User) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
+    // 3. Definisikan warna untuk setiap role.
+    const variants: { [key: string]: string } = {
+      admin: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+      user: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+      guest: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+      // Tambahkan role lain di sini jika perlu warna berbeda
+    };
+
+    return (
+      // 4. Gunakan `displayName` untuk teks dan `variants` untuk warna.
+      <Badge className={variants[roleName] || variants.user}>
+        {displayName}
+      </Badge>
+    );
   };
 
   const getStatusBadge = (isAktif: number) => {
@@ -47,12 +60,7 @@ export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
       1: "bg-green-100 text-green-800 hover:bg-green-100",
       0: "bg-red-100 text-red-800 hover:bg-red-100",
     };
-
-    const labels = {
-      1: "Active",
-      0: "Inactive",
-    };
-
+    const labels = { 1: "Active", 0: "Inactive" };
     return (
       <Badge className={variants[isAktif as keyof typeof variants]}>
         {labels[isAktif as keyof typeof labels]}
@@ -60,119 +68,42 @@ export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
     );
   };
 
-  const getRoleBadge = (
-    userRoles?: Array<{ role?: { nama_role: string } }>
-  ) => {
-    // Check if user has roles and if the first role exists
-    if (
-      !userRoles ||
-      userRoles.length === 0 ||
-      !userRoles[0]?.role?.nama_role
-    ) {
-      return (
-        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-          User
-        </Badge>
-      );
-    }
-
-    const roleName = userRoles[0].role.nama_role.toLowerCase();
-    const variants = {
-      admin: "bg-purple-100 text-purple-800 hover:bg-purple-100",
-      manager: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-      employee: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-      user: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-    };
-
-    const displayName = roleName === "admin" ? "Admin" : "User";
-
-    return (
-      <Badge
-        className={variants[roleName as keyof typeof variants] || variants.user}
-      >
-        {displayName}
-      </Badge>
-    );
-  };
-
   const formatDateTime = (dateString: string) => {
+    if (!dateString) return "-";
     const options: Intl.DateTimeFormatOptions = {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
     };
     return new Date(dateString).toLocaleString("id-ID", options);
   };
-
-  const sortedUsers = useMemo(() => {
-    const list = Array.isArray(users) ? [...users] : [];
-    return list.sort((a, b) => {
-      const aVal = String(a[sortField] ?? "").toLowerCase();
-      const bVal = String(b[sortField] ?? "").toLowerCase();
-      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [users, sortField, sortDirection]);
 
   return (
     <div className="rounded-md border bg-white">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead
-              className="text-gray-900 font-semibold"
-              onClick={() => handleSort("nama")}
-            >
-              Name
-            </TableHead>
-            <TableHead
-              className="text-gray-900 font-semibold"
-              onClick={() => handleSort("username")}
-            >
-              Username
-            </TableHead>
-            <TableHead
-              className="text-gray-900 font-semibold"
-              onClick={() => handleSort("email")}
-            >
-              Email
-            </TableHead>
+            <TableHead className="text-gray-900 font-semibold">Name</TableHead>
+            <TableHead className="text-gray-900 font-semibold">Username</TableHead>
+            <TableHead className="text-gray-900 font-semibold">Email</TableHead>
             <TableHead className="text-gray-900 font-semibold">Role</TableHead>
-            <TableHead
-              className=" text-gray-900 font-semibold"
-              onClick={() => handleSort("is_aktif")}
-            >
-              Status
-            </TableHead>
-            <TableHead
-              className="text-gray-900 font-semibold"
-              onClick={() => handleSort("created_at")}
-            >
-              Created
-            </TableHead>
-            <TableHead className="w-[50px] text-gray-900 font-semibold">
-              Actions
-            </TableHead>
+            <TableHead className="text-gray-900 font-semibold">Status</TableHead>
+            <TableHead className="text-gray-900 font-semibold">Created</TableHead>
+            <TableHead className="w-[50px] text-gray-900 font-semibold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedUsers.map((user) => (
+          {users.map((user) => (
             <TableRow key={user.id_user} className="hover:bg-gray-50">
-              <TableCell className="font-medium text-gray-900">
-                {user.nama}
-              </TableCell>
+              <TableCell className="font-medium text-gray-900">{user.nama}</TableCell>
               <TableCell className="text-gray-700">{user.username}</TableCell>
               <TableCell className="text-gray-700">{user.email}</TableCell>
               <TableCell>{getRoleBadge(user.userRoles)}</TableCell>
               <TableCell>{getStatusBadge(user.is_aktif)}</TableCell>
-              <TableCell className="text-gray-700">
-                {formatDateTime(user.created_at)}
-              </TableCell>
-              <TableCell className="text-gray-900">
+              <TableCell className="text-gray-700">{formatDateTime(user.created_at)}</TableCell>
+              <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -189,14 +120,14 @@ export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
                     </DropdownMenuLabel>
                     <DropdownMenuItem
                       onClick={() => onView(user)}
-                      className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                      className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50 cursor-pointer"
                     >
                       <Eye className="mr-2 h-4 w-4 text-gray-900" />
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => onEdit(user)}
-                      className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                      className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50 cursor-pointer"
                     >
                       <Edit className="mr-2 h-4 w-4 text-gray-900" />
                       Edit User
@@ -204,7 +135,7 @@ export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => onDelete(user.id_user)}
-                      className="text-red-600 hover:bg-red-50 focus:bg-red-50"
+                      className="text-red-600 hover:bg-red-50 focus:bg-red-50 cursor-pointer"
                     >
                       <Trash2 className="mr-2 h-4 w-4 text-red-600" />
                       Delete User

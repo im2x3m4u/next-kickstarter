@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   const newRole = await createEntity(Role, body);
 
   try {
-    await logActivity(session.user.id_user, "Menambah Data Role", req);
+    await logActivity(session.user.id, "Menambah Data Role", req);
   } catch (err) {
     console.error("logActivity POST error:", err);
   }
