@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthSession } from "@/function/authPermission";
 import { getConnection } from "@/lib/typeorm";
 import { RolePermission } from "@/entities/rolePermission";
+import { logActivity } from "@/function/activityHelp";
 
 // GET permissions for a specific role
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -16,6 +17,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         where: { role: { id_role: params.id } },
         relations: ["permission"],
     });
+    try {
+    await logActivity(session.user.id_user, "Melihat Data", req);
+  } catch (err) {
+    console.error("logActivity POST error:", err);
+  }
     return NextResponse.json(permissions.map(p => p.permission));
 }
 
@@ -43,6 +49,11 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (newPermissions.length > 0) {
         await rolePermissionRepo.save(newPermissions);
     }
+    try {
+    await logActivity(session.user.id_user, "Mengubah Data", req);
+  } catch (err) {
+    console.error("logActivity POST error:", err);
+  }
 
     return NextResponse.json({ message: "Permissions updated successfully" });
 }

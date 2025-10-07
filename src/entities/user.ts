@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import { UserRole } from "./userRole";
+import type { UserRole } from "./userRole";
+// import { UserSession } from "./UserSession";
 
 @Entity("user")
 export class User {
@@ -36,6 +37,13 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany('UserRole', 'user')
+  // Relasi ke UserRole
+  @OneToMany(() => require("./userRole").UserRole, (userRole: any) => userRole.user)
   userRoles: UserRole[];
+
+  // entities/user.ts
+ @OneToMany(() => require("./UserSession").UserSession, (session: any) => session.user)
+  sessions: any[];
+
+
 }

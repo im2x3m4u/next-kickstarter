@@ -18,25 +18,25 @@ export function ActivityTable({ activities }: ActivityProps) {
     <Table className="bg-white">
       <TableHeader>
         <TableRow>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             No
           </TableHead>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             User
           </TableHead>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             Email
           </TableHead>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             No Telepon
           </TableHead>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             Activity
           </TableHead>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             Location
           </TableHead>
-          <TableHead className="text-gray-900 font-semibold">
+          <TableHead className="font-semibold text-gray-900">
             Created At
           </TableHead>
         </TableRow>
