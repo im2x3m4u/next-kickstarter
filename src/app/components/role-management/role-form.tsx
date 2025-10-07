@@ -203,7 +203,7 @@ export function RoleForm({
               {mode === "view" ? "Close" : "Cancel"}
             </Button>
             {mode !== "view" && (
-              <Button type="submit">
+              <Button type="submit" className="bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors">
                 {mode === "create" ? "Create Role" : "Update Role"}
               </Button>
             )}

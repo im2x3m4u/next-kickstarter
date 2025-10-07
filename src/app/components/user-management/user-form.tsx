@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -56,10 +57,11 @@ export function UserForm({
   const [formData, setFormData] = useState(getInitialFormData());
   const [roles, setRoles] = useState<Role[]>([]);
   const isReadOnly = mode === "view";
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      if ((mode === 'edit' || mode === 'view') && user) {
+      if ((mode === "edit" || mode === "view") && user) {
         const roleId = user.userRoles?.[0]?.role?.id_role;
         setFormData({
           nama: user.nama || "",
@@ -107,15 +109,15 @@ export function UserForm({
     e.preventDefault();
     const submissionData: Partial<User> = { ...formData };
     // Jangan kirim password kosong saat edit
-    if (mode === 'edit' && !formData.password) {
+    if (mode === "edit" && !formData.password) {
       delete (submissionData as any).password;
     }
     onSubmit(submissionData);
   };
 
   const getTitle = () => {
-    if (mode === 'create') return "Add New User";
-    if (mode === 'edit') return "Edit User";
+    if (mode === "create") return "Add New User";
+    if (mode === "edit") return "Edit User";
     return "User Details";
   };
 
@@ -128,7 +130,9 @@ export function UserForm({
             {getTitle()}
           </DialogTitle>
           <DialogDescription className="text-gray-700">
-            {mode === 'create' ? "Create a new user account." : "View or edit user details."}
+            {mode === "create"
+              ? "Create a new user account."
+              : "View or edit user details."}
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +146,7 @@ export function UserForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="space-y-2">
+                <div className="space-y-2">
                   <Label htmlFor="nama" className="text-gray-900">
                     Full Name *
                   </Label>
@@ -169,7 +173,7 @@ export function UserForm({
                     placeholder="Enter username"
                     className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
                     required
-                    disabled={isReadOnly || mode === 'edit'}
+                    disabled={isReadOnly || mode === "edit"}
                   />
                 </div>
               </div>
@@ -207,25 +211,46 @@ export function UserForm({
                 </div>
               </div>
 
-              {mode !== 'view' && (
+              {mode !== "view" && (
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-gray-900">
-                    Password {mode === 'create' ? '*' : '(Opsional)'}
+                    Password {mode === "create" ? "*" : "(Opsional)"}
                   </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    placeholder={mode === 'create' ? "Enter password" : "Kosongkan jika tidak ingin diubah"}
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
-                    required={mode === 'create'}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      placeholder={
+                        mode === "create"
+                          ? "Enter password"
+                          : "Kosongkan jika tidak ingin diubah"
+                      }
+                      className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 pr-10"
+                      required={mode === "create"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-gray-900">Role *</Label>
+                <Label htmlFor="role" className="text-gray-900">
+                  Role *
+                </Label>
                 <Select
                   value={formData.id_role[0] || ""}
                   onValueChange={handleRoleChange}
@@ -247,14 +272,14 @@ export function UserForm({
           </Card>
 
           <Card className="bg-white border border-gray-200 shadow-sm">
-             <CardHeader>
+            <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
                 <Shield className="h-4 w-4" />
                 System Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="is_aktif" className="text-gray-900">
                   Status *
                 </Label>
@@ -297,12 +322,17 @@ export function UserForm({
           </Card>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              {isReadOnly ? "Close" : "Cancel"}
+            <Button
+              type="button"
+              variant="outline"
+              className="text-gray bg-white"
+              onClick={onClose}
+            >
+              {mode === "view" ? "Close" : "Cancel"}
             </Button>
-            {!isReadOnly && (
-              <Button type="submit">
-                {mode === "create" ? "Create User" : "Save Changes"}
+            {mode !== "view" && (
+              <Button type="submit" className="bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors">
+                {mode === "create" ? "Create User" : "Update User"}
               </Button>
             )}
           </DialogFooter>

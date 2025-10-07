@@ -66,7 +66,7 @@ export default function UserManagementPage() {
 
   // Stats dihitung di client dari data yang diterima, ini masih oke
   const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.is_aktif === 1).length;
+  const activeUsers = users.filter((u) => u.is_aktif === 1).length;
   const inactiveUsers = totalUsers - activeUsers;
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -89,7 +89,7 @@ export default function UserManagementPage() {
         setUsers(res.data);
         setTotal(res.pagination.total);
       } else {
-        throw new Error('Failed to fetch users');
+        throw new Error("Failed to fetch users");
       }
     } catch (err: any) {
       setError(err.message || "Failed to fetch users");
@@ -128,7 +128,7 @@ export default function UserManagementPage() {
     }
     setPage(1); // Reset to first page on sort
   };
-  
+
   // Handlers for search and filter changes
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -138,13 +138,12 @@ export default function UserManagementPage() {
   const handleFilterRole = (role: string) => {
     setRoleFilter(role);
     setPage(1);
-  }
+  };
 
   const handleFilterStatus = (status: string) => {
     setStatusFilter(status);
     setPage(1);
-  }
-
+  };
 
   // CRUD handlers (tetap sama)
   const handleAddUser = () => {
@@ -173,7 +172,9 @@ export default function UserManagementPage() {
   const confirmDelete = async () => {
     if (!userToDelete) return;
     try {
-      const response = await fetch(`/api/user/${userToDelete}`, { method: "DELETE" });
+      const response = await fetch(`/api/user/${userToDelete}`, {
+        method: "DELETE",
+      });
       if (!response.ok) throw new Error("Failed to delete user");
       toast.success("User berhasil dihapus.");
       loadUsers(); // Re-fetch data
@@ -187,8 +188,11 @@ export default function UserManagementPage() {
 
   const handleFormSubmit = async (userData: Partial<User>) => {
     try {
-      const url = formMode === 'create' ? '/api/user' : `/api/user/${selectedUser?.id_user}`;
-      const method = formMode === 'create' ? 'POST' : 'PUT';
+      const url =
+        formMode === "create"
+          ? "/api/user"
+          : `/api/user/${selectedUser?.id_user}`;
+      const method = formMode === "create" ? "POST" : "PUT";
 
       const response = await fetch(url, {
         method,
@@ -198,7 +202,9 @@ export default function UserManagementPage() {
 
       if (!response.ok) throw new Error(`Failed to ${formMode} user`);
 
-      toast.success(`User berhasil di-${formMode === 'create' ? 'tambahkan' : 'perbarui'}.`);
+      toast.success(
+        `User berhasil di-${formMode === "create" ? "tambahkan" : "perbarui"}.`
+      );
       loadUsers();
       setIsFormOpen(false);
     } catch (error: any) {
@@ -257,28 +263,106 @@ export default function UserManagementPage() {
               </Suspense>
 
               {/* Pagination */}
+              {/* Pagination */}
               <div className="flex justify-center items-center mt-6">
                 <Pagination>
                   <PaginationContent className="flex items-center space-x-1">
+                    {/* Previous button */}
                     <PaginationItem>
                       <PaginationPrevious
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         className={`cursor-pointer ${
-                          page === 1 ? "pointer-events-none opacity-50" : ""
+                          page === 1
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
                         }`}
                       />
                     </PaginationItem>
-                    
-                    {/* Simplified pagination display */}
-                    <PaginationItem>
-                        <PaginationLink isActive>Page {page} of {totalPages}</PaginationLink>
-                    </PaginationItem>
 
+                    {/* Page numbers (with ellipsis logic) */}
+                    {(() => {
+                      const maxVisible = 5;
+                      const startPage = Math.max(
+                        1,
+                        page - Math.floor(maxVisible / 2)
+                      );
+                      const endPage = Math.min(
+                        totalPages,
+                        startPage + maxVisible - 1
+                      );
+                      const pages = [];
+
+                      if (startPage > 1) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink onClick={() => setPage(1)}>
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                        if (startPage > 2) {
+                          pages.push(
+                            <span
+                              key="start-ellipsis"
+                              className="px-1 text-gray-500"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                      }
+
+                      for (let i = startPage; i <= endPage; i++) {
+                        pages.push(
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              onClick={() => setPage(i)}
+                              isActive={page === i}
+                              className={`${
+                                page === i
+                                  ? "bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+                                  : "hover:bg-gray-100 text-black"
+                              }`}
+                            >
+                              {i}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+
+                      if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                          pages.push(
+                            <span
+                              key="end-ellipsis"
+                              className="px-1 text-gray-500"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink onClick={() => setPage(totalPages)}>
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+
+                      return pages;
+                    })()}
+
+                    {/* Next button */}
                     <PaginationItem>
                       <PaginationNext
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
                         className={`cursor-pointer ${
-                          page === totalPages ? "pointer-events-none opacity-50" : ""
+                          page === totalPages
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
                         }`}
                       />
                     </PaginationItem>
@@ -288,7 +372,9 @@ export default function UserManagementPage() {
             </>
           ) : (
             <div className="flex items-center justify-center h-64">
-              <div className="text-gray-500 text-center">No users found for the current filters.</div>
+              <div className="text-gray-500 text-center">
+                No users found for the current filters.
+              </div>
             </div>
           )}
         </CardContent>
@@ -314,7 +400,8 @@ export default function UserManagementPage() {
               <p className="text-black">Hapus User</p>
             </AlertDialogTitle>
             <AlertDialogDescription className="text-black">
-              Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak
+              dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
