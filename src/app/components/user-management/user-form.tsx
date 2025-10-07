@@ -22,6 +22,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User as UserIcon, Shield, CalendarCheck } from "lucide-react";
 import { type User } from "@/app/state/userState";
+import PasswordInput from "../auth/PasswordInput";
 
 interface UserFormProps {
   user?: User;
@@ -50,7 +51,6 @@ export function UserForm({
 
   const [roles, setRoles] = useState<any[]>([]);
 
-  // Ambil role dari API
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -64,7 +64,6 @@ export function UserForm({
     fetchRoles();
   }, []);
 
-  // Perbarui formData
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -196,26 +195,21 @@ export function UserForm({
               </div>
 
               {mode === "create" && (
+                // DIUBAH: Menggunakan komponen PasswordInput
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-gray-900">
                     Password *
                   </Label>
-                  <Input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
                     }
-                    placeholder="Enter password"
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
-                    required
-                    disabled={isReadOnly}
                   />
                 </div>
               )}
 
-              {/* Role Dropdown dari API */}
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-gray-900">
                   Role *
@@ -248,7 +242,6 @@ export function UserForm({
             </CardContent>
           </Card>
 
-          {/* System Information */}
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
