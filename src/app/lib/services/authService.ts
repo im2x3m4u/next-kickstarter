@@ -15,7 +15,7 @@ export async function loginService(username: string, password: string) {
   return res;
 }
 
-// LOGOUT
+//LOGOUT
 export async function logoutService(redirectUrl: string = "/login") {
   await signOut({
     redirect: true,
