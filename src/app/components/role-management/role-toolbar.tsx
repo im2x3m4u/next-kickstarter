@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,29 +17,29 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Card, CardContent } from "@/components/ui/card"
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  Download, 
+} from "@/components/ui/dropdown-menu";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Search,
+  Filter,
+  Plus,
+  Download,
   Upload,
   MoreHorizontal,
   Shield,
-  Users,
-  Settings
-} from "lucide-react"
+  UserX,
+  Settings,
+} from "lucide-react";
 
 interface RoleToolbarProps {
-  onAddRole: () => void
-  onSearch: (query: string) => void
-  onFilterStatus: (status: string) => void
-  onExport: () => void
-  onImport: () => void
-  totalRoles: number
-  activeRoles: number
-  inactiveRoles: number
+  onAddRole: () => void;
+  onSearch: (query: string) => void;
+  onFilterStatus: (status: string) => void;
+  onExport: () => void;
+  onImport: () => void;
+  totalRoles: number;
+  activeRoles: number;
+  inactiveRoles: number;
 }
 
 export function RoleToolbar({
@@ -50,57 +50,69 @@ export function RoleToolbar({
   onImport,
   totalRoles,
   activeRoles,
-  inactiveRoles
+  inactiveRoles,
 }: RoleToolbarProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const handleSearch = (value: string) => {
-    setSearchQuery(value)
-    onSearch(value)
-  }
+    setSearchQuery(value);
+    onSearch(value);
+  };
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value)
-    onFilterStatus(value)
-  }
+    setStatusFilter(value);
+    onFilterStatus(value);
+  };
 
   return (
     <div className="space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-white">
+        <Card className="group hover:shadow-md transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover:from-[#F8EDFF] hover:to-[#EBD4FD] border border-gray-100">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Total Roles</p>
-                <p className="text-2xl font-bold text-gray-900">{totalRoles}</p>
+                <p className="text-sm font-medium text-gray-600 group-hover:text-[#7A1FC7] transition-colors">
+                  Total Roles
+                </p>
+                <p className="text-2xl font-bold text-gray-900 group-hover:text-[#7A1FC7] transition-colors">
+                  {totalRoles}
+                </p>
               </div>
-              <Shield className="h-8 w-8 text-blue-500" />
+              <Shield className="h-8 w-8 text-[#AD49E1] group-hover:text-[#7A1FC7] transition-colors" />
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-white">
+
+        <Card className="group hover:shadow-md transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover:from-[#E9F9F1] hover:to-[#D4F4E3] border border-gray-100">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Active Roles</p>
-                <p className="text-2xl font-bold text-green-600">{activeRoles}</p>
+                <p className="text-sm font-medium text-gray-600 group-hover:text-green-700 transition-colors">
+                  Active Roles
+                </p>
+                <p className="text-2xl font-bold text-green-600 group-hover:text-green-700 transition-colors">
+                  {activeRoles}
+                </p>
               </div>
-              <Settings className="h-8 w-8 text-green-500" />
+              <Settings className="h-8 w-8 text-green-500 group-hover:text-green-700 transition-colors" />
             </div>
           </CardContent>
         </Card>
-        
-        <Card className="bg-white">
+
+        <Card className="group hover:shadow-md transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover:from-[#FFF2F2] hover:to-[#FFE3E3] border border-gray-100">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Inactive Roles</p>
-                <p className="text-2xl font-bold text-red-600">{inactiveRoles}</p>
+                <p className="text-sm font-medium text-gray-600 group-hover:text-red-700 transition-colors">
+                  Inactive Roles
+                </p>
+                <p className="text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
+                  {inactiveRoles}
+                </p>
               </div>
-              <Users className="h-8 w-8 text-red-500" />
+              <UserX className="h-8 w-8 text-red-500 group-hover:text-red-700 transition-colors" />
             </div>
           </CardContent>
         </Card>
@@ -121,44 +133,71 @@ export function RoleToolbar({
                   className="pl-10"
                 />
               </div>
-              
+
               <Select value={statusFilter} onValueChange={handleStatusFilter}>
                 <SelectTrigger className="w-[140px] bg-white border-gray-200 text-gray-900">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                  <SelectItem value="all" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">All Status</SelectItem>
-                  <SelectItem value="active" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Active</SelectItem>
-                  <SelectItem value="inactive" className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50">Inactive</SelectItem>
+                  <SelectItem
+                    value="all"
+                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                  >
+                    All Status
+                  </SelectItem>
+                  <SelectItem
+                    value="active"
+                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                  >
+                    Active
+                  </SelectItem>
+                  <SelectItem
+                    value="inactive"
+                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                  >
+                    Inactive
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Button onClick={onAddRole} variant="outline" className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors">
+              <Button
+                onClick={onAddRole}
+                variant="outline"
+                className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+              >
                 <Plus className="h-4 w-4 " />
                 Add Role
               </Button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors">
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+                  >
                     <MoreHorizontal className="h-4 w-4 " />
                     More
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
-                  <DropdownMenuLabel className="text-gray-900 bg-white">Actions</DropdownMenuLabel>
-                  <DropdownMenuItem 
-                    onClick={onExport} 
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-white border border-gray-200 shadow-lg"
+                >
+                  <DropdownMenuLabel className="text-gray-900 bg-white">
+                    Actions
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={onExport}
                     className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
                   >
                     <Download className="mr-2 h-4 w-4 text-gray-900" />
                     Export Roles
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={onImport} 
+                  <DropdownMenuItem
+                    onClick={onImport}
                     className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
                   >
                     <Upload className="mr-2 h-4 w-4 text-gray-900" />
@@ -171,5 +210,5 @@ export function RoleToolbar({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

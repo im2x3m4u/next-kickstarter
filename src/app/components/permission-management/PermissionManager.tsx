@@ -114,7 +114,7 @@ export default function PermissionManager({
       <Button
         onClick={handleSave}
         disabled={roleName.toLowerCase() === "admin"}
-        className="bg-indigo-600 hover:bg-indigo-700 text-white"
+        className="bg-[#AD49E1] text-white hover:bg-[#9B40D9] active:bg-[#7A1FC7] transition-all shadow-sm hover:shadow-md"
       >
         Simpan Perubahan
       </Button>

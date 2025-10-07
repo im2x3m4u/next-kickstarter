@@ -75,29 +75,29 @@ export function UserToolbar({
     <div className="space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Users Card */}
-        <Card className="group hover:shadow-md transition-shadow bg-white hover:bg-[#C68FE6]">
+        {/* Total Users */}
+        <Card className="group hover:shadow-md transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover:from-[#F8EDFF] hover:to-[#EBD4FD] border border-gray-100">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700 group-hover:text-blue-800 transition-colors">
+                <p className="text-sm font-medium text-gray-600 group-hover:text-[#7A1FC7] transition-colors">
                   Total Users
                 </p>
-                <p className="text-2xl font-bold text-gray-900 group-hover:text-blue-800 transition-colors">
+                <p className="text-2xl font-bold text-gray-900 group-hover:text-[#7A1FC7] transition-colors">
                   {totalUsers}
                 </p>
               </div>
-              <Users className="h-8 w-8 text-blue-500 group-hover:text-blue-800 transition-colors" />
+              <Users className="h-8 w-8 text-[#AD49E1] group-hover:text-[#7A1FC7] transition-colors" />
             </div>
           </CardContent>
         </Card>
 
-        {/* Active Users Card */}
-        <Card className="group hover:shadow-md transition-shadow bg-white hover:bg-[#C68FE6]">
+        {/* Active Users */}
+        <Card className="group hover:shadow-md transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover:from-[#E9F9F1] hover:to-[#D4F4E3] border border-gray-100">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors">
+                <p className="text-sm font-medium text-gray-600 group-hover:text-green-700 transition-colors">
                   Active Users
                 </p>
                 <p className="text-2xl font-bold text-green-600 group-hover:text-green-700 transition-colors">
@@ -109,12 +109,12 @@ export function UserToolbar({
           </CardContent>
         </Card>
 
-        {/* Inactive Users Card */}
-        <Card className="group hover:shadow-md transition-shadow bg-white hover:bg-[#C68FE6]">
+        {/* Inactive Users */}
+        <Card className="group hover:shadow-md transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover:from-[#FFF2F2] hover:to-[#FFE3E3] border border-gray-100">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700 group-hover:text-red-700 transition-colors">
+                <p className="text-sm font-medium text-gray-600 group-hover:text-red-700 transition-colors">
                   Inactive Users
                 </p>
                 <p className="text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
@@ -128,10 +128,10 @@ export function UserToolbar({
       </div>
 
       {/* Toolbar */}
-      <Card className="bg-white">
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
         <CardContent className="p-4">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Search and Filters */}
+            {/* Search & Filters */}
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -139,75 +139,52 @@ export function UserToolbar({
                   placeholder="Search users..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 text-gray-500"
+                  className="pl-10 text-gray-700 border-gray-200 focus:border-[#AD49E1] focus:ring-[#AD49E1]"
                 />
               </div>
 
               <Select value={roleFilter} onValueChange={handleRoleFilter}>
-                <SelectTrigger className="w-[140px] bg-white border-gray-200 text-gray-900">
+                <SelectTrigger className="w-[140px] bg-white border-gray-200 text-gray-800 hover:border-[#AD49E1] transition-colors">
                   <SelectValue placeholder="All Roles" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                  <SelectItem
-                    value="all"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    All Roles
-                  </SelectItem>
-                  <SelectItem
-                    value="admin"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    Admin
-                  </SelectItem>
-                  <SelectItem
-                    value="user"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    User
-                  </SelectItem>
+                  {["all", "admin", "user"].map((r) => (
+                    <SelectItem
+                      key={r}
+                      value={r}
+                      className="text-gray-800 hover:bg-[#F5E8FF] focus:bg-[#F5E8FF] transition-colors"
+                    >
+                      {r === "all"
+                        ? "All Roles"
+                        : r.charAt(0).toUpperCase() + r.slice(1)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
               <Select value={statusFilter} onValueChange={handleStatusFilter}>
-                <SelectTrigger className="w-[140px] bg-white border-gray-200 text-gray-900">
+                <SelectTrigger className="w-[140px] bg-white border-gray-200 text-gray-800 hover:border-[#AD49E1] transition-colors">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                  <SelectItem
-                    value="all"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    All Status
-                  </SelectItem>
-                  <SelectItem
-                    value="active"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    Active
-                  </SelectItem>
-                  <SelectItem
-                    value="inactive"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    Inactive
-                  </SelectItem>
-                  <SelectItem
-                    value="pending"
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    Pending
-                  </SelectItem>
+                  {["all", "active", "inactive", "pending"].map((s) => (
+                    <SelectItem
+                      key={s}
+                      value={s}
+                      className="text-gray-800 hover:bg-[#F5E8FF] focus:bg-[#F5E8FF] transition-colors"
+                    >
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 ">
+            <div className="flex gap-2">
               <Button
                 onClick={onAddUser}
-                variant="outline"
-                className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+                className="flex items-center gap-2 bg-[#AD49E1] text-white hover:bg-[#9B40D9] active:bg-[#7A1FC7] transition-all shadow-sm hover:shadow-md"
               >
                 <Plus className="h-4 w-4" />
                 Add User
@@ -215,33 +192,30 @@ export function UserToolbar({
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
-                  >
+                  <Button className="flex items-center gap-2 bg-[#AD49E1] text-white hover:bg-[#9B40D9] active:bg-[#7A1FC7] transition-all shadow-sm hover:shadow-md">
                     <MoreHorizontal className="h-4 w-4" />
                     More
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="bg-white border border-gray-200 shadow-lg"
+                  className="bg-white border border-gray-200 shadow-lg rounded-lg"
                 >
-                  <DropdownMenuLabel className="text-gray-900 bg-white">
+                  <DropdownMenuLabel className="text-gray-700 font-semibold">
                     Actions
                   </DropdownMenuLabel>
                   <DropdownMenuItem
                     onClick={onExport}
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                    className="text-gray-800 hover:bg-[#F5E8FF] transition-colors"
                   >
-                    <Download className="mr-2 h-4 w-4 text-gray-900" />
+                    <Download className="mr-2 h-4 w-4 text-[#AD49E1]" />
                     Export Users
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={onImport}
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                    className="text-gray-800 hover:bg-[#F5E8FF] transition-colors"
                   >
-                    <Upload className="mr-2 h-4 w-4 text-gray-900" />
+                    <Upload className="mr-2 h-4 w-4 text-[#AD49E1]" />
                     Import Users
                   </DropdownMenuItem>
                 </DropdownMenuContent>
