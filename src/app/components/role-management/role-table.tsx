@@ -10,13 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Shield,
-} from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,12 +77,17 @@ export function RoleTable({
     );
   };
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("id-ID", {
+  const formatDateTime = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    });
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+    return new Date(dateString).toLocaleString("id-ID", options);
+  };
 
   const formatRoleName = (namaRole: string) =>
     namaRole.charAt(0).toUpperCase() + namaRole.slice(1);
@@ -136,10 +135,10 @@ export function RoleTable({
               </TableCell>
               <TableCell>{getStatusBadge(role.is_aktif)}</TableCell>
               <TableCell className="text-gray-700">
-                {formatDate(role.created_at)}
+                {formatDateTime(role.created_at)}
               </TableCell>
               <TableCell className="text-gray-700">
-                {formatDate(role.updated_at)}
+                {formatDateTime(role.updated_at)}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
