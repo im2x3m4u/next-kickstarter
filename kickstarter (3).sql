@@ -164,6 +164,41 @@ ALTER TABLE `user_role`
   ADD CONSTRAINT `fk_user` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`) ON DELETE CASCADE;
 COMMIT;
 
+-- Membuat tabel `permission`
+CREATE TABLE `permission` (
+  `id_permission` CHAR(36) NOT NULL,
+  `nama_permission` VARCHAR(255) NOT NULL,
+  `deskripsi` TEXT NULL,
+  PRIMARY KEY (`id_permission`),
+  UNIQUE KEY `IDX_nama_permission` (`nama_permission`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Membuat tabel penghubung `role_permission`
+CREATE TABLE `role_permission` (
+  `id_role_permission` CHAR(36) NOT NULL,
+  `id_role` CHAR(36) NULL,
+  `id_permission` CHAR(36) NULL,
+  PRIMARY KEY (`id_role_permission`),
+  INDEX `FK_role_permission_role` (`id_role`),
+  INDEX `FK_role_permission_permission` (`id_permission`),
+  CONSTRAINT `FK_role_permission_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id_role`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `FK_role_permission_permission` FOREIGN KEY (`id_permission`) REFERENCES `permission` (`id_permission`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Menambahkan data izin dasar ke tabel `permission`
+INSERT INTO `permission` (`id_permission`, `nama_permission`, `deskripsi`) VALUES
+(UUID(), 'user:create', 'Memperbolehkan membuat pengguna baru'),
+(UUID(), 'user:read', 'Memperbolehkan melihat daftar pengguna'),
+(UUID(), 'user:update', 'Memperbolehkan mengedit data pengguna'),
+(UUID(), 'user:delete', 'Memperbolehkan menghapus pengguna'),
+(UUID(), 'role:create', 'Memperbolehkan membuat peran baru'),
+(UUID(), 'role:read', 'Memperbolehkan melihat daftar peran'),
+(UUID(), 'role:update', 'Memperbolehkan mengedit peran'),
+(UUID(), 'role:delete', 'Memperbolehkan menghapus peran'),
+(UUID(), 'permission:read', 'Memperbolehkan melihat daftar izin'),
+(UUID(), 'permission:update', 'Memperbolehkan mengedit izin untuk sebuah peran'),
+(UUID(), 'activity:read', 'Memperbolehkan melihat log aktivitas');
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

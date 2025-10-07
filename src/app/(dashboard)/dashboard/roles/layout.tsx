@@ -1,5 +1,3 @@
-import RoleManagementPage from "./page";
-
-export default function RolesLayout() {
-  return <RoleManagementPage />;
+export default function RolesLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

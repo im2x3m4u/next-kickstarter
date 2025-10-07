@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, Suspense, useCallback } from "react";
+import { useEffect, Suspense, useCallback, useState } from "react";
 import { useAtom } from "jotai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationLink,
+} from "@/components/ui/pagination";
 import { UserToolbar } from "@/app/components/user-management/user-toolbar";
-import { Users, Plus, AlertCircle } from "lucide-react";
+import { Users, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,23 +63,30 @@ export default function UserManagementPage() {
   const [pageSize, setPageSize] = useAtom(pageSizeAtom);
   const [sortBy, setSortBy] = useAtom(sortByAtom);
   const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
+  const [total, setTotal] = useState(0);
 
-  // stats otomatis dihitung dari usersAtom
   const [stats] = useAtom(statsAtom);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // load data dari server dengan pagination & sorting
+  // Load users with pagination
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchUsersService(
+      const res = await fetchUsersService(
         searchQuery,
         page,
         pageSize,
         sortBy,
         sortOrder
       );
-      setUsers(data.data);
-      setFilteredUsers(data.data);
+
+      // Expected: { data: User[], total: number }
+      const data = res?.data ?? [];
+      const totalCount = res?.total ?? data.length;
+
+      setUsers(data);
+      setFilteredUsers(data);
+      setTotal(totalCount);
     } catch (err: any) {
       setError(err.message || "Failed to fetch users");
     } finally {
@@ -90,25 +104,13 @@ export default function UserManagementPage() {
     setLoading,
   ]);
 
-  // load tiap kali dependency berubah
+  // Load whenever dependencies change
   useEffect(() => {
     loadUsers();
-  }, [
-    page,
-    pageSize,
-    sortBy,
-    sortOrder,
-    searchQuery,
-    roleFilter,
-    statusFilter,
-  ]);
+  }, [loadUsers]);
 
-  // Filter tambahan (di sisi client)
-  const filterUsers = (
-    searchQuery: string,
-    roleFilter: string,
-    statusFilter: string
-  ) => {
+  // Client-side filters
+  useEffect(() => {
     let filtered = users;
 
     if (searchQuery.trim()) {
@@ -145,12 +147,7 @@ export default function UserManagementPage() {
     }
 
     setFilteredUsers(filtered);
-  };
-
-  // Trigger filter tiap kali state berubah
-  useEffect(() => {
-    filterUsers(searchQuery, roleFilter, statusFilter);
-  }, [users, searchQuery, roleFilter, statusFilter]);
+  }, [users, searchQuery, roleFilter, statusFilter, setFilteredUsers]);
 
   // Sorting handler
   const handleSort = (field: string) => {
@@ -162,7 +159,7 @@ export default function UserManagementPage() {
     }
   };
 
-  // CRUD
+  // CRUD handlers
   const handleAddUser = () => {
     setSelectedUser(null);
     setFormMode("create");
@@ -187,18 +184,16 @@ export default function UserManagementPage() {
   };
 
   const confirmDelete = async () => {
-    if (userToDelete) {
-      try {
-        const response = await fetch(`/api/user/${userToDelete}`, {
-          method: "DELETE",
-        });
-        const result = await response.json();
-        if (result.ok) {
-          loadUsers();
-        }
-      } catch (error) {
-        console.error("Error deleting user:", error);
-      }
+    if (!userToDelete) return;
+    try {
+      const response = await fetch(`/api/user/${userToDelete}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (result.ok) loadUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    } finally {
       setUserToDelete(null);
       setDeleteDialogOpen(false);
     }
@@ -206,19 +201,23 @@ export default function UserManagementPage() {
 
   const handleFormSubmit = async (userData: Partial<User>) => {
     try {
+      const roleId = userData.role === "admin" ? 1 : 2;
+      const payload = { ...userData, id_role: [roleId] };
+
       if (formMode === "create") {
         await fetch("/api/user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userData),
+          body: JSON.stringify(payload),
         });
       } else if (formMode === "edit" && selectedUser) {
         await fetch(`/api/user/${selectedUser.id_user}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userData),
+          body: JSON.stringify(payload),
         });
       }
+
       loadUsers();
       setIsFormOpen(false);
     } catch (error) {
@@ -253,7 +252,7 @@ export default function UserManagementPage() {
       />
 
       {/* Table */}
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Users className="h-5 w-5" />
@@ -278,25 +277,110 @@ export default function UserManagementPage() {
               </Suspense>
 
               {/* Pagination */}
-              <div className="flex justify-between items-center mt-4">
-                <Button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Prev
-                </Button>
-                <span>Page {page}</span>
-                <Button onClick={() => setPage((p) => p + 1)}>Next</Button>
+              <div className="flex justify-center items-center mt-6">
+                <Pagination>
+                  <PaginationContent className="flex items-center space-x-1">
+                    {/* Previous button */}
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        className={`cursor-pointer ${
+                          page === 1
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
+                        }`}
+                      />
+                    </PaginationItem>
 
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="ml-4 border rounded p-1"
-                >
-                  <option value={5}>5 / page</option>
-                  <option value={10}>10 / page</option>
-                  <option value={20}>20 / page</option>
-                </select>
+                    {/* Page numbers (with ellipsis logic) */}
+                    {(() => {
+                      const maxVisible = 5;
+                      const startPage = Math.max(
+                        1,
+                        page - Math.floor(maxVisible / 2)
+                      );
+                      const endPage = Math.min(
+                        totalPages,
+                        startPage + maxVisible - 1
+                      );
+                      const pages = [];
+
+                      if (startPage > 1) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink onClick={() => setPage(1)}>
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                        if (startPage > 2) {
+                          pages.push(
+                            <span
+                              key="start-ellipsis"
+                              className="px-1 text-gray-500"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                      }
+
+                      for (let i = startPage; i <= endPage; i++) {
+                        pages.push(
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              onClick={() => setPage(i)}
+                              isActive={page === i}
+                              className={`${
+                                page === i
+                                  ? "bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+                                  : "hover:bg-gray-100 text-black"
+                              }`}
+                            >
+                              {i}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+
+                      if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                          pages.push(
+                            <span
+                              key="end-ellipsis"
+                              className="px-1 text-gray-500"
+                            >
+                              ...
+                            </span>
+                          );
+                        }
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink onClick={() => setPage(totalPages)}>
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
+
+                      return pages;
+                    })()}
+
+                    {/* Next button */}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        className={`cursor-pointer ${
+                          page === totalPages
+                            ? "pointer-events-none opacity-50 text-black"
+                            : ""
+                        }`}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             </>
           ) : (
@@ -320,24 +404,23 @@ export default function UserManagementPage() {
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              Delete User
+              <AlertCircle className="h-5 w-5 text-red-500 hover:text-red-7000" />{" "}
+              <p className="text-black">Hapus User</p>
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this user? This action cannot be
-              undone.
+            <AlertDialogDescription className="text-black">
+              Apakah kamu yakin ingin menghapus role?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete User
+              Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

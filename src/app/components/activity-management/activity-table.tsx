@@ -15,28 +15,28 @@ interface ActivityProps {
 
 export function ActivityTable({ activities }: ActivityProps) {
   return (
-    <Table>
+    <Table className="bg-white">
       <TableHeader>
         <TableRow>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             No
           </TableHead>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             User
           </TableHead>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             Email
           </TableHead>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             No Telepon
           </TableHead>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             Activity
           </TableHead>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             Location
           </TableHead>
-          <TableHead className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold">
+          <TableHead className="text-gray-900 font-semibold">
             Created At
           </TableHead>
         </TableRow>

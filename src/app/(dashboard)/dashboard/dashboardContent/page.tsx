@@ -69,7 +69,7 @@ export default function DashboardContent() {
       </div>
 
       <Suspense fallback={<DashboardSkeleton />}>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6">
           <RecentActivity activities={activities} />
         </div>
       </Suspense>

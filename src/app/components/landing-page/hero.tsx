@@ -47,7 +47,7 @@ export default function Hero() {
               <Button asChild variant="outline" className="h-11 px-6 text-base">
                 <a
                   href="/about"
-                  className="inline-flex items-center gap-2 bg-white hover:bg-gray-900 text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
+                  className="inline-flex items-center gap-2 bg-white hover:bg-[#AD49E1] text-black border hover:text-white shadow-md hover:shadow-lg transition-all duration-300"
                 >
                   Pelajari Lebih Lanjut
                 </a>

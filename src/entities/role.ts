@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import type { UserRole } from "./userRole"; 
+import { UserRole } from "./userRole"; 
+import { RolePermission } from "./rolePermission";
 
 @Entity("role")
 export class Role {
@@ -18,7 +19,9 @@ export class Role {
   @UpdateDateColumn()
   updated_at: Date;
 
-  // Relasi ke UserRole
-  @OneToMany(() => require("./userRole").UserRole, (userRole: any) => userRole.role)
+  @OneToMany('UserRole', 'role')
   userRoles: UserRole[];
+
+  @OneToMany('RolePermission', 'role')
+  rolePermissions: RolePermission[];
 }
