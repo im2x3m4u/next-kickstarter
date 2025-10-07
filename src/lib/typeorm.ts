@@ -6,6 +6,9 @@ import { Role } from "../entities/role";
 import { UserRole } from "../entities/userRole";
 import { Activity } from "@/entities/activity";
 
+import { Permission } from "@/entities/permission";
+import { RolePermission } from "@/entities/rolePermission";
+
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -16,7 +19,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME!,
   synchronize: false,
   logging: false,
-  entities: [User, Role, UserRole,Activity],
+  entities: [User, Role, UserRole,Activity, Permission, RolePermission],
 });
 
 let connectionPromise: Promise<DataSource> | null = null;

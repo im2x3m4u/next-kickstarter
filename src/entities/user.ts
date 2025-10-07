@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import type { UserRole } from "./userRole";
+import { UserRole } from "./userRole";
 
 @Entity("user")
 export class User {
@@ -36,8 +36,6 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  // Relasi ke UserRole
-  @OneToMany(() => require("./userRole").UserRole, (userRole: any) => userRole.user)
+  @OneToMany('UserRole', 'user')
   userRoles: UserRole[];
-
 }
