@@ -26,7 +26,6 @@ import {
 import type { User } from "@/app/state/userState";
 import {
   usersAtom,
-  filteredUsersAtom,
   loadingAtom,
   errorAtom,
   isFormOpenAtom,
@@ -45,10 +44,10 @@ import {
 } from "@/app/state/userState";
 import { LazyUserForm, LazyUserTable } from "@/app/utils/lazyComponents";
 import { fetchUsersService } from "@/app/lib/services/userService";
+import { toast } from "sonner";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useAtom(usersAtom);
-  const [filteredUsers, setFilteredUsers] = useAtom(filteredUsersAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
   const [error, setError] = useAtom(errorAtom);
   const [isFormOpen, setIsFormOpen] = useAtom(isFormOpenAtom);
@@ -65,10 +64,14 @@ export default function UserManagementPage() {
   const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
   const [total, setTotal] = useState(0);
 
-  const [stats] = useAtom(statsAtom);
+  // Stats dihitung di client dari data yang diterima, ini masih oke
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.is_aktif === 1).length;
+  const inactiveUsers = totalUsers - activeUsers;
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // Load users with pagination
+  // Load users from backend with all filters
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -77,18 +80,20 @@ export default function UserManagementPage() {
         page,
         pageSize,
         sortBy,
-        sortOrder
+        sortOrder,
+        roleFilter,
+        statusFilter
       );
 
-      // Expected: { data: User[], total: number }
-      const data = res?.data ?? [];
-      const totalCount = res?.total ?? data.length;
-
-      setUsers(data);
-      setFilteredUsers(data);
-      setTotal(totalCount);
+      if (res.ok) {
+        setUsers(res.data);
+        setTotal(res.pagination.total);
+      } else {
+        throw new Error('Failed to fetch users');
+      }
     } catch (err: any) {
       setError(err.message || "Failed to fetch users");
+      toast.error("Gagal memuat data pengguna", { description: err.message });
     } finally {
       setLoading(false);
     }
@@ -98,58 +103,22 @@ export default function UserManagementPage() {
     pageSize,
     sortBy,
     sortOrder,
+    roleFilter,
+    statusFilter,
     setUsers,
-    setFilteredUsers,
     setError,
     setLoading,
   ]);
 
-  // Load whenever dependencies change
+  // Re-fetch data whenever dependencies change
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
 
-  // Client-side filters
-  useEffect(() => {
-    let filtered = users;
+  // 🔴 CLIENT-SIDE FILTERING DIHAPUS 🔴
+  // useEffect untuk filtering di sisi client sudah tidak diperlukan lagi.
+  // Backend sekarang yang bertanggung jawab penuh.
 
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(
-        (user) =>
-          user.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.no_telepon.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (roleFilter !== "all") {
-      filtered = filtered.filter((user) => {
-        if (roleFilter === "admin") {
-          return user.userRoles?.some((ur) => ur.role?.nama_role === "admin");
-        } else if (roleFilter === "user") {
-          return (
-            !user.userRoles ||
-            user.userRoles.length === 0 ||
-            !user.userRoles[0]?.role?.nama_role
-          );
-        }
-        return true;
-      });
-    }
-
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((user) => {
-        if (statusFilter === "active") return user.is_aktif === 1;
-        if (statusFilter === "inactive") return user.is_aktif === 0;
-        return true;
-      });
-    }
-
-    setFilteredUsers(filtered);
-  }, [users, searchQuery, roleFilter, statusFilter, setFilteredUsers]);
-
-  // Sorting handler
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
@@ -157,9 +126,27 @@ export default function UserManagementPage() {
       setSortBy(field);
       setSortOrder("ASC");
     }
+    setPage(1); // Reset to first page on sort
+  };
+  
+  // Handlers for search and filter changes
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
   };
 
-  // CRUD handlers
+  const handleFilterRole = (role: string) => {
+    setRoleFilter(role);
+    setPage(1);
+  }
+
+  const handleFilterStatus = (status: string) => {
+    setStatusFilter(status);
+    setPage(1);
+  }
+
+
+  // CRUD handlers (tetap sama)
   const handleAddUser = () => {
     setSelectedUser(null);
     setFormMode("create");
@@ -186,13 +173,12 @@ export default function UserManagementPage() {
   const confirmDelete = async () => {
     if (!userToDelete) return;
     try {
-      const response = await fetch(`/api/user/${userToDelete}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-      if (result.ok) loadUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
+      const response = await fetch(`/api/user/${userToDelete}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete user");
+      toast.success("User berhasil dihapus.");
+      loadUsers(); // Re-fetch data
+    } catch (error: any) {
+      toast.error("Gagal menghapus user.", { description: error.message });
     } finally {
       setUserToDelete(null);
       setDeleteDialogOpen(false);
@@ -201,27 +187,22 @@ export default function UserManagementPage() {
 
   const handleFormSubmit = async (userData: Partial<User>) => {
     try {
-      const roleId = userData.role === "admin" ? 1 : 2;
-      const payload = { ...userData, id_role: [roleId] };
+      const url = formMode === 'create' ? '/api/user' : `/api/user/${selectedUser?.id_user}`;
+      const method = formMode === 'create' ? 'POST' : 'PUT';
 
-      if (formMode === "create") {
-        await fetch("/api/user", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } else if (formMode === "edit" && selectedUser) {
-        await fetch(`/api/user/${selectedUser.id_user}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
 
+      if (!response.ok) throw new Error(`Failed to ${formMode} user`);
+
+      toast.success(`User berhasil di-${formMode === 'create' ? 'tambahkan' : 'perbarui'}.`);
       loadUsers();
       setIsFormOpen(false);
-    } catch (error) {
-      console.error("Error saving user:", error);
+    } catch (error: any) {
+      toast.error(`Gagal menyimpan user.`, { description: error.message });
     }
   };
 
@@ -243,12 +224,14 @@ export default function UserManagementPage() {
       {/* Toolbar */}
       <UserToolbar
         onAddUser={handleAddUser}
-        onSearch={(q) => setSearchQuery(q)}
-        onFilterRole={(role) => setRoleFilter(role)}
-        onFilterStatus={(status) => setStatusFilter(status)}
-        totalUsers={stats.total}
-        activeUsers={stats.active}
-        inactiveUsers={stats.inactive}
+        onSearch={handleSearch}
+        onFilterRole={handleFilterRole}
+        onFilterStatus={handleFilterStatus}
+        totalUsers={total}
+        activeUsers={activeUsers}
+        inactiveUsers={inactiveUsers}
+        onExport={() => {}}
+        onImport={() => {}}
       />
 
       {/* Table */}
@@ -256,23 +239,20 @@ export default function UserManagementPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Users className="h-5 w-5" />
-            Users ({filteredUsers?.length ?? 0})
+            Users ({total})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">Loading...</div>
-          ) : (filteredUsers?.length ?? 0) > 0 ? (
+          ) : users.length > 0 ? (
             <>
               <Suspense fallback={<div>Loading Table...</div>}>
                 <LazyUserTable
-                  users={filteredUsers}
+                  users={users} // Gunakan `users` langsung, bukan `filteredUsers`
                   onEdit={handleEditUser}
                   onDelete={handleDeleteUser}
                   onView={handleViewUser}
-                  onSort={handleSort}
-                  sortBy={sortBy}
-                  sortOrder={sortOrder}
                 />
               </Suspense>
 
@@ -280,102 +260,25 @@ export default function UserManagementPage() {
               <div className="flex justify-center items-center mt-6">
                 <Pagination>
                   <PaginationContent className="flex items-center space-x-1">
-                    {/* Previous button */}
                     <PaginationItem>
                       <PaginationPrevious
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         className={`cursor-pointer ${
-                          page === 1
-                            ? "pointer-events-none opacity-50 text-black"
-                            : ""
+                          page === 1 ? "pointer-events-none opacity-50" : ""
                         }`}
                       />
                     </PaginationItem>
+                    
+                    {/* Simplified pagination display */}
+                    <PaginationItem>
+                        <PaginationLink isActive>Page {page} of {totalPages}</PaginationLink>
+                    </PaginationItem>
 
-                    {/* Page numbers (with ellipsis logic) */}
-                    {(() => {
-                      const maxVisible = 5;
-                      const startPage = Math.max(
-                        1,
-                        page - Math.floor(maxVisible / 2)
-                      );
-                      const endPage = Math.min(
-                        totalPages,
-                        startPage + maxVisible - 1
-                      );
-                      const pages = [];
-
-                      if (startPage > 1) {
-                        pages.push(
-                          <PaginationItem key={1}>
-                            <PaginationLink onClick={() => setPage(1)}>
-                              1
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                        if (startPage > 2) {
-                          pages.push(
-                            <span
-                              key="start-ellipsis"
-                              className="px-1 text-gray-500"
-                            >
-                              ...
-                            </span>
-                          );
-                        }
-                      }
-
-                      for (let i = startPage; i <= endPage; i++) {
-                        pages.push(
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              onClick={() => setPage(i)}
-                              isActive={page === i}
-                              className={`${
-                                page === i
-                                  ? "bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
-                                  : "hover:bg-gray-100 text-black"
-                              }`}
-                            >
-                              {i}
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                      }
-
-                      if (endPage < totalPages) {
-                        if (endPage < totalPages - 1) {
-                          pages.push(
-                            <span
-                              key="end-ellipsis"
-                              className="px-1 text-gray-500"
-                            >
-                              ...
-                            </span>
-                          );
-                        }
-                        pages.push(
-                          <PaginationItem key={totalPages}>
-                            <PaginationLink onClick={() => setPage(totalPages)}>
-                              {totalPages}
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                      }
-
-                      return pages;
-                    })()}
-
-                    {/* Next button */}
                     <PaginationItem>
                       <PaginationNext
-                        onClick={() =>
-                          setPage((p) => Math.min(totalPages, p + 1))
-                        }
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         className={`cursor-pointer ${
-                          page === totalPages
-                            ? "pointer-events-none opacity-50 text-black"
-                            : ""
+                          page === totalPages ? "pointer-events-none opacity-50" : ""
                         }`}
                       />
                     </PaginationItem>
@@ -385,13 +288,13 @@ export default function UserManagementPage() {
             </>
           ) : (
             <div className="flex items-center justify-center h-64">
-              <div className="text-gray-500 text-center">No users found</div>
+              <div className="text-gray-500 text-center">No users found for the current filters.</div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Form */}
+      {/* Form Modal */}
       <Suspense fallback={<div>Loading Form...</div>}>
         <LazyUserForm
           user={selectedUser}
@@ -407,11 +310,11 @@ export default function UserManagementPage() {
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500 hover:text-red-7000" />{" "}
+              <AlertCircle className="h-5 w-5 text-red-500" />
               <p className="text-black">Hapus User</p>
             </AlertDialogTitle>
             <AlertDialogDescription className="text-black">
-              Apakah kamu yakin ingin menghapus role?
+              Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

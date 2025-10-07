@@ -36,7 +36,7 @@ export async function PUT(
   if (!updated) return new Response("Role not found", { status: 404 });
 
   try {
-    await logActivity(session.user.id_user, "Mengubah Data Role", req);
+    await logActivity(session.user.id, "Mengubah Data Role", req);
   } catch (err) {
     console.error("logActivity PUT error:", err);
   }
@@ -58,7 +58,7 @@ export async function DELETE(
   if (!deleted) return new Response("Role not found", { status: 404 });
 
   try {
-    await logActivity(session.user.id_user, "Menghapus Data Role", req);
+    await logActivity(session.user.id, "Menghapus Data Role", req);
   } catch (err) {
     console.error("logActivity DELETE error:", err);
   }

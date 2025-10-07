@@ -1,15 +1,28 @@
 import type { User, ApiResponse } from "@/app/state/userState";
 
+export interface UsersApiResponse {
+  ok: boolean;
+  data: User[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 const BASE_URL = "/api/user";
 
-// Get all users
+// Get all users dengan parameter filter
 export async function fetchUsersService(
   search: string = "",
   page: number = 1,
   pageSize: number = 10,
   sortBy: string = "nama",
-  sortOrder: "ASC" | "DESC" = "ASC"
-): Promise<ApiResponse> {
+  sortOrder: "ASC" | "DESC" = "ASC",
+  role: string = "all",
+  status: string = "all"
+): Promise<UsersApiResponse> {
   try {
     const q = new URLSearchParams({
       search,
@@ -17,6 +30,8 @@ export async function fetchUsersService(
       pageSize: String(pageSize),
       sortBy,
       sortOrder,
+      role,      // Tambahkan filter role
+      status,    // Tambahkan filter status
     });
 
     const res = await fetch(`${BASE_URL}?${q.toString()}`, {
@@ -25,23 +40,16 @@ export async function fetchUsersService(
       credentials: "include",
     });
 
-    const text = await res.text(); // baca text dulu supaya kita bisa log apa pun yang dikembalikan
-    let data: any;
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch {
-      data = text;
-    }
-
     if (!res.ok) {
-      console.error("fetchUsersService error response:", res.status, data);
-      throw new Error(`Failed to fetch users: ${res.status} ${typeof data === "string" ? data : JSON.stringify(data)}`);
+        const errorData = await res.json().catch(() => ({ message: 'Failed to fetch users' }));
+        throw new Error(errorData.message || `Error: ${res.status}`);
     }
 
-    return data as ApiResponse;
+    return res.json();
   } catch (err) {
-    console.error("fetchUsersService thrown error:", err);
-    throw err;
+    console.error("fetchUsersService error:", err);
+    // Return struktur data yang konsisten saat error
+    return { ok: false, data: [], pagination: { total: 0, page: 1, pageSize: 10, totalPages: 0 } };
   }
 }
 

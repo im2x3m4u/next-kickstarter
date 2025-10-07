@@ -21,10 +21,15 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User as UserIcon, Shield, CalendarCheck } from "lucide-react";
-import { type User } from "@/app/state/userState";
+import type { User } from "@/app/state/userState";
+
+interface Role {
+  id_role: string;
+  nama_role: string;
+}
 
 interface UserFormProps {
-  user?: User;
+  user?: User | null;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (userData: Partial<User>) => void;
@@ -38,74 +43,81 @@ export function UserForm({
   onSubmit,
   mode,
 }: UserFormProps) {
-  const [formData, setFormData] = useState({
-    nama: user?.nama || "",
-    username: user?.username || "",
-    email: user?.email || "",
-    no_telepon: user?.no_telepon || "",
+  const getInitialFormData = () => ({
+    nama: "",
+    username: "",
+    email: "",
+    no_telepon: "",
     password: "",
-    is_aktif: user?.is_aktif ?? 1,
-    id_role: user?.id_role || [],
+    is_aktif: 1,
+    id_role: [] as string[],
   });
 
-  const [roles, setRoles] = useState<any[]>([]);
+  const [formData, setFormData] = useState(getInitialFormData());
+  const [roles, setRoles] = useState<Role[]>([]);
+  const isReadOnly = mode === "view";
 
-  // Ambil role dari API
   useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const res = await fetch("/api/role");
-        const data = await res.json();
-        setRoles(data.data || []);
-      } catch (error) {
-        console.error("Error fetching roles:", error);
+    if (isOpen) {
+      if ((mode === 'edit' || mode === 'view') && user) {
+        const roleId = user.userRoles?.[0]?.role?.id_role;
+        setFormData({
+          nama: user.nama || "",
+          username: user.username || "",
+          email: user.email || "",
+          no_telepon: user.no_telepon || "",
+          password: "",
+          is_aktif: user.is_aktif ?? 1,
+          id_role: roleId ? [roleId] : [],
+        });
+      } else {
+        setFormData(getInitialFormData());
       }
-    };
-    fetchRoles();
-  }, []);
+    }
+  }, [isOpen, user, mode]);
 
-  // Perbarui formData
+  useEffect(() => {
+    if (isOpen) {
+      const fetchRoles = async () => {
+        try {
+          const res = await fetch("/api/role");
+          const result = await res.json();
+          if (result.ok && Array.isArray(result.data)) {
+            setRoles(result.data);
+          } else {
+            setRoles([]);
+          }
+        } catch (error) {
+          console.error("Error fetching roles:", error);
+        }
+      };
+      fetchRoles();
+    }
+  }, [isOpen]);
+
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleRoleChange = (value: string) => {
-    const selectedId = parseInt(value);
-    setFormData((prev) => ({ ...prev, id_role: [selectedId] }));
+    setFormData((prev) => ({ ...prev, id_role: [value] }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const submissionData: Partial<User> = { ...formData };
+    // Jangan kirim password kosong saat edit
+    if (mode === 'edit' && !formData.password) {
+      delete (submissionData as any).password;
+    }
+    onSubmit(submissionData);
   };
 
   const getTitle = () => {
-    switch (mode) {
-      case "create":
-        return "Add New User";
-      case "edit":
-        return "Edit User";
-      case "view":
-        return "User Details";
-      default:
-        return "User";
-    }
+    if (mode === 'create') return "Add New User";
+    if (mode === 'edit') return "Edit User";
+    return "User Details";
   };
-
-  const getDescription = () => {
-    switch (mode) {
-      case "create":
-        return "Create a new user account in the system.";
-      case "edit":
-        return "Update user information and permissions.";
-      case "view":
-        return "View detailed information about this user.";
-      default:
-        return "";
-    }
-  };
-
-  const isReadOnly = mode === "view";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -116,7 +128,7 @@ export function UserForm({
             {getTitle()}
           </DialogTitle>
           <DialogDescription className="text-gray-700">
-            {getDescription()}
+            {mode === 'create' ? "Create a new user account." : "View or edit user details."}
           </DialogDescription>
         </DialogHeader>
 
@@ -130,7 +142,7 @@ export function UserForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                 <div className="space-y-2">
                   <Label htmlFor="nama" className="text-gray-900">
                     Full Name *
                   </Label>
@@ -157,7 +169,7 @@ export function UserForm({
                     placeholder="Enter username"
                     className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
                     required
-                    disabled={isReadOnly}
+                    disabled={isReadOnly || mode === 'edit'}
                   />
                 </div>
               </div>
@@ -195,50 +207,36 @@ export function UserForm({
                 </div>
               </div>
 
-              {mode === "create" && (
+              {mode !== 'view' && (
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-gray-900">
-                    Password *
+                    Password {mode === 'create' ? '*' : '(Opsional)'}
                   </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) =>
-                      handleInputChange("password", e.target.value)
-                    }
-                    placeholder="Enter password"
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    placeholder={mode === 'create' ? "Enter password" : "Kosongkan jika tidak ingin diubah"}
                     className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
-                    required
-                    disabled={isReadOnly}
+                    required={mode === 'create'}
                   />
                 </div>
               )}
 
-              {/* Role Dropdown dari API */}
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-gray-900">
-                  Role *
-                </Label>
+                <Label htmlFor="role" className="text-gray-900">Role *</Label>
                 <Select
-                  value={formData.id_role[0]?.toString() || ""}
+                  value={formData.id_role[0] || ""}
                   onValueChange={handleRoleChange}
                   disabled={isReadOnly}
                 >
                   <SelectTrigger className="bg-white border-gray-300">
-                    <SelectValue
-                      placeholder="Select role"
-                      className="text-gray-900"
-                    />
+                    <SelectValue placeholder="Select role" />
                   </SelectTrigger>
-
-                  <SelectContent className="bg-white border border-gray-300 shadow-md text-gray-900">
+                  <SelectContent className="bg-white">
                     {roles.map((role) => (
-                      <SelectItem
-                        key={role.id_role}
-                        value={role.id_role.toString()}
-                        className="text-gray-900 hover:bg-gray-100"
-                      >
+                      <SelectItem key={role.id_role} value={role.id_role}>
                         {role.nama_role}
                       </SelectItem>
                     ))}
@@ -248,16 +246,15 @@ export function UserForm({
             </CardContent>
           </Card>
 
-          {/* System Information */}
           <Card className="bg-white border border-gray-200 shadow-sm">
-            <CardHeader>
+             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
                 <Shield className="h-4 w-4" />
                 System Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+                 <div className="space-y-2">
                 <Label htmlFor="is_aktif" className="text-gray-900">
                   Status *
                 </Label>
@@ -278,7 +275,7 @@ export function UserForm({
                 </Select>
               </div>
 
-              {mode === "view" && user && (
+              {mode !== "create" && user && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                   <div className="space-y-2">
                     <Label className="text-gray-900">Created At</Label>
@@ -300,12 +297,12 @@ export function UserForm({
           </Card>
 
           <DialogFooter>
-            <Button type="button" variant="outline" className="text-gray bg-white" onClick={onClose}>
-              {mode === "view" ? "Close" : "Cancel"}
+            <Button type="button" variant="outline" onClick={onClose}>
+              {isReadOnly ? "Close" : "Cancel"}
             </Button>
-            {mode !== "view" && (
+            {!isReadOnly && (
               <Button type="submit">
-                {mode === "create" ? "Create User" : "Update User"}
+                {mode === "create" ? "Create User" : "Save Changes"}
               </Button>
             )}
           </DialogFooter>

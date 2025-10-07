@@ -97,4 +97,7 @@ export const PUT = withProtection(
     requiredRoles: ["admin"],
     activity: "Mengubah Role Permission",
   }
+
 );
+
+
