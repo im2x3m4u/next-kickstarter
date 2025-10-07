@@ -50,7 +50,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         await rolePermissionRepo.save(newPermissions);
     }
     try {
-    await logActivity(session.user.id_user, "Mengubah Data", req);
+    await logActivity(session.user.id_user, "Mengubah", req);
   } catch (err) {
     console.error("logActivity POST error:", err);
   }

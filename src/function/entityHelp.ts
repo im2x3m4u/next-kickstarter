@@ -8,7 +8,7 @@ export async function getAllEntities<T>(
   page: number = 1,
   pageSize: number = 10,
   orderField: keyof T = "created_at" as keyof T,
-  sortOrder: "ASC" | "DESC" = "ASC",
+  sortOrder: "ASC" | "DESC" = "DESC",
   searchField?: keyof T,
   search?: string,
   relations: string[] = [],

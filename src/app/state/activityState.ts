@@ -19,4 +19,5 @@ export const searchActivityQueryAtom = atom<string>("");
 export const pageAtom = atom<number>(1);
 export const pageSizeAtom = atom<number>(10);
 export const sortByAtom = atom<string>("created_at");
-export const sortOrderAtom = atom<"ASC" | "DESC">("ASC");
+export const sortOrderAtom = atom<"ASC" | "DESC">("DESC");
+export const totalActivitiesAtom = atom(0);

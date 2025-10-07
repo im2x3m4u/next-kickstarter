@@ -2,18 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAllEntities } from "@/function/entityHelp";
 import { Activity } from "@/entities/activity";
 
+// PASTIKAN BARIS INI ADA DI PALING ATAS
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
-    const url = new URL(req.url);
+    const { searchParams } = new URL(req.url);
 
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const pageSize = parseInt(url.searchParams.get("pageSize") || "10");
-    const sortBy = (url.searchParams.get("sortBy") ||
-      "created_at") as keyof Activity;
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+    const sortBy = (searchParams.get("sortBy") || "created_at") as keyof Activity;
+    const usernameFilter = searchParams.get("username") || "";
+
+    // PASTIKAN NILAI DEFAULT-NYA ADALAH "DESC"
     const sortOrder = (
-      url.searchParams.get("sortOrder") || "ASC"
+      searchParams.get("sortOrder") || "DESC"
     ).toUpperCase() as "ASC" | "DESC";
-    const usernameFilter = url.searchParams.get("username") || "";
+
+    const filterOptions = usernameFilter
+      ? { relation: "user", column: "username", value: usernameFilter }
+      : undefined;
 
     const result = await getAllEntities<Activity>(
       Activity,
@@ -21,19 +29,17 @@ export async function GET(req: NextRequest) {
       pageSize,
       sortBy,
       sortOrder,
-      undefined, 
-      undefined, 
-      ["user"], 
-      usernameFilter
-        ? { relation: "user", column: "username", value: usernameFilter }
-        : undefined 
+      undefined,
+      undefined,
+      ["user"],
+      filterOptions
     );
 
     return NextResponse.json(result);
-  } catch (err) {
-    console.error("Activity GET error:", err);
+  } catch (error) {
+    console.error("API Error fetching activities:", error);
     return NextResponse.json(
-      { ok: false, error: "Internal server error" },
+      { message: "Terjadi kesalahan pada server." },
       { status: 500 }
     );
   }
