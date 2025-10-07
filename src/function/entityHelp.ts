@@ -28,9 +28,18 @@ export async function getAllEntities<T>(
     .take(safePageSize);
 
   // Tambahkan relations jika ada
-  relations.forEach((rel) => {
-    qb.leftJoinAndSelect(`t.${rel}`, rel);
-  });
+  // relations.forEach((rel) => {
+  //   qb.leftJoinAndSelect(`t.${rel}`, rel);
+  // });
+relations.forEach((rel) => {
+  const parts = rel.split(".");
+  if (parts.length === 1) {
+    qb.leftJoinAndSelect(`t.${parts[0]}`, parts[0]);
+  } else if (parts.length === 2) {
+    qb.leftJoinAndSelect(`t.${parts[0]}`, parts[0]);
+    qb.leftJoinAndSelect(`${parts[0]}.${parts[1]}`, parts.join("_"));
+  }
+});
 
   // Search di relasi
   if (searchInRelation?.value) {

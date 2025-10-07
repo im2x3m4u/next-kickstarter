@@ -3,6 +3,7 @@ import { randomBytes } from "crypto";
 import { getConnection } from "@/lib/typeorm";
 import { verifyPassword } from "@/lib/crypto";
 import { User } from "@/entities/user";
+// import { UserSession } from "@/entities/UserSession";
 
 export const providers = [
   Credentials({
@@ -14,6 +15,7 @@ export const providers = [
     async authorize(credentials: any) {
       const ds = await getConnection();
       const userRepo = ds.getRepository(User);
+      //  const sessionRepo = ds.getRepository(UserSession);
 
       const user = await userRepo.findOne({
         where: { username: credentials.username },
@@ -31,6 +33,12 @@ export const providers = [
       const loginToken = randomBytes(32).toString("hex");
       user.login_token = loginToken;
       await userRepo.save(user);
+      // Simpan ke tabel user_sessions
+  // const newSession = sessionRepo.create({
+  //   user,
+  //   token: loginToken,
+  // });
+  // await sessionRepo.save(newSession);
 
       return {
         id: user.id_user,
