@@ -16,7 +16,7 @@ export default function AppHeader() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/dashboard" className="text-xl font-bold text-blue-600">
-              Talent Start Admin
+              Admin
             </Link>
           </div>
 

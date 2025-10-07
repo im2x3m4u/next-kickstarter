@@ -69,7 +69,7 @@ export function RoleToolbar({
     <div className="space-y-4">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -81,7 +81,7 @@ export function RoleToolbar({
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -93,7 +93,7 @@ export function RoleToolbar({
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -107,7 +107,7 @@ export function RoleToolbar({
       </div>
 
       {/* Toolbar */}
-      <Card>
+      <Card className="bg-white">
         <CardContent className="p-4">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
             {/* Search and Filters */}
@@ -136,14 +136,14 @@ export function RoleToolbar({
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Button onClick={onAddRole} variant="outline" className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+              <Button onClick={onAddRole} variant="outline" className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors">
                 <Plus className="h-4 w-4 " />
                 Add Role
               </Button>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                  <Button variant="outline" className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors">
                     <MoreHorizontal className="h-4 w-4 " />
                     More
                   </Button>

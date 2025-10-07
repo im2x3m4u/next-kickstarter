@@ -3,7 +3,12 @@
 import { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RoleToolbar } from "@/app/components/role-management/role-toolbar";
 import { Shield, AlertCircle } from "lucide-react";
@@ -37,14 +42,12 @@ import {
   Role,
 } from "@/app/state/roleState";
 
-import {
-  LazyRoleTable,
-  LazyRoleForm,
-} from "@/app/utils/lazyComponents";
+import { LazyRoleTable, LazyRoleForm } from "@/app/utils/lazyComponents";
 
 export default function RoleManagementPage() {
   const router = useRouter();
 
+  // ---- state atoms ----
   const [roles] = useAtom(rolesAtom);
   const [loading] = useAtom(loadingAtom);
   const [error, setError] = useAtom(errorAtom);
@@ -61,10 +64,12 @@ export default function RoleManagementPage() {
   const [stats] = useAtom(statsAtom);
   const [, fetchRoles] = useAtom(fetchRolesAtom);
 
+  // ---- load data ----
   useEffect(() => {
     fetchRoles();
   }, [searchQuery, statusFilter, page, pageSize, fetchRoles]);
 
+  // ---- handlers ----
   const handleSearch = (q: string) => {
     setSearchQuery(q);
     setPage(1);
@@ -99,7 +104,9 @@ export default function RoleManagementPage() {
   };
 
   const handleManagePermissions = (role: Role) => {
-    const url = `/dashboard/roles/${role.id_role}/permissions?name=${encodeURIComponent(role.nama_role)}`;
+    const url = `/dashboard/roles/${role.id_role}/permissions?name=${encodeURIComponent(
+      role.nama_role
+    )}`;
     console.log("Navigating to:", url);
     router.push(url);
   };
@@ -107,11 +114,13 @@ export default function RoleManagementPage() {
   const confirmDelete = async () => {
     if (!roleToDelete) return;
     try {
-      const { deleteRoleService } = await import("@/app/lib/services/roleService");
+      const { deleteRoleService } = await import(
+        "@/app/lib/services/roleService"
+      );
       await deleteRoleService(roleToDelete);
       await fetchRoles();
     } catch (err: any) {
-      setError(err.message || "Failed to delete role");
+      setError(err.message || "Gagal menghapus role");
     } finally {
       setRoleToDelete(null);
       setDeleteDialogOpen(false);
@@ -119,7 +128,9 @@ export default function RoleManagementPage() {
   };
 
   const handleFormSubmit = async (roleData: Partial<Role>) => {
-    const { createRoleService, updateRoleService } = await import("@/app/lib/services/roleService");
+    const { createRoleService, updateRoleService } = await import(
+      "@/app/lib/services/roleService"
+    );
     try {
       if (formMode === "create") {
         await createRoleService(roleData);
@@ -129,14 +140,16 @@ export default function RoleManagementPage() {
       await fetchRoles();
       setIsFormOpen(false);
     } catch (err: any) {
-      setError(err.message || "Failed to save role");
+      setError(err.message || "Gagal menyimpan role");
     }
   };
 
   const totalPages = Math.ceil(total / pageSize);
 
+  // ---- render ----
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold text-gray-900">
@@ -148,6 +161,7 @@ export default function RoleManagementPage() {
         </div>
       </div>
 
+      {/* Toolbar */}
       <RoleToolbar
         onAddRole={handleAddRole}
         onSearch={handleSearch}
@@ -159,7 +173,8 @@ export default function RoleManagementPage() {
         inactiveRoles={stats.inactive}
       />
 
-      <Card>
+      {/* Table Section */}
+      <Card className="bg-white shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <Shield className="h-5 w-5" /> Roles ({roles.length})
@@ -187,6 +202,7 @@ export default function RoleManagementPage() {
             </div>
           )}
 
+          {/* Pagination */}
           {total > pageSize && (
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm text-gray-700">
@@ -215,6 +231,7 @@ export default function RoleManagementPage() {
         </CardContent>
       </Card>
 
+      {/* Form Modal */}
       <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-gray-200" />}>
         <LazyRoleForm
           role={selectedRole}
@@ -225,23 +242,26 @@ export default function RoleManagementPage() {
         />
       </Suspense>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" /> Delete Role
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="h-5 w-5" />
+              Hapus Role
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this role? This action cannot be undone.
+            <AlertDialogDescription className="text-gray-700">
+              Apakah kamu yakin ingin menghapus role ini? Aksi ini tidak dapat
+              dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

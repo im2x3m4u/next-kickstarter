@@ -126,7 +126,7 @@ export default function ActivityUser() {
                           isActive={pageNumber === page}
                           className={`cursor-pointer ${
                             isActive
-                              ? "bg-black text-white hover:bg-black"
+                              ? "bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
                               : "text-black hover:bg-gray-100"
                           }`}
                         >

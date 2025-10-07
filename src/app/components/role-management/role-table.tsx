@@ -25,6 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 import { Role } from "@/app/state/roleState";
 
 interface RoleTableProps {
@@ -42,12 +43,39 @@ export function RoleTable({
   onView,
   onManagePermissions,
 }: RoleTableProps) {
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // 🔹 Fungsi sorting sederhana
+  const handleSort = (field: keyof Role) => {
+    const newOrder =
+      sortField === field && sortOrder === "asc" ? "desc" : "asc";
+    setSortField(field);
+    setSortOrder(newOrder);
+  };
+
+  const sortedRoles = [...roles].sort((a, b) => {
+    if (!sortField) return 0;
+    const valA = a[sortField];
+    const valB = b[sortField];
+    if (typeof valA === "string" && typeof valB === "string") {
+      return sortOrder === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    }
+    if (typeof valA === "number" && typeof valB === "number") {
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    }
+    return 0;
+  });
+
+  // 🔹 Badge status aktif/tidak aktif
   const getStatusBadge = (isAktif: number) => {
     const variants = {
       1: "bg-green-100 text-green-800 hover:bg-green-100",
       0: "bg-red-100 text-red-800 hover:bg-red-100",
     };
-    const labels = { 1: "Active", 0: "Inactive" };
+    const labels = { 1: "Aktif", 0: "Nonaktif" };
     return (
       <Badge className={variants[isAktif as keyof typeof variants]}>
         {labels[isAktif as keyof typeof labels]}
@@ -70,23 +98,49 @@ export function RoleTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="font-semibold text-gray-900">Role Name</TableHead>
-            <TableHead className="font-semibold text-gray-900">Status</TableHead>
-            <TableHead className="font-semibold text-gray-900">Created At</TableHead>
-            <TableHead className="font-semibold text-gray-900">Updated At</TableHead>
-            <TableHead className="w-[50px] font-semibold text-gray-900">Actions</TableHead>
+            <TableHead
+              className="text-gray-900 font-semibold cursor-pointer"
+              onClick={() => handleSort("nama_role")}
+            >
+              Role Name
+            </TableHead>
+            <TableHead
+              className="text-gray-900 font-semibold cursor-pointer"
+              onClick={() => handleSort("is_aktif")}
+            >
+              Status
+            </TableHead>
+            <TableHead
+              className="text-gray-900 font-semibold cursor-pointer"
+              onClick={() => handleSort("created_at")}
+            >
+              Created At
+            </TableHead>
+            <TableHead
+              className="text-gray-900 font-semibold cursor-pointer"
+              onClick={() => handleSort("updated_at")}
+            >
+              Updated At
+            </TableHead>
+            <TableHead className="w-[50px] text-gray-900 font-semibold">
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {roles.map((role) => (
+          {sortedRoles.map((role) => (
             <TableRow key={role.id_role} className="hover:bg-gray-50">
               <TableCell className="font-medium text-gray-900">
                 {formatRoleName(role.nama_role)}
               </TableCell>
               <TableCell>{getStatusBadge(role.is_aktif)}</TableCell>
-              <TableCell className="text-gray-700">{formatDate(role.created_at)}</TableCell>
-              <TableCell className="text-gray-700">{formatDate(role.updated_at)}</TableCell>
+              <TableCell className="text-gray-700">
+                {formatDate(role.created_at)}
+              </TableCell>
+              <TableCell className="text-gray-700">
+                {formatDate(role.updated_at)}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -95,19 +149,26 @@ export function RoleTable({
                     </Button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg">
-                    <DropdownMenuLabel className="text-gray-900">Actions</DropdownMenuLabel>
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-white border border-gray-200 shadow-lg"
+                  >
+                    <DropdownMenuLabel className="text-gray-900">
+                      Aksi
+                    </DropdownMenuLabel>
 
+                    {/* View */}
                     <DropdownMenuItem asChild>
                       <button
                         onClick={() => onView(role)}
                         className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-gray-900 hover:bg-gray-50"
                       >
                         <Eye className="h-4 w-4" />
-                        View Details
+                        Lihat Detail
                       </button>
                     </DropdownMenuItem>
 
+                    {/* Edit */}
                     <DropdownMenuItem asChild>
                       <button
                         onClick={() => onEdit(role)}
@@ -118,6 +179,7 @@ export function RoleTable({
                       </button>
                     </DropdownMenuItem>
 
+                    {/* Manage Permission */}
                     {role.nama_role.toLowerCase() !== "admin" && (
                       <DropdownMenuItem asChild>
                         <button
@@ -125,20 +187,21 @@ export function RoleTable({
                           className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-gray-900 hover:bg-gray-50"
                         >
                           <Shield className="h-4 w-4" />
-                          Manage Permissions
+                          Kelola Permission
                         </button>
                       </DropdownMenuItem>
                     )}
 
                     <DropdownMenuSeparator />
 
+                    {/* Delete */}
                     <DropdownMenuItem asChild>
                       <button
                         onClick={() => onDelete(role.id_role)}
                         className="flex w-full items-center gap-2 px-2 py-1.5 text-left text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Delete Role
+                        Hapus Role
                       </button>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

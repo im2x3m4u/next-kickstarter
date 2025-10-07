@@ -120,32 +120,32 @@ export function UserTable({ users, onEdit, onDelete, onView }: RoleUserProps) {
         <TableHeader>
           <TableRow>
             <TableHead
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("nama")}
             >
               Name
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("username")}
             >
               Username
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("email")}
             >
               Email
             </TableHead>
             <TableHead className="text-gray-900 font-semibold">Role</TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className=" text-gray-900 font-semibold"
               onClick={() => handleSort("is_aktif")}
             >
               Status
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-gray-50 text-gray-900 font-semibold"
+              className="text-gray-900 font-semibold"
               onClick={() => handleSort("created_at")}
             >
               Created
