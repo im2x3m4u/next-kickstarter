@@ -42,8 +42,8 @@ export class User {
   userRoles: UserRole[];
 
   // entities/user.ts
- @OneToMany(() => require("./UserSession").UserSession, (session: any) => session.user)
-  sessions: any[];
+//  @OneToMany(() => require("./UserSession").UserSession, (session: any) => session.user)
+//   sessions: any[];
 
 
 }
