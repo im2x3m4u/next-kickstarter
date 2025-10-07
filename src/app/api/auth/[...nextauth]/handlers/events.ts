@@ -1,6 +1,7 @@
 import { getConnection } from "@/lib/typeorm";
 import { User } from "@/entities/user";
 import { logActivity } from "@/function/activityHelp";
+// import { UserSession } from "@/entities/UserSession";
 
 // signIn
 export const signIn = async ({ user }: { user: any }) => {
@@ -24,3 +25,19 @@ export const signOut = async ({ token }: { token: any }) => {
 
   await logActivity(token.id.toString(), "Pengguna Logout", { url: "/logout" });
 };
+
+// export const signOut = async ({ token }: { token: any }) => {
+//    if (!token?.id || !token?.loginToken) return;
+//   try {
+//     const ds = await getConnection();
+//     const sessionRepo = ds.getRepository(UserSession);
+
+//     // Hapus hanya sesi yg cocok
+//     await sessionRepo.delete({ token: token.loginToken });
+
+//     await logActivity(token.id.toString(), "Pengguna Logout", { url: "/logout" });
+//   } catch (err) {
+//     console.error("Failed to log logout activity:", err);
+//   }
+// };
+

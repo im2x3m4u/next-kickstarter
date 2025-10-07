@@ -5,6 +5,7 @@ import { User } from "../entities/user";
 import { Role } from "../entities/role";
 import { UserRole } from "../entities/userRole";
 import { Activity } from "@/entities/activity";
+// import { UserSession } from "@/entities/UserSession";
 
 
 export const AppDataSource = new DataSource({
