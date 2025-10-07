@@ -12,6 +12,7 @@ import {
   pageSizeAtom,
   sortByAtom,
   sortOrderAtom,
+  totalActivitiesAtom, // 1. Impor atom baru
 } from "@/app/state/activityState";
 import { fetchActivities } from "@/app/lib/services/activityService";
 import { ActivityTable } from "@/app/components/activity-management/activity-table";
@@ -33,40 +34,51 @@ export default function ActivityManagementPage() {
   const [pageSize] = useAtom(pageSizeAtom);
   const [sortBy, setSortBy] = useAtom(sortByAtom);
   const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
+  const [totalActivities, setTotalActivities] = useAtom(totalActivitiesAtom); // 2. Gunakan atom baru
 
   const loadActivities = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await fetchActivities(page, pageSize, sortBy, sortOrder);
+      // 3. Kirim searchQuery ke API
+      // Pastikan fetchActivities bisa menerima searchQuery
+      const result = await fetchActivities(
+        page,
+        pageSize,
+        sortBy,
+        sortOrder,
+        searchQuery
+      );
       setActivities(result.data);
+      setTotalActivities(result.total); // Simpan total data dari API
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, sortBy, sortOrder, setActivities, setLoading]);
+  }, [
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+    searchQuery,
+    setActivities,
+    setLoading,
+    setTotalActivities,
+  ]); // Tambahkan searchQuery di dependency array
 
   useEffect(() => {
     loadActivities();
   }, [loadActivities]);
 
-  // Filter search
-  const filteredActivities = activities.filter((act) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      act.activity.toLowerCase().includes(query) ||
-      act.location.toLowerCase().includes(query) ||
-      act.user?.username?.toLowerCase().includes(query)
-    );
-  });
+  // 4. HAPUS filter dan slice di sisi klien. Data dari API sudah final.
+  // const filteredActivities = activities.filter(...);  // <-- HAPUS
+  // const paginatedData = filteredActivities.slice(...); // <-- HAPUS
 
-  // Pagination setup
-  const totalItems = filteredActivities.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const paginatedData = filteredActivities.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  // 5. Hitung total halaman berdasarkan total data dari server
+  const totalPages = Math.ceil(totalActivities / pageSize);
 
-  const handleSearch = (query: string) => setSearchQuery(query);
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setPage(1); // Reset ke halaman 1 setiap kali ada pencarian baru
+  };
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -90,7 +102,9 @@ export default function ActivityManagementPage() {
       {/* Toolbar */}
       <ActivityToolbar
         onSearch={handleSearch}
-        pdfData={filteredActivities}
+        // PDF sebaiknya mengambil semua data atau data yang sudah difilter di server.
+        // Untuk simpelnya, kita gunakan data yang ada di halaman ini saja.
+        pdfData={activities}
         pdfColumns={[
           { header: "Activity", key: "activity" },
           { header: "Location", key: "location" },
@@ -106,23 +120,25 @@ export default function ActivityManagementPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900">
             <CalendarCheck className="h-5 w-5" />
-            Activity ({filteredActivities.length})
+            {/* 6. Tampilkan total dari state */}
+            Activity ({totalActivities})
           </CardTitle>
         </CardHeader>
 
         <CardContent>
           {loading ? (
             <div className="text-center py-8">Loading activities...</div>
-          ) : paginatedData.length > 0 ? (
+          ) : activities.length > 0 ? ( // 7. Cek langsung ke `activities`
             <>
               <ActivityTable
-                activities={paginatedData}
+                activities={activities} // 8. Gunakan `activities` langsung
                 onSort={handleSort}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
               />
 
               {/* Pagination */}
+              {/* Logika pagination Anda sudah bagus, tidak perlu diubah */}
               <div className="flex justify-center items-center mt-6">
                 <Pagination>
                   <PaginationContent className="flex items-center space-x-1">
@@ -130,10 +146,8 @@ export default function ActivityManagementPage() {
                     <PaginationItem>
                       <PaginationPrevious
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        className={`cursor-pointer ${
-                          page === 1
-                            ? "pointer-events-none opacity-50 text-black"
-                            : ""
+                        className={`cursor-pointer text-black ${
+                          page === 1 ? "pointer-events-none opacity-50" : ""
                         }`}
                       />
                     </PaginationItem>
@@ -141,14 +155,19 @@ export default function ActivityManagementPage() {
                     {/* Page Numbers */}
                     {(() => {
                       const maxVisible = 5;
-                      const startPage = Math.max(
+                      let startPage = Math.max(
                         1,
                         page - Math.floor(maxVisible / 2)
                       );
-                      const endPage = Math.min(
+                      let endPage = Math.min(
                         totalPages,
                         startPage + maxVisible - 1
                       );
+
+                      if (endPage - startPage + 1 < maxVisible) {
+                        startPage = Math.max(1, endPage - maxVisible + 1);
+                      }
+
                       const pages = [];
 
                       if (startPage > 1) {
@@ -224,9 +243,10 @@ export default function ActivityManagementPage() {
                         onClick={() =>
                           setPage((p) => Math.min(totalPages, p + 1))
                         }
-                        className={`cursor-pointer ${
-                          page === totalPages
-                            ? "pointer-events-none opacity-50 text-black"
+                        className={`cursor-pointer text-black ${
+                          // <-- Tambahkan text-black di sini
+                          page === totalPages || totalPages === 0
+                            ? "pointer-events-none opacity-50"
                             : ""
                         }`}
                       />
