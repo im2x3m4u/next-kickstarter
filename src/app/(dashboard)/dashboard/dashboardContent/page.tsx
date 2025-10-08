@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useAtomValue, useSetAtom } from "jotai";
-import { StatsCard } from "@/app/components/dashboard/stats-card";
+import { StatsCard } from "@/app/(dashboard)/_components/dashboard/stats-card";
 import { DashboardSkeleton } from "@/app/components/loading-skeleton";
 import { Users, Shield, Activity } from "lucide-react";
 import {
@@ -17,7 +17,7 @@ import {
 
 const RecentActivity = dynamic(
   () =>
-    import("@/app/components/dashboard/recent-activity").then((mod) => ({
+    import("@/app/(dashboard)/_components/dashboard/recent-activity").then((mod) => ({
       default: mod.RecentActivity,
     })),
   {

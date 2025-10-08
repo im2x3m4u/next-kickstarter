@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RoleToolbar } from "@/app/components/role-management/role-toolbar";
+import { RoleToolbar } from "@/app/(dashboard)/_components/role-management/role-toolbar";
 import { Shield, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
