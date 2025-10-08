@@ -14,26 +14,22 @@ export const dynamic = 'force-dynamic';
 //     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
 //     const sortBy = (searchParams.get("sortBy") || "created_at") as keyof Activity;
 //     const usernameFilter = searchParams.get("username") || "";
-
-<<<<<<< HEAD
 //     // PASTIKAN NILAI DEFAULT-NYA ADALAH "DESC"
 //     const sortOrder = (
 //       searchParams.get("sortOrder") || "DESC"
 //     ).toUpperCase() as "ASC" | "DESC";
-=======
     // const getAll = searchParams.get("all") === "true";
 
     // PASTIKAN NILAI DEFAULT-NYA ADALAH "DESC"
-    const sortOrder = (
-      searchParams.get("sortOrder") || "DESC"
-    ).toUpperCase() as "ASC" | "DESC";
->>>>>>> 53e58c555336594831bc83fcfa5d6941c72b94cf
+    // const sortOrder = (
+    //   searchParams.get("sortOrder") || "DESC"
+    // ).toUpperCase() as "ASC" | "DESC";
 
 //     const filterOptions = usernameFilter
 //       ? { relation: "user", column: "username", value: usernameFilter }
 //       : undefined;
 
-<<<<<<< HEAD
+
 //     const result = await getAllEntities<Activity>(
 //       Activity,
 //       page,
@@ -45,7 +41,6 @@ export const dynamic = 'force-dynamic';
 //       ["user"],
 //       filterOptions
 //     );
-=======
     //   if (getAll) {
     //   const result = await getAllEntities<Activity>(
     //     Activity,
@@ -65,18 +60,17 @@ export const dynamic = 'force-dynamic';
     //   });
     // }
 
-    const result = await getAllEntities<Activity>(
-      Activity,
-      page,
-      pageSize,
-      sortBy,
-      sortOrder,
-      undefined,
-      undefined,
-      ["user"],
-      filterOptions
-    );
->>>>>>> 53e58c555336594831bc83fcfa5d6941c72b94cf
+    // const result = await getAllEntities<Activity>(
+    //   Activity,
+    //   page,
+    //   pageSize,
+    //   sortBy,
+    //   sortOrder,
+    //   undefined,
+    //   undefined,
+    //   ["user"],
+    //   filterOptions
+    // );
 
 //     return NextResponse.json(result);
 //   } catch (error) {
