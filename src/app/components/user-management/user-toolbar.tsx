@@ -192,7 +192,7 @@ export function UserToolbar({
                         .map(
                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
                         )
-                        .join(" ")}
+                        .join(" ")} 
                     </SelectItem>
                   ))}
                 </SelectContent>

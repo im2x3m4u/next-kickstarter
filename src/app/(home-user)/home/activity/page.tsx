@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { activityAtom } from "@/app/state/activityState";
 import { fetchActivities } from "@/app/lib/services/activityService";
+import { useSession } from "next-auth/react";
 import {
   Table,
   TableBody,
@@ -23,6 +24,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ActivityUser() {
+  const { data: session } = useSession();
+  const username = session?.user?.username;
+
   const [activities, setActivities] = useAtom(activityAtom);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -32,13 +36,15 @@ export default function ActivityUser() {
   const totalPages = Math.ceil(total / pageSize);
 
   const loadActivities = async () => {
+    if (!username) return; // Jangan fetch kalau belum login
     setLoading(true);
     try {
       const result = await fetchActivities(
         page,
         pageSize,
         "created_at",
-        "DESC"
+        "DESC",
+        username
       );
       setActivities(result.data);
       setTotal(result.total);
@@ -51,7 +57,7 @@ export default function ActivityUser() {
 
   useEffect(() => {
     loadActivities();
-  }, [page]);
+  }, [page, username]);
 
   const safeActivities = Array.isArray(activities) ? activities : [];
 
