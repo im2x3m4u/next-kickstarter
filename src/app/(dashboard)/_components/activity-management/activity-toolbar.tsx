@@ -45,6 +45,8 @@ export function ActivityToolbar({
       const columns = [
         { header: "ID", key: "id_activity" },
         { header: "Nama", key: "user.username" },
+        { header: "Email", key: "user.email" },
+        { header: "No Telepon", key: "user.no_telepon" },
         { header: "Aktivitas", key: "activity" },
         { header: "Lokasi", key: "location" },
         { header: "Tanggal", key: "created_at" },

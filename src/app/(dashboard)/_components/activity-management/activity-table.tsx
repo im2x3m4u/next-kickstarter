@@ -18,15 +18,9 @@ export function ActivityTable({ activities }: ActivityProps) {
     <Table className="bg-white">
       <TableHeader>
         <TableRow>
-          <TableHead className="font-semibold text-gray-900">
-            No
-          </TableHead>
-          <TableHead className="font-semibold text-gray-900">
-            User
-          </TableHead>
-          <TableHead className="font-semibold text-gray-900">
-            Email
-          </TableHead>
+          <TableHead className="font-semibold text-gray-900">No</TableHead>
+          <TableHead className="font-semibold text-gray-900">User</TableHead>
+          <TableHead className="font-semibold text-gray-900">Email</TableHead>
           <TableHead className="font-semibold text-gray-900">
             No Telepon
           </TableHead>
@@ -55,7 +49,11 @@ export function ActivityTable({ activities }: ActivityProps) {
               {activity.user.no_telepon}
             </TableCell>
             <TableCell className="text-gray-700">{activity.activity}</TableCell>
-            <TableCell className="text-gray-700">{activity.location}</TableCell>
+            <TableCell className="text-gray-700 max-w-[200px] truncate hover:whitespace-normal hover:overflow-visible group relative">
+              <span className="block truncate group-hover:whitespace-normal group-hover:bg-white group-hover:p-2 group-hover:shadow-md group-hover:absolute group-hover:z-10 group-hover:-left-2 group-hover:-top-2">
+                {activity.location || "-"}
+              </span>
+            </TableCell>
             <TableCell className="text-gray-700">
               {new Date(activity.created_at).toLocaleString("id-ID", {
                 dateStyle: "short",
