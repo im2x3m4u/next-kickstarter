@@ -5,26 +5,26 @@ import { RolePermission } from "@/entities/rolePermission";
 import { logActivity } from "@/function/activityHelp";
 import { withProtection } from "@/function/authHelp";
 
-// GET permissions for a specific role
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-    const session = await getAuthSession();
-    if (!session || !session.user.roles.includes("admin")) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+// // GET permissions for a specific role
+// export async function GET(req: Request, { params }: { params: { id: string } }) {
+//     const session = await getAuthSession();
+//     if (!session || !session.user.roles.includes("admin")) {
+//         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+//     }
 
-    const ds = await getConnection();
-    const rolePermissionRepo = ds.getRepository(RolePermission);
-    const permissions = await rolePermissionRepo.find({
-        where: { role: { id_role: params.id } },
-        relations: ["permission"],
-    });
-    try {
-    await logActivity(session.user.id_user, "Melihat Data", req);
-  } catch (err) {
-    console.error("logActivity POST error:", err);
-  }
-    return NextResponse.json(permissions.map(p => p.permission));
-}
+//     const ds = await getConnection();
+//     const rolePermissionRepo = ds.getRepository(RolePermission);
+//     const permissions = await rolePermissionRepo.find({
+//         where: { role: { id_role: params.id } },
+//         relations: ["permission"],
+//     });
+//     try {
+//     await logActivity(session.user.id_user, "Melihat Data", req);
+//   } catch (err) {
+//     console.error("logActivity POST error:", err);
+//   }
+//     return NextResponse.json(permissions.map(p => p.permission));
+// }
 
 // UPDATE permissions for a specific role
 // export async function PUT(req: Request, { params }: { params: { id: string } }) {
@@ -59,6 +59,28 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 //     return NextResponse.json({ message: "Permissions updated successfully" });
 // }
 
+export const GET = withProtection(
+  async (req, session, params) => {
+    const { id } = params;
+
+    const ds = await getConnection();
+    const rolePermissionRepo = ds.getRepository(RolePermission);
+
+    // Ambil semua permission berdasarkan role
+    const permissions = await rolePermissionRepo.find({
+      where: { role: { id_role: id } },
+      relations: ["permission"],
+    });
+
+    return NextResponse.json(
+      permissions.map((p) => p.permission)
+    );
+  },
+  {
+    requiredRoles: ["admin"], 
+    activity: "Melihat Data Role Permission", 
+  }
+);
 export const PUT = withProtection(
   async (req, session, params) => {
     const { id } = params;

@@ -1,46 +1,91 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllEntities } from "@/function/entityHelp";
 import { Activity } from "@/entities/activity";
+import { withProtection } from "@/function/authHelp";
 
 // PASTIKAN BARIS INI ADA DI PALING ATAS
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
+// export async function GET(req: NextRequest) {
+//   try {
+//     const { searchParams } = new URL(req.url);
 
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
-    const sortBy = (searchParams.get("sortBy") || "created_at") as keyof Activity;
-    const usernameFilter = searchParams.get("username") || "";
+//     const page = parseInt(searchParams.get("page") || "1", 10);
+//     const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+//     const sortBy = (searchParams.get("sortBy") || "created_at") as keyof Activity;
+//     const usernameFilter = searchParams.get("username") || "";
 
-    // PASTIKAN NILAI DEFAULT-NYA ADALAH "DESC"
-    const sortOrder = (
-      searchParams.get("sortOrder") || "DESC"
-    ).toUpperCase() as "ASC" | "DESC";
+//     // PASTIKAN NILAI DEFAULT-NYA ADALAH "DESC"
+//     const sortOrder = (
+//       searchParams.get("sortOrder") || "DESC"
+//     ).toUpperCase() as "ASC" | "DESC";
 
-    const filterOptions = usernameFilter
-      ? { relation: "user", column: "username", value: usernameFilter }
-      : undefined;
+//     const filterOptions = usernameFilter
+//       ? { relation: "user", column: "username", value: usernameFilter }
+//       : undefined;
 
-    const result = await getAllEntities<Activity>(
-      Activity,
-      page,
-      pageSize,
-      sortBy,
-      sortOrder,
-      undefined,
-      undefined,
-      ["user"],
-      filterOptions
-    );
+//     const result = await getAllEntities<Activity>(
+//       Activity,
+//       page,
+//       pageSize,
+//       sortBy,
+//       sortOrder,
+//       undefined,
+//       undefined,
+//       ["user"],
+//       filterOptions
+//     );
 
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("API Error fetching activities:", error);
-    return NextResponse.json(
-      { message: "Terjadi kesalahan pada server." },
-      { status: 500 }
-    );
+//     return NextResponse.json(result);
+//   } catch (error) {
+//     console.error("API Error fetching activities:", error);
+//     return NextResponse.json(
+//       { message: "Terjadi kesalahan pada server." },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+export const GET = withProtection(
+  async (req) => {
+    try {
+      const { searchParams } = new URL(req.url);
+
+      const page = parseInt(searchParams.get("page") || "1", 10);
+      const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+      const sortBy = (searchParams.get("sortBy") || "created_at") as keyof Activity;
+      const sortOrder = (
+        searchParams.get("sortOrder") || "DESC"
+      ).toUpperCase() as "ASC" | "DESC";
+      const usernameFilter = searchParams.get("username") || "";
+
+      const filterOptions = usernameFilter
+        ? { relation: "user", column: "username", value: usernameFilter }
+        : undefined;
+
+      const result = await getAllEntities<Activity>(
+        Activity,
+        page,
+        pageSize,
+        sortBy,
+        sortOrder,
+        undefined,
+        undefined,
+        ["user"],
+        filterOptions
+      );
+
+      return NextResponse.json(result);
+    } catch (error) {
+      console.error("API Error fetching activities:", error);
+      return NextResponse.json(
+        { message: "Terjadi kesalahan pada server." },
+        { status: 500 }
+      );
+    }
+  },
+  {
+    requiredRoles: ["admin"],
+    activity: "Melihat Daftar Aktivitas",
   }
-}
+);
