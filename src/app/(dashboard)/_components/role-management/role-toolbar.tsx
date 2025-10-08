@@ -11,18 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Search,
-  Filter,
-  Plus,
-  Download,
-  Upload,
-  MoreHorizontal,
-  Shield,
-  UserX,
-  Settings,
-} from "lucide-react";
-
+import { Search, Plus, Download, Shield, UserX, Settings } from "lucide-react";
+import DownloadExcel from "@/app/components/DownloadExcel";
+import { fetchAllRoles } from "@/app/lib/services/roleService";
 
 interface RoleToolbarProps {
   onAddRole: () => void;
@@ -39,8 +30,6 @@ export function RoleToolbar({
   onAddRole,
   onSearch,
   onFilterStatus,
-  onExport,
-  onImport,
   totalRoles,
   activeRoles,
   inactiveRoles,
@@ -57,6 +46,46 @@ export function RoleToolbar({
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value);
     onFilterStatus(value);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      setLoading(true);
+
+      const allData = await fetchAllRoles();
+
+      if (!allData.length) {
+        alert("Tidak ada data role untuk diekspor");
+        return;
+      }
+
+      // Ubah nilai is_aktif jadi teks biar jelas di Excel
+      const formattedData = allData.map((item) => ({
+        ...item,
+        status: item.is_aktif === 1 ? "Aktif" : "Nonaktif",
+      }));
+
+      // Definisikan kolom Excel (key harus sesuai dengan data di atas)
+      const columns = [
+        { header: "ID Role", key: "id_role" },
+        { header: "Nama Role", key: "nama_role" },
+        { header: "Status", key: "status" },
+        { header: "Tanggal Dibuat", key: "created_at" },
+        { header: "Tanggal Update", key: "updated_at" },
+      ];
+
+      await DownloadExcel({
+        data: formattedData,
+        columns,
+        title: "Data Role",
+        fileName: "role_report.xlsx",
+      });
+    } catch (err) {
+      console.error("Gagal mengekspor role:", err);
+      alert("Terjadi kesalahan saat mengekspor data role");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -169,10 +198,10 @@ export function RoleToolbar({
               {/* Export Button */}
               <div className="flex items-center gap-2">
                 <Button
-                  // onClick={handleExportExcel}
+                  onClick={handleExportExcel}
                   variant="outline"
                   className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
-                  // disabled={loading}
+                  disabled={loading}
                 >
                   <Download className="h-4 w-4" />
                   {loading ? "Exporting..." : "Export Excel"}

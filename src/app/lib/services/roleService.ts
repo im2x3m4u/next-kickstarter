@@ -62,3 +62,27 @@
     if (!res.ok) throw new Error(`Failed to delete role: ${res.status}`);
     return res.json();
   }
+
+  // Export Excel
+export async function fetchAllRoles(
+  sortBy: string = "nama_role",
+  sortOrder: "ASC" | "DESC" = "DESC"
+): Promise<Role[]> {
+  try {
+    const params = new URLSearchParams({ sortBy, sortOrder });
+
+    const res = await fetch(`/api/role/cetak?${params.toString()}`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch roles for export");
+
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.error("Error fetching all roles:", err);
+    return [];
+  }
+}
