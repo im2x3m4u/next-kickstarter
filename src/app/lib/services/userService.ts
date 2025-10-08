@@ -86,3 +86,34 @@ export async function deleteUserService(userId: string): Promise<ApiResponse> {
   if (!res.ok) throw new Error("Failed to delete user");
   return res.json();
 }
+
+
+// Fungsi untuk export semua user (Excel)
+export async function fetchAllUsers(
+  search: string = "",
+  sortBy: string = "nama",
+  sortOrder: "ASC" | "DESC" = "ASC"
+): Promise<User[]> {
+  try {
+    const params = new URLSearchParams({
+      search,
+      sortBy,
+      sortOrder,
+      export: "true", // tanda untuk export di backend
+    });
+
+    const res = await fetch(`/api/user/cetak?${params.toString()}`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error("Failed to fetch users for export");
+
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.error("Error fetching all users:", err);
+    return [];
+  }
+}

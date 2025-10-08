@@ -10,24 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Search,
-  Plus,
-  Download,
-  Upload,
-  MoreHorizontal,
-  Users,
-  UserCheck,
-  UserX,
-} from "lucide-react";
+import { Search, Plus, Download, Users, UserCheck, UserX } from "lucide-react";
+import DownloadExcel from "@/app/components/DownloadExcel";
+import { fetchAllUsers } from "@/app/lib/services/userService";
 
 interface Role {
   id_role: string;
@@ -51,8 +37,6 @@ export function UserToolbar({
   onSearch,
   onFilterRole,
   onFilterStatus,
-  onExport,
-  onImport,
   totalUsers,
   activeUsers,
   inactiveUsers,
@@ -62,6 +46,7 @@ export function UserToolbar({
   const [statusFilter, setStatusFilter] = useState("all");
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(false);
+
   // Ambil semua role dari API
   useEffect(() => {
     const fetchRoles = async () => {
@@ -93,6 +78,48 @@ export function UserToolbar({
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value);
     onFilterStatus(value);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      setLoading(true);
+
+      const allUsers = await fetchAllUsers(searchQuery);
+
+      if (!allUsers.length) {
+        alert("Tidak ada data user untuk diekspor");
+        return;
+      }
+
+      // Format data, misal status
+      const formattedData = allUsers.map((user) => ({
+        ...user,
+        status: user.is_aktif ? "Aktif" : "Nonaktif",
+      }));
+
+      // Kolom Excel
+      const columns = [
+        { header: "ID User", key: "id_user" },
+        { header: "Nama", key: "nama" },
+        { header: "Email", key: "email" },
+        { header: "Role", key: "role" },
+        { header: "Status", key: "status" },
+        { header: "Tanggal Dibuat", key: "created_at" },
+        { header: "Tanggal Update", key: "updated_at" },
+      ];
+
+      await DownloadExcel({
+        data: formattedData,
+        columns,
+        title: "Data User",
+        fileName: "user_report.xlsx",
+      });
+    } catch (err) {
+      console.error("Gagal mengekspor user:", err);
+      alert("Terjadi kesalahan saat mengekspor data user");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -229,10 +256,10 @@ export function UserToolbar({
 
               <div className="flex items-center gap-2">
                 <Button
-                  // onClick={handleExportExcel}
+                  onClick={handleExportExcel}
                   variant="outline"
                   className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
-                  // disabled={loading}
+                  disabled={loading}
                 >
                   <Download className="h-4 w-4" />
                   {loading ? "Exporting..." : "Export Excel"}
