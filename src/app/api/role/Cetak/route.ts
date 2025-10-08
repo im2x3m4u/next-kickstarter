@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { NextRequest, NextResponse } from "next/server";
+=======
+import { NextResponse } from "next/server";
+>>>>>>> 41a2a28badbf5dfa2d665f3ff5215eae63d0983b
 import { getConnection } from "@/lib/typeorm";
 import { Role } from "@/entities/role";
 import { withProtection } from "@/function/authHelp";
@@ -16,10 +20,16 @@ export const GET = withProtection(
       const ds = await getConnection();
       const repo = ds.getRepository(Role);
 
+<<<<<<< HEAD
       // Gunakan backtick agar template literal dikenali
       const query = repo.createQueryBuilder("role").orderBy(`role.${sortBy}`, sortOrder);
 
       // Tambahkan filter jika ada
+=======
+      const query = repo.createQueryBuilder("role")
+        .orderBy(`role.${sortBy}`, sortOrder as "ASC" | "DESC");
+
+>>>>>>> 41a2a28badbf5dfa2d665f3ff5215eae63d0983b
       if (roleFilter) {
         query.where("role.nama_role LIKE :nama", { nama: `%${roleFilter}%` });
       }

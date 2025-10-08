@@ -37,8 +37,7 @@ export const fetchActivities = async (
   }
 };
 
-
-// fungsi untuk ekspor semua data
+// fungsi untuk ekspor excel
 export const fetchAllActivities = async (
   sortBy: string,
   sortOrder: "ASC" | "DESC",
@@ -48,12 +47,13 @@ export const fetchAllActivities = async (
     const params = new URLSearchParams({
       sortBy,
       sortOrder,
-      all: "true", // tambahkan parameter agar backend tahu ini ambil semua
     });
 
     if (username) params.append("username", username);
 
-    const res = await fetch(`/api/activity?${params.toString()}`);
+    const res = await fetch(`/api/activity/cetak?${params.toString()}`, {
+      cache: "no-store",
+    });
     if (!res.ok) throw new Error("Failed to fetch all activities");
 
     const json = await res.json();
