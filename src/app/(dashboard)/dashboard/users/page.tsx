@@ -11,7 +11,7 @@ import {
   PaginationNext,
   PaginationLink,
 } from "@/components/ui/pagination";
-import { UserToolbar } from "@/app/components/user-management/user-toolbar";
+import { UserToolbar } from "@/app/(dashboard)/_components/user-management/user-toolbar";
 import { Users, AlertCircle } from "lucide-react";
 import {
   AlertDialog,

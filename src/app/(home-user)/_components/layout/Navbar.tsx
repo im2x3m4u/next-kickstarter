@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState } from "react";
-import Profile from "../../Profile";
+import Profile from "../../../components/Profile";
 
 export default function NavbarUser() {
   const [isOpen, setIsOpen] = useState(false);

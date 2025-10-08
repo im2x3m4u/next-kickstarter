@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import PermissionManager from "@/app/components/permission-management/PermissionManager";
+import PermissionManager from "../../_components/PermissionManager";
 
 export default function ManagePermissionsPage() {
   const params = useParams();

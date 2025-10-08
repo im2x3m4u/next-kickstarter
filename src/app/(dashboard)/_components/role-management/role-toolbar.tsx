@@ -10,14 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Search,
@@ -30,6 +22,7 @@ import {
   UserX,
   Settings,
 } from "lucide-react";
+
 
 interface RoleToolbarProps {
   onAddRole: () => void;
@@ -54,6 +47,7 @@ export function RoleToolbar({
 }: RoleToolbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -172,39 +166,18 @@ export function RoleToolbar({
                 Add Role
               </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
-                  >
-                    <MoreHorizontal className="h-4 w-4 " />
-                    More
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="bg-white border border-gray-200 shadow-lg"
+              {/* Export Button */}
+              <div className="flex items-center gap-2">
+                <Button
+                  // onClick={handleExportExcel}
+                  variant="outline"
+                  className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+                  // disabled={loading}
                 >
-                  <DropdownMenuLabel className="text-gray-900 bg-white">
-                    Actions
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={onExport}
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    <Download className="mr-2 h-4 w-4 text-gray-900" />
-                    Export Roles
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={onImport}
-                    className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                  >
-                    <Upload className="mr-2 h-4 w-4 text-gray-900" />
-                    Import Roles
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <Download className="h-4 w-4" />
+                  {loading ? "Exporting..." : "Export Excel"}
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

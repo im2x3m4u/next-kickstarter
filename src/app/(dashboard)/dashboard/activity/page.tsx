@@ -15,8 +15,8 @@ import {
   totalActivitiesAtom, // 1. Impor atom baru
 } from "@/app/state/activityState";
 import { fetchActivities } from "@/app/lib/services/activityService";
-import { ActivityTable } from "@/app/components/activity-management/activity-table";
-import { ActivityToolbar } from "@/app/components/activity-management/activity-toolbar";
+import { ActivityTable } from "@/app/(dashboard)/_components/activity-management/activity-table";
+import { ActivityToolbar } from "@/app/(dashboard)/_components/activity-management/activity-toolbar";
 import {
   Pagination,
   PaginationContent,
