@@ -5,40 +5,62 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Search, Download } from "lucide-react";
-import DownloadPdf from "@/app/components/DownloadPdf";
+import DownloadExcel from "@/app/components/DownloadExcel";
+import { fetchAllActivities } from "@/app/lib/services/activityService";
 
 interface ActivityToolbarProps {
   onSearch: (query: string) => void;
-  pdfData?: any[];
-  pdfColumns?: { header: string; key: string }[];
-  pdfTitle?: string;
-  pdfFileName?: string;
+  sortBy?: string;
+  sortOrder?: "ASC" | "DESC";
+  username?: string;
 }
 
 export function ActivityToolbar({
   onSearch,
-  pdfData = [],
-  pdfColumns = [],
-  pdfTitle = "Report",
-  pdfFileName = "report.pdf",
+  sortBy = "created_at",
+  sortOrder = "DESC",
+  username,
 }: ActivityToolbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     onSearch(value);
   };
 
-  const handleExport = () => {
-    if (pdfData.length > 0) {
-      DownloadPdf({
-        data: pdfData,
-        columns: pdfColumns,
-        title: pdfTitle,
-        fileName: pdfFileName,
+  const handleExportExcel = async () => {
+    try {
+      setLoading(true);
+
+      // Ambil SEMUA data aktivitas
+      const allData = await fetchAllActivities(sortBy, sortOrder, username);
+
+      if (!allData.length) {
+        alert("Tidak ada data untuk diekspor");
+        return;
+      }
+
+      // Definisikan kolom untuk Excel
+      const columns = [
+        { header: "ID", key: "id_activity" },
+        { header: "Nama", key: "user.username" },
+        { header: "Aktivitas", key: "activity" },
+        { header: "Lokasi", key: "location" },
+        { header: "Tanggal", key: "created_at" },
+      ];
+
+      await DownloadExcel({
+        data: allData,
+        columns,
+        title: "Data Aktivitas",
+        fileName: "activity_report.xlsx",
       });
-    } else {
-      console.warn("No data available to export.");
+    } catch (err) {
+      console.error("Gagal mengekspor data:", err);
+      alert("Terjadi kesalahan saat mengekspor data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,14 +80,17 @@ export function ActivityToolbar({
           </div>
 
           {/* Export Button */}
-          <Button
-            onClick={handleExport}
-            variant="outline"
-            className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
-          >
-            <Download className="mr-2 h-4 w-4 " />
-            Export PDF
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleExportExcel}
+              variant="outline"
+              className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+              disabled={loading}
+            >
+              <Download className="h-4 w-4" />
+              {loading ? "Exporting..." : "Export Excel"}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

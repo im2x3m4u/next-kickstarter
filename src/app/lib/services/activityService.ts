@@ -36,3 +36,30 @@ export const fetchActivities = async (
     return { data: [], total: 0 };
   }
 };
+
+
+// fungsi untuk ekspor semua data
+export const fetchAllActivities = async (
+  sortBy: string,
+  sortOrder: "ASC" | "DESC",
+  username?: string
+): Promise<Activity[]> => {
+  try {
+    const params = new URLSearchParams({
+      sortBy,
+      sortOrder,
+      all: "true", // tambahkan parameter agar backend tahu ini ambil semua
+    });
+
+    if (username) params.append("username", username);
+
+    const res = await fetch(`/api/activity?${params.toString()}`);
+    if (!res.ok) throw new Error("Failed to fetch all activities");
+
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.error("Error fetching all activities:", err);
+    return [];
+  }
+};

@@ -61,7 +61,7 @@ export function UserToolbar({
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roles, setRoles] = useState<Role[]>([]);
-
+  const [loading, setLoading] = useState(false);
   // Ambil semua role dari API
   useEffect(() => {
     const fetchRoles = async () => {
@@ -192,7 +192,7 @@ export function UserToolbar({
                         .map(
                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
                         )
-                        .join(" ")} 
+                        .join(" ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -227,36 +227,17 @@ export function UserToolbar({
                 Add User
               </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="flex items-center gap-2 bg-[#AD49E1] text-white hover:bg-[#9B40D9] shadow-sm hover:shadow-md">
-                    <MoreHorizontal className="h-4 w-4" />
-                    More
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="bg-white border border-gray-200 shadow-lg rounded-lg"
+              <div className="flex items-center gap-2">
+                <Button
+                  // onClick={handleExportExcel}
+                  variant="outline"
+                  className="flex items-center gap-2 bg-[#AD49E1] hover:bg-[#9328d0] hover:text-white transition-colors"
+                  // disabled={loading}
                 >
-                  <DropdownMenuLabel className="text-gray-700 font-semibold">
-                    Actions
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    onClick={onExport}
-                    className="text-gray-800 hover:bg-[#F5E8FF]"
-                  >
-                    <Download className="mr-2 h-4 w-4 text-[#AD49E1]" />
-                    Export Users
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={onImport}
-                    className="text-gray-800 hover:bg-[#F5E8FF]"
-                  >
-                    <Upload className="mr-2 h-4 w-4 text-[#AD49E1]" />
-                    Import Users
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <Download className="h-4 w-4" />
+                  {loading ? "Exporting..." : "Export Excel"}
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

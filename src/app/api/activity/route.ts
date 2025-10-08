@@ -14,6 +14,8 @@ export async function GET(req: NextRequest) {
     const sortBy = (searchParams.get("sortBy") || "created_at") as keyof Activity;
     const usernameFilter = searchParams.get("username") || "";
 
+    // const getAll = searchParams.get("all") === "true";
+
     // PASTIKAN NILAI DEFAULT-NYA ADALAH "DESC"
     const sortOrder = (
       searchParams.get("sortOrder") || "DESC"
@@ -22,6 +24,25 @@ export async function GET(req: NextRequest) {
     const filterOptions = usernameFilter
       ? { relation: "user", column: "username", value: usernameFilter }
       : undefined;
+
+    //   if (getAll) {
+    //   const result = await getAllEntities<Activity>(
+    //     Activity,
+    //     1,
+    //     99999, // ambil semua data tanpa batas
+    //     sortBy,
+    //     sortOrder,
+    //     undefined,
+    //     undefined,
+    //     ["user"],
+    //     filterOptions
+    //   );
+
+    //   return NextResponse.json({
+    //     data: result.data,
+    //     pagination: { total: result.data.length },
+    //   });
+    // }
 
     const result = await getAllEntities<Activity>(
       Activity,
