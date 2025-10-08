@@ -29,7 +29,7 @@ export default function ReusableLayout({
 
   // selalu dipanggil di semua render
   useEffect(() => {
-    console.log("✅ ReusableLayout active as client layout");
+    console.log("ReusableLayout active as client layout");
   }, []);
 
   // kalau session masih loading, render skeleton — tapi hook tetap sudah dipanggil di atas
@@ -60,7 +60,9 @@ export default function ReusableLayout({
       {/* Main area */}
       <div className="flex-1 flex flex-col ml-64">
         <header className="fixed top-0 left-64 right-0 z-40">
-          <Suspense fallback={<div className="h-16 bg-white border-b animate-pulse" />}>
+          <Suspense
+            fallback={<div className="h-16 bg-white border-b animate-pulse" />}
+          >
             <AppHeader />
           </Suspense>
         </header>
